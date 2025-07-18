@@ -2,7 +2,7 @@ name: Feature Task Template
 description: Template for tracking tasks by phase and feature
 title: "Task: [Phase] - [Feature Name]"
 labels: ["task"]
-projects: ["genielvn-strat/projects/1"]
+projects: ["genielvn-strat/1"]
 assignees:
   - genielvn-strat
 body:
