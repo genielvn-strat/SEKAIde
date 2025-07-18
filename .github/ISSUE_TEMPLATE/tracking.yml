@@ -6,15 +6,6 @@ projects: ["genielvn-strat/projects/1"]
 assignees:
   - genielvn-strat
 body:
-  - type: input
-    id: task
-    attributes:
-      label: Task
-      description: Use the format [Phase] - [Feature Name]
-      placeholder: "[Phase] - [Feature Name]"
-    validations:
-      required: true
-
   - type: dropdown
     id: priority
     attributes:
