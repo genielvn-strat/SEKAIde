@@ -1,0 +1,22 @@
+name: Bug Report
+description: Report if a bug has occurred.
+body:
+  - type: textarea
+    attributes: 
+      label: The problem
+      description: Provide details of the bug, how to get the bug, etc.
+      value: |
+        ### Description 
+        <!-- Describe the bug -->
+
+        ### To produce the bug 
+        <!-- A clear step by step instructions on how to reproduce the bug -->
+    validations:
+      required: true
+  - type: textarea 
+    attributes:
+      label: Screenshot/Screen recording
+      description: Add a screenshot or a screen recording of the bug
+      placeholder: You can drag or drop the file here.
+    validations:
+      required: true
