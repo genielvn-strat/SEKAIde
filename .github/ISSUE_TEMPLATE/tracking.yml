@@ -1,66 +1,70 @@
-issue_template:
-  name: Feature Task Template
-  description: Template for tracking tasks by phase and feature
-  body:
-    - type: input
-      id: task
-      attributes:
-        label: Task
-        description: Use the format [Phase] - [Feature Name]
-        placeholder: "[Phase] - [Feature Name]"
-      validations:
-        required: true
+name: Feature Task Template
+description: Template for tracking tasks by phase and feature
+title: "Task: [Phase] - [Feature Name]"
+labels: ["task"]
+projects: ["genielvn-strat/projects/1"]
+assignees:
+  - genielvn-strat
+body:
+  - type: input
+    id: task
+    attributes:
+      label: Task
+      description: Use the format [Phase] - [Feature Name]
+      placeholder: "[Phase] - [Feature Name]"
+    validations:
+      required: true
 
-    - type: dropdown
-      id: priority
-      attributes:
-        label: Priority
-        options:
-          - High
-          - Medium
-          - Low
-      validations:
-        required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - High
+        - Medium
+        - Low
+    validations:
+      required: true
 
-    - type: input
-      id: estimated_time
-      attributes:
-        label: Estimated Time
-        description: Approximate hours to complete the task
-        placeholder: "e.g. 4 hours"
-      validations:
-        required: false
+  - type: input
+    id: estimated_time
+    attributes:
+      label: Estimated Time
+      description: Approximate hours to complete the task
+      placeholder: "e.g. 4 hours"
+    validations:
+      required: false
 
-    - type: input
-      id: week
-      attributes:
-        label: Week
-        placeholder: "Week X"
-      validations:
-        required: false
+  - type: input
+    id: week
+    attributes:
+      label: Week
+      placeholder: "Week X"
+    validations:
+      required: false
 
-    - type: textarea
-      id: description
-      attributes:
-        label: Description
-        description: Clear description of what needs to be implemented
-      validations:
-        required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Clear description of what needs to be implemented
+    validations:
+      required: true
 
-    - type: checkboxes
-      id: acceptance_criteria
-      attributes:
-        label: Acceptance Criteria
-        description: Define when the task is considered complete
-        options:
-          - label: Specific, measurable criteria
-          - label: That define when the task is complete
-          - label: Include testing requirements
+  - type: checkboxes
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Define when the task is considered complete
+      options:
+        - label: Specific, measurable criteria
+        - label: That define when the task is complete
+        - label: Include testing requirements
 
-    - type: textarea
-      id: notes
-      attributes:
-        label: Notes
-        description: Add dependencies, resources, or implementation constraints
-      validations:
-        required: false
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Add dependencies, resources, or implementation constraints
+    validations:
+      required: false
