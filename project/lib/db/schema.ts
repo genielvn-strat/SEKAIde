@@ -30,7 +30,7 @@ export const projects = pgTable("projects", {
 export const lists = pgTable("lists", {
     id: uuid("id").defaultRandom().primaryKey(),
     name: text("name").notNull(),
-    projectId: text("project_id").references(() => projects.id),
+    projectId: uuid("project_id").references(() => projects.id),
     position: integer("position").notNull(),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),
