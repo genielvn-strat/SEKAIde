@@ -1,3 +1,62 @@
+import {
+    pgTable,
+    pgEnum,
+    integer,
+    text,
+    timestamp,
+    uuid,
+} from "drizzle-orm/pg-core";
+
+export const priorityEnum = pgEnum("priority", ["low", "medium", "high"]);
+export const users = pgTable("users", {
+    id: uuid("id").defaultRandom().primaryKey(),
+    clerkId: text("clerk_id").notNull().unique(),
+    email: text("email").notNull(),
+    name: text("name").notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const projects = pgTable("projects", {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: text("name").notNull(),
+    description: text("description"),
+    ownerId: uuid("owner_id").references(() => users.id),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+    dueDate: timestamp("due_date").defaultNow(),
+});
+
+export const lists = pgTable("lists", {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: text("name").notNull(),
+    projectId: text("project_id").references(() => projects.id),
+    position: integer("position").notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+});
+export const tasks = pgTable("tasks", {
+    id: uuid("id").defaultRandom().primaryKey(),
+    title: text("title").notNull(),
+    description: text("description"),
+    listId: uuid("list_id").references(() => lists.id),
+    assigneeId: uuid("assignee_id").references(() => users.id),
+    priority: priorityEnum("priority").default("low"),
+    dueDate: timestamp("due_date"),
+    position: integer("position").notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const comments = pgTable("comments", {
+    id: uuid("id").defaultRandom().primaryKey(),
+    content: text("content").notNull(),
+    taskId: uuid("task_id").references(() => tasks.id),
+    authorId: uuid("author_id").references(() => users.id),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // TODO: Task 3.1 - Design database schema for users, projects, lists, and tasks
 // TODO: Task 3.3 - Set up Drizzle ORM with type-safe schema definitions
 
@@ -37,8 +96,3 @@ export const users = pgTable('users', {
 */
 
 // Placeholder exports to prevent import errors
-export const users = "TODO: Implement users table schema"
-export const projects = "TODO: Implement projects table schema"
-export const lists = "TODO: Implement lists table schema"
-export const tasks = "TODO: Implement tasks table schema"
-export const comments = "TODO: Implement comments table schema"

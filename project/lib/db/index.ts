@@ -1,3 +1,53 @@
+import { config } from "dotenv";
+import { drizzle } from "drizzle-orm/neon-http";
+
+config({ path: ".env" }); 
+export const db = drizzle(process.env.DATABASE_URL!);
+
+export const queries = {
+    projects: {
+        getAll: () => {
+            console.log("TODO: Task 4.1 - Implement project CRUD operations");
+            return [];
+        },
+        getById: (id: string) => {
+            console.log(`TODO: Get project by ID: ${id}`);
+            return null;
+        },
+        create: (data: any) => {
+            console.log("TODO: Create project", data);
+            return null;
+        },
+        update: (id: string, data: any) => {
+            console.log(`TODO: Update project ${id}`, data);
+            return null;
+        },
+        delete: (id: string) => {
+            console.log(`TODO: Delete project ${id}`);
+            return null;
+        },
+    },
+    tasks: {
+        getByProject: (projectId: string) => {
+            console.log(`TODO: Task 4.4 - Get tasks for project ${projectId}`);
+            return [];
+        },
+        create: (data: any) => {
+            console.log("TODO: Create task", data);
+            return null;
+        },
+        update: (id: string, data: any) => {
+            console.log(`TODO: Update task ${id}`, data);
+            return null;
+        },
+        delete: (id: string) => {
+            console.log(`TODO: Delete task ${id}`);
+            return null;
+        },
+    },
+};
+
+
 // TODO: Task 3.2 - Configure PostgreSQL database (Vercel Postgres or Neon)
 // TODO: Task 3.5 - Implement database connection and query utilities
 
@@ -38,47 +88,3 @@ export const queries = {
 */
 
 // Placeholder exports to prevent import errors
-export const db = "TODO: Implement database connection"
-
-export const queries = {
-  projects: {
-    getAll: () => {
-      console.log("TODO: Task 4.1 - Implement project CRUD operations")
-      return []
-    },
-    getById: (id: string) => {
-      console.log(`TODO: Get project by ID: ${id}`)
-      return null
-    },
-    create: (data: any) => {
-      console.log("TODO: Create project", data)
-      return null
-    },
-    update: (id: string, data: any) => {
-      console.log(`TODO: Update project ${id}`, data)
-      return null
-    },
-    delete: (id: string) => {
-      console.log(`TODO: Delete project ${id}`)
-      return null
-    },
-  },
-  tasks: {
-    getByProject: (projectId: string) => {
-      console.log(`TODO: Task 4.4 - Get tasks for project ${projectId}`)
-      return []
-    },
-    create: (data: any) => {
-      console.log("TODO: Create task", data)
-      return null
-    },
-    update: (id: string, data: any) => {
-      console.log(`TODO: Update task ${id}`, data)
-      return null
-    },
-    delete: (id: string) => {
-      console.log(`TODO: Delete task ${id}`)
-      return null
-    },
-  },
-}
