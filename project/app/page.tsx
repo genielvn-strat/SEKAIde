@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { ArrowRight, CheckCircle, Users, Kanban } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { SignOutButton } from "@clerk/nextjs"
 
 export default function HomePage() {
   return (
@@ -27,6 +28,7 @@ export default function HomePage() {
               <Link href="/sign-in" className="text-outer_space-500 dark:text-platinum-500 hover:text-blue_munsell-500">
                 Sign In
               </Link>
+              <SignOutButton />
               <Link
                 href="/sign-up"
                 className="px-4 py-2 bg-blue_munsell-500 text-white rounded-lg hover:bg-blue_munsell-600"
