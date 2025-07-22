@@ -8,6 +8,11 @@ import {
 } from "drizzle-orm/pg-core";
 
 export const priorityEnum = pgEnum("priority", ["low", "medium", "high"]);
+export const memberRoleEnum = pgEnum("role", [
+    "member",
+    "project_manager",
+    "admin",
+]);
 export const users = pgTable("users", {
     id: uuid("id").defaultRandom().primaryKey(),
     clerkId: text("clerk_id").notNull().unique(),
@@ -25,6 +30,18 @@ export const projects = pgTable("projects", {
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),
     dueDate: timestamp("due_date").defaultNow(),
+});
+
+export const projectMembers = pgTable("project_members", {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+        .references(() => users.id)
+        .notNull(),
+    projectId: uuid("project_id")
+        .references(() => projects.id)
+        .notNull(),
+    role: memberRoleEnum().default("member"),
+    createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const lists = pgTable("lists", {
