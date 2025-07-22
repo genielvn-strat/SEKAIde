@@ -56,6 +56,7 @@ export const tasks = pgTable("tasks", {
     id: uuid("id").defaultRandom().primaryKey(),
     title: text("title").notNull(),
     description: text("description"),
+    projectId: uuid("project_id").references(() => projects.id),
     listId: uuid("list_id").references(() => lists.id),
     assigneeId: uuid("assignee_id").references(() => users.id),
     priority: priorityEnum("priority").default("low"),

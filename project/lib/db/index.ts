@@ -1,52 +1,63 @@
 import { config } from "dotenv";
 import { drizzle } from "drizzle-orm/neon-http";
+import { projects, tasks } from "./schema";
+import { eq } from "drizzle-orm";
 
-config({ path: ".env" }); 
+config({ path: ".env" });
 export const db = drizzle(process.env.DATABASE_URL!);
 
 export const queries = {
     projects: {
-        getAll: () => {
-            console.log("TODO: Task 4.1 - Implement project CRUD operations");
-            return [];
+        getAll: async () => {
+            return await db.select().from(projects);
         },
-        getById: (id: string) => {
-            console.log(`TODO: Get project by ID: ${id}`);
-            return null;
+        getById: async (id: string) => {
+            const result = await db
+                .select()
+                .from(projects)
+                .where(eq(projects.id, id));
+            return result[0] || null;
         },
-        create: (data: any) => {
-            console.log("TODO: Create project", data);
-            return null;
+        create: async (data: any) => {
+            const result = await db.insert(projects).values(data).returning();
+            return result[0];
         },
-        update: (id: string, data: any) => {
-            console.log(`TODO: Update project ${id}`, data);
-            return null;
+        update: async (id: string, data: any) => {
+            const result = await db
+                .update(projects)
+                .set({ ...data, updatedAt: new Date() })
+                .where(eq(projects.id, id))
+                .returning();
+            return result[0];
         },
-        delete: (id: string) => {
-            console.log(`TODO: Delete project ${id}`);
-            return null;
+        delete: async (id: string) => {
+            await db.delete(projects).where(eq(projects.id, id));
         },
     },
     tasks: {
-        getByProject: (projectId: string) => {
-            console.log(`TODO: Task 4.4 - Get tasks for project ${projectId}`);
-            return [];
+        getByProject: async (projectId: string) => {
+            return await db
+                .select()
+                .from(tasks)
+                .where(eq(tasks.projectId, projectId));
         },
-        create: (data: any) => {
-            console.log("TODO: Create task", data);
-            return null;
+        create: async (data: any) => {
+            const result = await db.insert(tasks).values(data).returning();
+            return result[0];
         },
-        update: (id: string, data: any) => {
-            console.log(`TODO: Update task ${id}`, data);
-            return null;
+        update: async (id: string, data: any) => {
+            const result = await db
+                .update(tasks)
+                .set({ ...data, updatedAt: new Date() })
+                .where(eq(tasks.id, id))
+                .returning();
+            return result[0];
         },
-        delete: (id: string) => {
-            console.log(`TODO: Delete task ${id}`);
-            return null;
+        delete: async (id: string) => {
+            await db.delete(tasks).where(eq(tasks.id, id));
         },
     },
 };
-
 
 // TODO: Task 3.2 - Configure PostgreSQL database (Vercel Postgres or Neon)
 // TODO: Task 3.5 - Implement database connection and query utilities
