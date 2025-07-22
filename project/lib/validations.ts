@@ -1,3 +1,31 @@
+import { z } from "zod";
+export const userSchema = "TODO: Implement user validation schema";
+export const projectSchema = z.object({
+    name: z.string().min(1, "Name is required").max(100, "Name too long"),
+    description: z.string().max(500, "Description too long").optional(),
+    dueDate: z.date().min(new Date(), "Due date must be in future").optional(),
+});
+
+export const taskSchema = z.object({
+    title: z
+        .string()
+        .min(5, "Title is too short.")
+        .max(200, "Title is too long"),
+    description: z.string().max(1000, "Description too long").optional(),
+    priority: z.enum(["low", "medium", "high"]),
+    assigneeId: z.string().uuid().optional(),
+    dueDate: z.date().min(new Date(), "Due date must be in future").optional(),
+});
+export const listSchema = z.object({
+    name: z.string().min(5, "Name is too short.").max(100, "Name is too long"),
+});
+export const commentSchema = z.object({
+    content: z
+        .string()
+        .min(3, "Content is too short.")
+        .max(1000, "Content is too long."),
+});
+
 // TODO: Task 3.6 - Set up data validation with Zod schemas
 
 /*
@@ -16,7 +44,6 @@ Example schemas needed:
 - Comment creation
 
 Example structure:
-import { z } from 'zod'
 
 export const projectSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name too long'),
@@ -30,12 +57,7 @@ export const taskSchema = z.object({
   priority: z.enum(['low', 'medium', 'high']),
   dueDate: z.date().optional(),
   assigneeId: z.string().uuid().optional(),
-})
-*/
+  })
+  */
 
 // Placeholder exports to prevent import errors
-export const projectSchema = "TODO: Implement project validation schema"
-export const taskSchema = "TODO: Implement task validation schema"
-export const userSchema = "TODO: Implement user validation schema"
-export const listSchema = "TODO: Implement list validation schema"
-export const commentSchema = "TODO: Implement comment validation schema"
