@@ -5,6 +5,7 @@ import {
     text,
     timestamp,
     uuid,
+    boolean,
 } from "drizzle-orm/pg-core";
 
 export const priorityEnum = pgEnum("priority", ["low", "medium", "high"]);
@@ -41,6 +42,7 @@ export const projectMembers = pgTable("project_members", {
         .references(() => projects.id)
         .notNull(),
     role: memberRoleEnum("role").default("member"),
+    inviteConfirmed: boolean("invite_confirmed").default(false),
     createdAt: timestamp("created_at").defaultNow(),
 });
 
