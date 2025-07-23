@@ -40,7 +40,7 @@ export const projectMembers = pgTable("project_members", {
     projectId: uuid("project_id")
         .references(() => projects.id)
         .notNull(),
-    role: memberRoleEnum().default("member"),
+    role: memberRoleEnum("role").default("member"),
     createdAt: timestamp("created_at").defaultNow(),
 });
 
