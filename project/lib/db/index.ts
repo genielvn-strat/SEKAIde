@@ -1,6 +1,14 @@
 import { config } from "dotenv";
 import { drizzle } from "drizzle-orm/neon-http";
-import { projectMembers, projects, tasks, users } from "./schema";
+import {
+    users,
+    tasks,
+    projects,
+    teams,
+    teamMembers,
+    lists,
+    comments,
+} from "./schema";
 import { eq } from "drizzle-orm";
 
 config({ path: ".env" });
@@ -38,6 +46,71 @@ export const queries = {
             await db.delete(users).where(eq(users.id, id));
         },
     },
+
+    teams: {
+        getById: async (id: string) => {
+            const result = await db
+                .select()
+                .from(teams)
+                .where(eq(teams.id, id));
+            return result[0] || null;
+        },
+        getByOwner: async (ownerId: string) => {
+            return await db
+                .select()
+                .from(teams)
+                .where(eq(teams.ownerId, ownerId));
+        },
+        create: async (data: any) => {
+            const result = await db.insert(teams).values(data).returning();
+            return result[0];
+        },
+        update: async (id: string, data: any) => {
+            const result = await db
+                .update(teams)
+                .set({ ...data, updatedAt: new Date() })
+                .where(eq(teams.id, id))
+                .returning();
+            return result[0];
+        },
+        delete: async (id: string) => {
+            await db.delete(teams).where(eq(teams.id, id));
+        },
+    },
+
+    teamMembers: {
+        getByUser: async (userId: string) => {
+            return await db
+                .select()
+                .from(teamMembers)
+                .where(eq(teamMembers.userId, userId));
+        },
+        getByTeam: async (teamId: string) => {
+            return await db
+                .select()
+                .from(teamMembers)
+                .where(eq(teamMembers.teamId, teamId));
+        },
+        create: async (data: any) => {
+            const result = await db
+                .insert(teamMembers)
+                .values(data)
+                .returning();
+            return result[0];
+        },
+        update: async (id: string, data: any) => {
+            const result = await db
+                .update(teamMembers)
+                .set(data)
+                .where(eq(teamMembers.id, id))
+                .returning();
+            return result[0];
+        },
+        delete: async (id: string) => {
+            await db.delete(teamMembers).where(eq(teamMembers.id, id));
+        },
+    },
+
     projects: {
         getById: async (id: string) => {
             const result = await db
@@ -46,16 +119,11 @@ export const queries = {
                 .where(eq(projects.id, id));
             return result[0] || null;
         },
-        getByUserId: async (userId: string) => {
-            const result = await db
-                .select({
-                    project: projects,
-                })
-                .from(projectMembers)
-                .innerJoin(projects, eq(projectMembers.projectId, projects.id))
-                .where(eq(projectMembers.userId, userId));
-
-            return result.map((row) => row.project);
+        getByTeamId: async (teamId: string) => {
+            return await db
+                .select()
+                .from(projects)
+                .where(eq(projects.teamId, teamId));
         },
         create: async (data: any) => {
             const result = await db.insert(projects).values(data).returning();
@@ -73,38 +141,31 @@ export const queries = {
             await db.delete(projects).where(eq(projects.id, id));
         },
     },
-    projectMembers: {
+
+    lists: {
         getByProject: async (projectId: string) => {
             return await db
                 .select()
-                .from(projectMembers)
-                .where(eq(projectMembers.projectId, projectId));
-        },
-        getByUser: async (userId: string) => {
-            return await db
-                .select()
-                .from(projectMembers)
-                .where(eq(projectMembers.userId, userId));
+                .from(lists)
+                .where(eq(lists.projectId, projectId));
         },
         create: async (data: any) => {
-            const result = await db
-                .insert(projectMembers)
-                .values(data)
-                .returning();
+            const result = await db.insert(lists).values(data).returning();
             return result[0];
         },
-        confirmInvite: async (id: string) => {
+        update: async (id: string, data: any) => {
             const result = await db
-                .update(projectMembers)
-                .set({ inviteConfirmed: true })
-                .where(eq(projectMembers.id, id))
+                .update(lists)
+                .set({ ...data, updatedAt: new Date() })
+                .where(eq(lists.id, id))
                 .returning();
             return result[0];
         },
         delete: async (id: string) => {
-            await db.delete(projectMembers).where(eq(projectMembers.id, id));
+            await db.delete(lists).where(eq(lists.id, id));
         },
     },
+
     tasks: {
         getByProject: async (projectId: string) => {
             return await db
@@ -126,6 +187,30 @@ export const queries = {
         },
         delete: async (id: string) => {
             await db.delete(tasks).where(eq(tasks.id, id));
+        },
+    },
+
+    comments: {
+        getByTask: async (taskId: string) => {
+            return await db
+                .select()
+                .from(comments)
+                .where(eq(comments.taskId, taskId));
+        },
+        create: async (data: any) => {
+            const result = await db.insert(comments).values(data).returning();
+            return result[0];
+        },
+        update: async (id: string, data: any) => {
+            const result = await db
+                .update(comments)
+                .set({ ...data, updatedAt: new Date() })
+                .where(eq(comments.id, id))
+                .returning();
+            return result[0];
+        },
+        delete: async (id: string) => {
+            await db.delete(comments).where(eq(comments.id, id));
         },
     },
 };

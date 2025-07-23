@@ -22,31 +22,49 @@ export const users = pgTable("users", {
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),
 });
-export const projects = pgTable("projects", {
+
+export const teams = pgTable("team", {
     id: uuid("id").defaultRandom().primaryKey(),
     name: text("name").notNull(),
-    description: text("description"),
-    ownerId: uuid("owner_id").references(() => users.id),
+    ownerId: uuid("owner_id").references(() => users.id, {
+        onDelete: "cascade",
+    }),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),
-    dueDate: timestamp("due_date").defaultNow(),
 });
-export const projectMembers = pgTable("project_members", {
+
+export const teamMembers = pgTable("team_members", {
     id: uuid("id").defaultRandom().primaryKey(),
     userId: uuid("user_id")
-        .references(() => users.id)
+        .references(() => users.id, { onDelete: "cascade" })
         .notNull(),
-    projectId: uuid("project_id")
-        .references(() => projects.id)
+    teamId: uuid("team_id")
+        .references(() => teams.id, { onDelete: "cascade" })
         .notNull(),
     role: memberRoleEnum("role").default("member"),
     inviteConfirmed: boolean("invite_confirmed").default(false),
     createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const projects = pgTable("projects", {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: text("name").notNull(),
+    description: text("description"),
+    ownerId: uuid("owner_id").references(() => users.id, {
+        onDelete: "cascade",
+    }),
+    teamId: uuid("team_id").references(() => teams.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+    dueDate: timestamp("due_date").defaultNow(),
+});
+
 export const lists = pgTable("lists", {
     id: uuid("id").defaultRandom().primaryKey(),
     name: text("name").notNull(),
-    projectId: uuid("project_id").references(() => projects.id),
+    projectId: uuid("project_id").references(() => projects.id, {
+        onDelete: "cascade",
+    }),
     position: integer("position").notNull(),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),
@@ -55,9 +73,13 @@ export const tasks = pgTable("tasks", {
     id: uuid("id").defaultRandom().primaryKey(),
     title: text("title").notNull(),
     description: text("description"),
-    projectId: uuid("project_id").references(() => projects.id),
-    listId: uuid("list_id").references(() => lists.id),
-    assigneeId: uuid("assignee_id").references(() => users.id),
+    projectId: uuid("project_id").references(() => projects.id, {
+        onDelete: "cascade",
+    }),
+    listId: uuid("list_id").references(() => lists.id, { onDelete: "cascade" }),
+    assigneeId: uuid("assignee_id").references(() => users.id, {
+        onDelete: "cascade",
+    }),
     priority: priorityEnum("priority").default("low"),
     dueDate: timestamp("due_date"),
     position: integer("position").notNull(),
@@ -67,8 +89,10 @@ export const tasks = pgTable("tasks", {
 export const comments = pgTable("comments", {
     id: uuid("id").defaultRandom().primaryKey(),
     content: text("content").notNull(),
-    taskId: uuid("task_id").references(() => tasks.id),
-    authorId: uuid("author_id").references(() => users.id),
+    taskId: uuid("task_id").references(() => tasks.id, { onDelete: "cascade" }),
+    authorId: uuid("author_id").references(() => users.id, {
+        onDelete: "cascade",
+    }),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),
 });

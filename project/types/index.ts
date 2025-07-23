@@ -1,58 +1,69 @@
-// TypeScript type definitions
-// Task 1.3: Set up project structure and folder organization
-
 export interface User {
-  id: string
-  clerkId: string
-  email: string
-  name: string
-  createdAt: Date
-  updatedAt: Date
+    id: string;
+    clerkId: string;
+    email: string;
+    name: string;
+    createdAt: Date | string;
+    updatedAt: Date | string;
+}
+
+export interface Team {
+    id: string;
+    name: string;
+    ownerId: string | null;
+    createdAt: Date | string;
+    updatedAt: Date | string;
+    dueDate: Date | string | null;
+}
+
+export interface TeamMember {
+    id: string;
+    userId: string;
+    teamId: string;
+    role: "member" | "project_manager" | "admin";
+    inviteConfirmed: boolean;
+    createdAt: Date | string;
 }
 
 export interface Project {
-  id: string
-  name: string
-  description?: string
-  ownerId: string
-  createdAt: Date
-  updatedAt: Date
-  dueDate?: Date
-  lists: List[]
+    id: string;
+    name: string;
+    description: string | null;
+    ownerId: string | null;
+    teamId: string | null;
+    createdAt: Date | string;
+    updatedAt: Date | string;
+    dueDate: Date | string | null;
 }
 
 export interface List {
-  id: string
-  name: string
-  projectId: string
-  position: number
-  createdAt: Date
-  updatedAt: Date
-  tasks: Task[]
+    id: string;
+    name: string;
+    projectId: string | null;
+    position: number;
+    createdAt: Date | string;
+    updatedAt: Date | string;
 }
 
 export interface Task {
-  id: string
-  title: string
-  description?: string
-  listId: string
-  assigneeId?: string
-  priority: "low" | "medium" | "high"
-  dueDate?: Date
-  position: number
-  createdAt: Date
-  updatedAt: Date
-  comments: Comment[]
+    id: string;
+    title: string;
+    description: string | null;
+    projectId: string | null;
+    listId: string | null;
+    assigneeId: string | null;
+    priority: "low" | "medium" | "high";
+    dueDate: Date | string | null;
+    position: number;
+    createdAt: Date | string;
+    updatedAt: Date | string;
 }
 
 export interface Comment {
-  id: string
-  content: string
-  taskId: string
-  authorId: string
-  createdAt: Date
-  updatedAt: Date
+    id: string;
+    content: string;
+    taskId: string | null;
+    authorId: string | null;
+    createdAt: Date | string;
+    updatedAt: Date | string;
 }
-
-// Note for interns: These types should match your database schema
-// Update as needed when implementing the actual database schema
