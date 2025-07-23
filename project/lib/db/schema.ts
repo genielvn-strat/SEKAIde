@@ -8,7 +8,7 @@ import {
     boolean,
 } from "drizzle-orm/pg-core";
 
-export const priorityEnum = pgEnum("priority", ["low", "medium", "high"]);
+export const priorityEnum = pgEnum("task_priority", ["low", "medium", "high"]);
 export const memberRoleEnum = pgEnum("role", [
     "member",
     "project_manager",
@@ -22,7 +22,6 @@ export const users = pgTable("users", {
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),
 });
-
 export const projects = pgTable("projects", {
     id: uuid("id").defaultRandom().primaryKey(),
     name: text("name").notNull(),
@@ -32,7 +31,6 @@ export const projects = pgTable("projects", {
     updatedAt: timestamp("updated_at").defaultNow(),
     dueDate: timestamp("due_date").defaultNow(),
 });
-
 export const projectMembers = pgTable("project_members", {
     id: uuid("id").defaultRandom().primaryKey(),
     userId: uuid("user_id")
@@ -45,7 +43,6 @@ export const projectMembers = pgTable("project_members", {
     inviteConfirmed: boolean("invite_confirmed").default(false),
     createdAt: timestamp("created_at").defaultNow(),
 });
-
 export const lists = pgTable("lists", {
     id: uuid("id").defaultRandom().primaryKey(),
     name: text("name").notNull(),
@@ -67,7 +64,6 @@ export const tasks = pgTable("tasks", {
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),
 });
-
 export const comments = pgTable("comments", {
     id: uuid("id").defaultRandom().primaryKey(),
     content: text("content").notNull(),
