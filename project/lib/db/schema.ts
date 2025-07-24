@@ -17,6 +17,7 @@ export const memberRoleEnum = pgEnum("role", [
 export const users = pgTable("users", {
     id: uuid("id").defaultRandom().primaryKey(),
     clerkId: text("clerk_id").notNull().unique(),
+    username: text("username").notNull().unique(),
     email: text("email").notNull(),
     name: text("name").notNull(),
     createdAt: timestamp("created_at").defaultNow(),

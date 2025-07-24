@@ -3,8 +3,9 @@ export interface User {
     clerkId: string;
     email: string;
     name: string;
-    createdAt: Date | string;
-    updatedAt: Date | string;
+    username: string;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface Team {

@@ -10,6 +10,7 @@ import {
     comments,
 } from "./schema";
 import { eq } from "drizzle-orm";
+import { User } from "@/types";
 
 config({ path: ".env" });
 export const db = drizzle(process.env.DATABASE_URL!);
@@ -30,8 +31,14 @@ export const queries = {
                 .where(eq(users.clerkId, clerkId));
             return result[0] || null;
         },
-        create: async (data: any) => {
-            const result = await db.insert(users).values(data).returning();
+        create: async (data: Partial<User>) => {
+            if (!data.name || !data.clerkId || !data.username || !data.email) {
+                throw new Error("Missing required fields");
+            }
+            const result = await db
+                .insert(users)
+                .values(data as User)
+                .returning();
             return result[0];
         },
         update: async (id: string, data: any) => {
