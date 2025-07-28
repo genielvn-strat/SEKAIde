@@ -2,6 +2,7 @@ import { z } from "zod";
 export const userSchema = z.object({
     clerkId: z.string().min(1),
     email: z.string().email(),
+    username: z.string().min(1),
     name: z.string().min(1),
 });
 
