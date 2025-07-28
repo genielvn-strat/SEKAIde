@@ -18,8 +18,8 @@ Each intern will work through all tasks below for their individual implementatio
   - [X] 2.1 Set up Clerk authentication service
   - [X] 2.2 Configure authentication middleware for route protection
   - [X] 2.3 Create sign-in and sign-up pages
-  - [ ] 2.4 Implement user session management
-  - [ ] 2.5 Set up webhook for user data synchronization
+  - [X] 2.4 Implement user session management
+  - [X] 2.5 Set up webhook for user data synchronization
   - [X] 2.6 Create protected dashboard layout
 
 ### Phase 3: Database & Backend (Weeks 3-4)
@@ -29,7 +29,7 @@ Each intern will work through all tasks below for their individual implementatio
   - [X] 3.2 Configure PostgreSQL database (Vercel Postgres or Neon)
   - [X] 3.3 Set up Drizzle ORM with type-safe schema definitions
   - [X] 3.4 Create database migration system
-  - [ ] 3.5 Implement database connection and query utilities
+  - [X] 3.5 Implement database connection and query utilities
   - [X] 3.6 Set up data validation with Zod schemas
 
 ### Phase 4: Core Features (Weeks 4-6)
