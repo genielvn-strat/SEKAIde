@@ -49,8 +49,8 @@ export const queries = {
                 .returning();
             return result[0];
         },
-        delete: async (id: string) => {
-            await db.delete(users).where(eq(users.id, id));
+        delete: async (cleckId: string) => {
+            await db.delete(users).where(eq(users.clerkId, cleckId));
         },
     },
 

@@ -1,11 +1,10 @@
 "use server";
 
 import { queries } from "@/lib/db";
-import { createUserSchema } from "@/lib/validations";
+import { User } from "@/types";
 import { WebhookEvent } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { Webhook } from "svix";
-import z from "zod";
 
 export async function POST(req: Request) {
     const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
@@ -47,6 +46,7 @@ export async function POST(req: Request) {
         });
     }
 
+    // Get the ID and type
     const eventType = evt.type;
 
     console.log(eventType);
@@ -56,33 +56,33 @@ export async function POST(req: Request) {
             evt.data;
 
         try {
-            const validatedData = createUserSchema.parse({
+            const data: Partial<User> = {
                 clerkId: id,
                 username: String(username),
                 name: `${first_name} ${last_name}`,
                 email: email_addresses[0].email_address,
-            });
+            };
 
-            await queries.users.create(validatedData);
+            const user = await queries.users.create(data);
 
             console.log(
                 `User created: ${id} - ${email_addresses[0]?.email_address}`
             );
             console.log(evt.data);
-        } catch (error) {
-            if (error instanceof z.ZodError) {
-                console.error(
-                    "Error saving user to database:",
-                    error.issues[0].message
-                );
-                return new Response(error.issues[0].message, { status: 400 });
-            }
-            if (error instanceof Error) {
-                console.error("Error saving user to database:", error.message);
-                return new Response(error.message, { status: 400 });
-            }
-            return new Response("Server error", { status: 500 });
+        } catch (dbError) {
+            console.error("Error saving user to database:", dbError);
+            return new Response("Database error", { status: 500 });
         }
+    }
+
+    if (eventType === "user.deleted") {
+        const { id } = evt.data;
+
+        if (!id)
+            throw new Response("No Clerk ID is provided when deleting.", {
+                status: 500,
+            });
+        await queries.users.delete(id);
     }
 
     // // Handle other events like 'user.updated' or 'user.deleted' as needed
@@ -99,12 +99,6 @@ export async function POST(req: Request) {
     //     console.log(
     //         `User updated: ${id} - ${email_addresses[0]?.email_address}`
     //     );
-    // }
-
-    // if (eventType === "user.deleted") {
-    //     const { id } = evt.data;
-    //     // Delete user from your database or mark as deleted
-    //     console.log(`User deleted: ${id}`);
     // }
 
     return new Response("Webhook received", { status: 200 });
