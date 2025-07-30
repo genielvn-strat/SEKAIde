@@ -6,6 +6,7 @@ import "./globals.css";
 // import { ClerkProvider } from "@clerk/nextjs"
 import { ThemeProvider } from "@/components/theme-provider";
 import { ClerkProvider } from "@clerk/nextjs";
+import { TanstackProvider } from "@/lib/tanstack-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,7 +15,6 @@ export const metadata: Metadata = {
     description: "Team collaboration and project management platform",
     generator: "v0.dev",
 };
-
 export default function RootLayout({
     children,
 }: {
@@ -23,11 +23,13 @@ export default function RootLayout({
     return (
         // TODO: Task 2.1 - Wrap with ClerkProvider once Clerk is set up
         <ClerkProvider>
-            <html lang="en" suppressHydrationWarning>
-                <body className={inter.className}>
-                    <ThemeProvider>{children}</ThemeProvider>
-                </body>
-            </html>
+            <TanstackProvider>
+                <html lang="en" suppressHydrationWarning>
+                    <body className={inter.className}>
+                        <ThemeProvider>{children}</ThemeProvider>
+                    </body>
+                </html>
+            </TanstackProvider>
         </ClerkProvider>
     );
 }

@@ -11,10 +11,9 @@ export interface User {
 export interface Team {
     id: string;
     name: string;
-    ownerId: string | null;
-    createdAt: Date | string;
-    updatedAt: Date | string;
-    dueDate: Date | string | null;
+    ownerId: string;
+    createdAt: Date | null;
+    updatedAt: Date | null;
 }
 
 export interface TeamMember {
@@ -23,7 +22,7 @@ export interface TeamMember {
     teamId: string;
     role: "member" | "project_manager" | "admin";
     inviteConfirmed: boolean;
-    createdAt: Date | string;
+    createdAt: Date;
 }
 
 export interface Project {
@@ -32,8 +31,8 @@ export interface Project {
     description: string | null;
     ownerId: string | null;
     teamId: string | null;
-    createdAt: Date | string;
-    updatedAt: Date | string;
+    createdAt: Date;
+    updatedAt: Date;
     dueDate: Date | string | null;
 }
 

@@ -21,6 +21,14 @@ export const updateProjectSchema = projectSchema.partial();
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;
 export type UpdateProjectInput = z.infer<typeof updateProjectSchema>;
 
+export const teamSchema = z.object({
+    name: z.string().min(1, "Name is required").max(100, "Name too long"),
+});
+export const createTeamSchema = teamSchema;
+export const updateTeamSchema = teamSchema.partial();
+export type CreateTeamInput = z.infer<typeof createTeamSchema>;
+export type UpdateTeamInput = z.infer<typeof updateTeamSchema>;
+
 export const taskSchema = z.object({
     title: z
         .string()

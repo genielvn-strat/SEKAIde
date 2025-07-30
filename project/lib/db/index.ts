@@ -10,7 +10,7 @@ import {
     comments,
 } from "./schema";
 import { eq } from "drizzle-orm";
-import { User } from "@/types";
+import { Team, User } from "@/types";
 
 config({ path: ".env" });
 export const db = drizzle(process.env.DATABASE_URL!);
@@ -62,14 +62,37 @@ export const queries = {
                 .where(eq(teams.id, id));
             return result[0] || null;
         },
+        getJoinedTeams: async (userId: string) => {
+            return await db
+                .select({
+                    teamId: teams.id,
+                    teamName: teams.name,
+                    role: teamMembers.role,
+                    inviteConfirmed: teamMembers.inviteConfirmed,
+                    createdAt: teams.createdAt,
+                    updatedAt: teams.updatedAt,
+                })
+                .from(teamMembers)
+                .innerJoin(teams, eq(teamMembers.teamId, teams.id))
+                .where(eq(teamMembers.userId, userId));
+        },
         getByOwner: async (ownerId: string) => {
             return await db
                 .select()
                 .from(teams)
                 .where(eq(teams.ownerId, ownerId));
         },
-        create: async (data: any) => {
-            const result = await db.insert(teams).values(data).returning();
+        create: async (data: Partial<Team>) => {
+            if (!data.name || !data.ownerId) {
+                throw new Error("Missing required fields");
+            }
+            const result = await db
+                .insert(teams)
+                .values({
+                    name: data.name,
+                    ownerId: data.ownerId,
+                })
+                .returning();
             return result[0];
         },
         update: async (id: string, data: any) => {
@@ -80,8 +103,24 @@ export const queries = {
                 .returning();
             return result[0];
         },
-        delete: async (id: string) => {
-            await db.delete(teams).where(eq(teams.id, id));
+        delete: async (data: Partial<Team>) => {
+            if (!data.id || !data.ownerId) {
+                throw new Error("Missing required fields");
+            }
+            const team = await db
+                .select()
+                .from(teams)
+                .where(eq(teams.id, data.id));
+
+            if (!team[0]) {
+                throw new Error("Team not found");
+            }
+
+            if (team[0].ownerId !== data.ownerId) {
+                throw new Error("You are not authorized to delete this team");
+            }
+
+            await db.delete(teams).where(eq(teams.id, data.id));
         },
     },
 

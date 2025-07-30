@@ -27,9 +27,11 @@ export const users = pgTable("users", {
 export const teams = pgTable("team", {
     id: uuid("id").defaultRandom().primaryKey(),
     name: text("name").notNull(),
-    ownerId: uuid("owner_id").references(() => users.id, {
-        onDelete: "cascade",
-    }),
+    ownerId: uuid("owner_id")
+        .references(() => users.id, {
+            onDelete: "cascade",
+        })
+        .notNull(),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),
 });
