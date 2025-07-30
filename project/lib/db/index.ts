@@ -41,11 +41,22 @@ export const queries = {
                 .returning();
             return result[0];
         },
-        update: async (id: string, data: any) => {
+        update: async (data: Partial<User>) => {
+            if (!data.clerkId) throw new Error("Missing required fields.");
+
+            const user = await db
+                .select()
+                .from(users)
+                .where(eq(users.clerkId, data.clerkId));
+
+            if (!user) {
+                throw new Error("User not in the database.")
+            }
+
             const result = await db
                 .update(users)
                 .set({ ...data, updatedAt: new Date() })
-                .where(eq(users.id, id))
+                .where(eq(users.id, user[0].id))
                 .returning();
             return result[0];
         },

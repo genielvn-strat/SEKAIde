@@ -85,21 +85,24 @@ export async function POST(req: Request) {
         await queries.users.delete(id);
     }
 
-    // // Handle other events like 'user.updated' or 'user.deleted' as needed
-    // if (eventType === "user.updated") {
-    //     const {
-    //         id,
-    //         email_addresses,
-    //         first_name,
-    //         last_name,
-    //         image_url,
-    //         username,
-    //     } = evt.data;
-    //     // Update user in your database
-    //     console.log(
-    //         `User updated: ${id} - ${email_addresses[0]?.email_address}`
-    //     );
-    // }
+    if (eventType === "user.updated") {
+        const {
+            id,
+            email_addresses,
+            first_name,
+            last_name,
+            username,
+        } = evt.data;
+
+        const data: Partial<User> = {
+            clerkId: id,
+            username: String(username),
+            name: `${first_name} ${last_name}`,
+            email: email_addresses[0].email_address,
+        };
+
+        await queries.users.update(data)
+    }
 
     return new Response("Webhook received", { status: 200 });
 }
