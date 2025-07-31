@@ -9,9 +9,9 @@ export const getSession = async () => {
     return session;
 };
 
-export const getUserDbId = async () => {
-    const session = await getSession();
-    const user = await queries.users.getByClerkId(session.userId);
+export const getUserDbId = async (userId?: string) => {
+    if (!userId) userId = (await getSession()).userId;
+    const user = await queries.users.getByClerkId(userId);
     if (!user) throw new Error("User not found in DB");
     return user.id;
 };
