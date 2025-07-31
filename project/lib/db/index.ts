@@ -10,7 +10,7 @@ import {
     comments,
 } from "./schema";
 import { eq } from "drizzle-orm";
-import { Team, User } from "@/types";
+import { Project, Team, User } from "@/types";
 
 config({ path: ".env" });
 export const db = drizzle(process.env.DATABASE_URL!);
@@ -121,11 +121,27 @@ export const queries = {
 
             return result;
         },
-        update: async (id: string, data: any) => {
+        update: async (data: Partial<Team>) => {
+            if (!data.id || !data.ownerId) {
+                throw new Error("Missing required fields");
+            }
+            const team = await db
+                .select()
+                .from(teams)
+                .where(eq(teams.id, data.id));
+
+            if (!team[0]) {
+                throw new Error("Team not found");
+            }
+
+            if (team[0].ownerId !== data.ownerId) {
+                throw new Error("You are not authorized to delete this team");
+            }
+
             const result = await db
                 .update(teams)
                 .set({ ...data, updatedAt: new Date() })
-                .where(eq(teams.id, id))
+                .where(eq(teams.id, data.id))
                 .returning();
             return result[0];
         },

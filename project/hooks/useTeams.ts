@@ -1,7 +1,11 @@
-// hooks/useTeams.ts
 "use client";
 
-import { fetchTeams, createTeam, deleteTeam } from "@/actions/teamActions";
+import {
+    fetchTeams,
+    createTeam,
+    deleteTeam,
+    updateTeam,
+} from "@/actions/teamActions";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function useTeams() {
@@ -26,6 +30,13 @@ export function useTeams() {
         },
     });
 
+    const update = useMutation({
+        mutationFn: updateTeam,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["teams"] });
+        },
+    });
+
     return {
         ownedTeams: data?.owned ?? [],
         joinedTeams: data?.joined ?? [],
@@ -33,6 +44,7 @@ export function useTeams() {
         error,
         createTeam: create.mutate,
         deleteTeam: del.mutate,
+        updateTeam: update.mutate,
         isCreating: create.isPending,
     };
 }

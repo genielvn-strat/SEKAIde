@@ -18,7 +18,12 @@ export const createTeam = async ({ name }: Partial<Team>) => {
     return await queries.teams.create({ name, ownerId });
 };
 
-export const deleteTeam = async ({ id }: Partial<Team>) => {
+export const deleteTeam = async ({ id: teamId }: Partial<Team>) => {
     const ownerId = await getUserDbId();
-    await queries.teams.delete({ id, ownerId });
+    await queries.teams.delete({ id: teamId, ownerId });
+};
+
+export const updateTeam = async (data: Partial<Team>) => {
+    const ownerId = await getUserDbId();
+    await queries.teams.update({ ...data, ownerId: ownerId });
 };
