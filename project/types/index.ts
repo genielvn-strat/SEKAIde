@@ -33,7 +33,7 @@ export interface Project {
     teamId: string | null;
     createdAt: Date;
     updatedAt: Date;
-    dueDate: Date | string | null;
+    dueDate: Date | null;
 }
 
 export interface List {

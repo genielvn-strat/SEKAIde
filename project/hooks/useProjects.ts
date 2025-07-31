@@ -1,3 +1,48 @@
+"use client";
+
+import {
+    fetchProjects,
+    createProject,
+    deleteProject,
+} from "@/actions/projectActions";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+export function useProjects() {
+    const queryClient = useQueryClient();
+
+    const {
+        data: projects,
+        isLoading,
+        error,
+    } = useQuery({
+        queryKey: ["projects"],
+        queryFn: () => fetchProjects(),
+    });
+
+    const create = useMutation({
+        mutationFn: createProject,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["projects"] });
+        },
+    });
+
+    const del = useMutation({
+        mutationFn: deleteProject,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["projects"] });
+        },
+    });
+
+    return {
+        projects: projects,
+        isLoading,
+        error,
+        createProject: create.mutate,
+        deleteProject: del.mutate,
+        isCreating: create.isPending,
+    };
+}
+
 // TODO: Task 4.1 - Implement project CRUD operations
 // TODO: Task 4.2 - Create project listing and dashboard interface
 
@@ -56,14 +101,3 @@ Dependencies to install:
 */
 
 // Placeholder to prevent import errors
-export function useProjects() {
-  console.log("TODO: Implement useProjects hook")
-  return {
-    projects: [],
-    isLoading: false,
-    error: null,
-    createProject: (data: any) => console.log("TODO: Create project", data),
-    updateProject: (id: string, data: any) => console.log(`TODO: Update project ${id}`, data),
-    deleteProject: (id: string) => console.log(`TODO: Delete project ${id}`),
-  }
-}

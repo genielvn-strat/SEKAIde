@@ -220,20 +220,63 @@ export const queries = {
                 .where(eq(teamMembers.userId, userId));
             return result;
         },
-        create: async (data: any) => {
-            const result = await db.insert(projects).values(data).returning();
-            return result[0];
-        },
-        update: async (id: string, data: any) => {
+        create: async (data: Partial<Project>) => {
+            if (!data.name || !data.ownerId || !data.teamId) {
+                throw new Error("Missing required fields.");
+            }
             const result = await db
-                .update(projects)
-                .set({ ...data, updatedAt: new Date() })
-                .where(eq(projects.id, id))
+                .insert(projects)
+                .values({
+                    name: data.name,
+                    ownerId: data.ownerId,
+                    teamId: data.teamId,
+                    description: data.description ?? "A project.",
+                })
                 .returning();
             return result[0];
         },
-        delete: async (id: string) => {
-            await db.delete(projects).where(eq(projects.id, id));
+        update: async (data: Partial<Project>) => {
+            if (!data.id || !data.ownerId) {
+                throw new Error("Missing required fields");
+            }
+            const project = await db
+                .select()
+                .from(projects)
+                .where(eq(projects.id, data.id));
+
+            if (!project[0]) {
+                throw new Error("Project not found");
+            }
+
+            if (project[0].ownerId !== data.ownerId) {
+                throw new Error("You are not authorized to delete this team");
+            }
+
+            const result = await db
+                .update(projects)
+                .set({ ...data, updatedAt: new Date() })
+                .where(eq(projects.id, data.id))
+                .returning();
+            return result[0];
+        },
+        delete: async (data: Partial<Project>) => {
+            if (!data.id || !data.ownerId) {
+                throw new Error("Missing required fields");
+            }
+            const project = await db
+                .select()
+                .from(projects)
+                .where(eq(projects.id, data.id));
+
+            if (!project[0]) {
+                throw new Error("Team not found");
+            }
+
+            if (project[0].ownerId !== data.ownerId) {
+                throw new Error("You are not authorized to delete this team");
+            }
+
+            await db.delete(projects).where(eq(projects.id, data.id));
         },
     },
 
