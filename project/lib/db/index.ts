@@ -50,7 +50,7 @@ export const queries = {
                 .where(eq(users.clerkId, data.clerkId));
 
             if (!user) {
-                throw new Error("User not in the database.")
+                throw new Error("User not in the database.");
             }
 
             const result = await db
@@ -94,17 +94,32 @@ export const queries = {
                 .where(eq(teams.ownerId, ownerId));
         },
         create: async (data: Partial<Team>) => {
-            if (!data.name || !data.ownerId) {
-                throw new Error("Missing required fields");
-            }
-            const result = await db
-                .insert(teams)
-                .values({
-                    name: data.name,
-                    ownerId: data.ownerId,
-                })
-                .returning();
-            return result[0];
+            const result = await db.transaction(async (tx) => {
+                if (!data.name || !data.ownerId) {
+                    throw new Error("Missing required fields");
+                }
+                const insertedTeam = await tx
+                    .insert(teams)
+                    .values({
+                        name: data.name,
+                        ownerId: data.ownerId,
+                    })
+                    .returning();
+                const team = insertedTeam[0];
+
+                if (!team) throw new Error("Failed to create team.");
+
+                // create a team member for this user as well
+                await tx.insert(teamMembers).values({
+                    teamId: team.id,
+                    userId: data.ownerId,
+                    role: "admin",
+                    inviteConfirmed: true,
+                });
+                return team;
+            });
+
+            return result;
         },
         update: async (id: string, data: any) => {
             const result = await db
@@ -181,6 +196,29 @@ export const queries = {
                 .select()
                 .from(projects)
                 .where(eq(projects.teamId, teamId));
+        },
+        getByOwnerId: async (ownerId: string) => {
+            return await db
+                .select()
+                .from(projects)
+                .where(eq(projects.ownerId, ownerId));
+        },
+        getByUserTeams: async (userId: string) => {
+            const result = await db
+                .select({
+                    projectId: projects.id,
+                    name: projects.name,
+                    description: projects.description,
+                    createdAt: projects.createdAt,
+                    updatedAt: projects.updatedAt,
+                    teamId: projects.teamId,
+                    teamName: teams.name,
+                })
+                .from(teamMembers)
+                .innerJoin(projects, eq(teamMembers.teamId, projects.teamId))
+                .innerJoin(teams, eq(teamMembers.teamId, teams.id))
+                .where(eq(teamMembers.userId, userId));
+            return result;
         },
         create: async (data: any) => {
             const result = await db.insert(projects).values(data).returning();
