@@ -15,6 +15,13 @@
       "when": 1753335984130,
       "tag": "0001_harsh_silverclaw",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1753947013664,
+      "tag": "0002_reflective_ma_gnuci",
+      "breakpoints": true
     }
   ]
 }

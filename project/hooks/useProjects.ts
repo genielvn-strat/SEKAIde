@@ -1,9 +1,10 @@
 "use client";
 
 import {
-    fetchProjects,
+    fetchUserProjects,
     createProject,
     deleteProject,
+    updateProject,
 } from "@/actions/projectActions";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -16,7 +17,7 @@ export function useProjects() {
         error,
     } = useQuery({
         queryKey: ["projects"],
-        queryFn: () => fetchProjects(),
+        queryFn: () => fetchUserProjects(),
     });
 
     const create = useMutation({
@@ -33,12 +34,20 @@ export function useProjects() {
         },
     });
 
+    const update = useMutation({
+        mutationFn: updateProject,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["projects"] });
+        },
+    });
+
     return {
         projects: projects,
         isLoading,
         error,
         createProject: create.mutate,
         deleteProject: del.mutate,
+        updateProject: update.mutate,
         isCreating: create.isPending,
     };
 }

@@ -53,6 +53,9 @@ importers:
       micro:
         specifier: ^10.0.1
         version: 10.0.1
+      nanoid:
+        specifier: ^5.1.5
+        version: 5.1.5
       next:
         specifier: 14.2.16
         version: 14.2.16(@babel/core@7.28.0)(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
@@ -74,6 +77,9 @@ importers:
       react-hook-form:
         specifier: ^7.61.1
         version: 7.61.1(react@18.0.0)
+      slugify:
+        specifier: ^1.6.6
+        version: 1.6.6
       svix:
         specifier: ^1.69.0
         version: 1.69.0
@@ -2645,6 +2651,11 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
+  nanoid@5.1.5:
+    resolution: {integrity: sha512-Ir/+ZpE9fDsNH0hQ3C68uyThDXzYcim2EqcZ8zn8Chtt1iylPT9xXJB0kPCnqzgcEGikO9RxSrh63MsmVCU7Fw==}
+    engines: {node: ^18 || >=20}
+    hasBin: true
+
   napi-postinstall@0.2.4:
     resolution: {integrity: sha512-ZEzHJwBhZ8qQSbknHqYcdtQVr8zUgGyM/q6h6qAyhtyVMNrSgDhrC4disf03dYW0e+czXyLnZINnCTEkWy0eJg==}
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
@@ -3176,6 +3187,10 @@ packages:
   slash@3.0.0:
     resolution: {integrity: sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==}
     engines: {node: '>=8'}
+
+  slugify@1.6.6:
+    resolution: {integrity: sha512-h+z7HKHYXj6wJU+AnS/+IH8Uh9fdcX1Lrhg1/VMdf9PwoBQXFcXiAdsy2tSK0P6gKwJLXp02r90ahUCqHk9rrw==}
+    engines: {node: '>=8.0.0'}
 
   snake-case@3.0.4:
     resolution: {integrity: sha512-LAOh4z89bGQvl9pFfNF8V146i7o7/CqFPbqzYgP+yYzDIDeS9HaNFtXABamRW+AQzEVODcvE79ljJ+8a9YSdMg==}
@@ -6494,6 +6509,8 @@ snapshots:
 
   nanoid@3.3.11: {}
 
+  nanoid@5.1.5: {}
+
   napi-postinstall@0.2.4: {}
 
   natural-compare@1.4.0: {}
@@ -7015,6 +7032,8 @@ snapshots:
   sisteransi@1.0.5: {}
 
   slash@3.0.0: {}
+
+  slugify@1.6.6: {}
 
   snake-case@3.0.4:
     dependencies:

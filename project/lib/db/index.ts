@@ -9,8 +9,10 @@ import {
     lists,
     comments,
 } from "./schema";
-import { eq } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
 import { Project, Team, User } from "@/types";
+import { nanoid } from "nanoid";
+import slugify from "slugify";
 
 config({ path: ".env" });
 export const db = drizzle(process.env.DATABASE_URL!);
@@ -98,11 +100,16 @@ export const queries = {
                 if (!data.name || !data.ownerId) {
                     throw new Error("Missing required fields");
                 }
+
                 const insertedTeam = await tx
                     .insert(teams)
                     .values({
                         name: data.name,
                         ownerId: data.ownerId,
+                        slug: `${slugify(data.name, {
+                            lower: true,
+                            strict: true,
+                        })}-${nanoid(6)}`,
                     })
                     .returning();
                 const team = insertedTeam[0];
@@ -200,12 +207,37 @@ export const queries = {
     },
 
     projects: {
-        getById: async (id: string) => {
+        getBySlug: async (slug: string, userId: string) => {
+            if (!slug || !userId) throw new Error("Missing required fields");
+
             const result = await db
-                .select()
+                .select({
+                    id: projects.id,
+                    name: projects.name,
+                    slug: projects.slug,
+                    description: projects.description,
+                    ownerId: projects.ownerId,
+                    teamId: projects.teamId,
+                    teamName: teams.name,
+                    createdAt: projects.createdAt,
+                    updatedAt: projects.updatedAt,
+                    dueDate: projects.dueDate,
+                })
                 .from(projects)
-                .where(eq(projects.id, id));
-            return result[0] || null;
+                .leftJoin(teams, eq(projects.teamId, teams.id))
+                .leftJoin(teamMembers, eq(teams.id, teamMembers.teamId))
+                .where(
+                    and(
+                        eq(projects.slug, slug),
+                        or(
+                            eq(projects.ownerId, userId),
+                            eq(teamMembers.userId, userId)
+                        )
+                    )
+                )
+                .then((res) => res[0] || null);
+
+            return result;
         },
         getByTeamId: async (teamId: string) => {
             return await db
@@ -228,6 +260,7 @@ export const queries = {
                     createdAt: projects.createdAt,
                     updatedAt: projects.updatedAt,
                     teamId: projects.teamId,
+                    slug: projects.slug,
                     teamName: teams.name,
                 })
                 .from(teamMembers)
@@ -247,6 +280,10 @@ export const queries = {
                     ownerId: data.ownerId,
                     teamId: data.teamId,
                     description: data.description ?? "A project.",
+                    slug: `${slugify(data.name, {
+                        lower: true,
+                        strict: true,
+                    })}-${nanoid(6)}`,
                 })
                 .returning();
             return result[0];

@@ -32,6 +32,7 @@ export const teams = pgTable("team", {
             onDelete: "cascade",
         })
         .notNull(),
+    slug: text("slug").notNull().unique(),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -57,6 +58,7 @@ export const projects = pgTable("projects", {
         onDelete: "cascade",
     }),
     teamId: uuid("team_id").references(() => teams.id, { onDelete: "cascade" }),
+    slug: text("slug").notNull().unique(),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),
     dueDate: timestamp("due_date").defaultNow(),

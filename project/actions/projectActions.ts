@@ -4,10 +4,16 @@ import { queries } from "@/lib/db";
 import { getUserDbId } from "./sessionActions";
 import { Project } from "@/types";
 
-export const fetchProjects = async () => {
+export const fetchUserProjects = async () => {
     const userId = await getUserDbId();
     const projects = await queries.projects.getByUserTeams(userId);
     return projects;
+};
+
+export const fetchProjectBySlug = async ({ slug }: Partial<Project>) => {
+    const userId = await getUserDbId();
+    const project = await queries.projects.getBySlug(slug!, userId);
+    return project;
 };
 
 export const createProject = async ({

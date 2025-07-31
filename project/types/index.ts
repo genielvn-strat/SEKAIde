@@ -11,6 +11,7 @@ export interface User {
 export interface Team {
     id: string;
     name: string;
+    slug: string;
     ownerId: string;
     createdAt: Date | null;
     updatedAt: Date | null;
@@ -28,6 +29,7 @@ export interface TeamMember {
 export interface Project {
     id: string;
     name: string;
+    slug: string;
     description: string | null;
     ownerId: string | null;
     teamId: string | null;

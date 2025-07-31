@@ -35,7 +35,7 @@
         "app/(dashboard)/calendar/page.tsx.back",
         "app/(dashboard)/team/page.tsx.back",
         "app/(dashboard)/dashboard/page.tsx.back",
-        "app/(dashboard)/projects/[id]/page.tsx.back"
+        "app/(dashboard)/projects/[slug]/page.tsx.back"
     ],
     "exclude": ["node_modules"]
 }

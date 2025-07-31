@@ -4,6 +4,8 @@ import { useProjects } from "@/hooks/useProjects";
 import { useTeams } from "@/hooks/useTeams";
 import { CreateProjectInput, projectSchema } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 import React, { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 
@@ -105,22 +107,26 @@ export default function ProjectsPage() {
                 {projects?.length ? (
                     <ul className="space-y-2">
                         {projects.map((project) => (
-                            <li
-                                key={project.projectId}
-                                className="bg-gray-100 p-2 rounded text-sm"
-                            >
-                                <pre>{JSON.stringify(project, null, 2)}</pre>
-                                <button
-                                    onClick={() => {
-                                        deleteProject({
-                                            id: project.projectId,
-                                        });
-                                    }}
-                                    className="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                            <Link href={`/projects/${project.slug}`}>
+                                <li
+                                    key={project.projectId}
+                                    className="bg-gray-100 p-2 rounded text-sm"
                                 >
-                                    Delete
-                                </button>
-                            </li>
+                                    <pre>
+                                        {JSON.stringify(project, null, 2)}
+                                    </pre>
+                                    <button
+                                        onClick={() => {
+                                            deleteProject({
+                                                id: project.projectId,
+                                            });
+                                        }}
+                                        className="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                                    >
+                                        Delete
+                                    </button>
+                                </li>
+                            </Link>
                         ))}
                     </ul>
                 ) : (
