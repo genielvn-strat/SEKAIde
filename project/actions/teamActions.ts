@@ -2,7 +2,7 @@
 
 import { queries } from "@/lib/db";
 import { getUserDbId } from "./sessionActions";
-import { Team } from "@/types";
+import { Team } from "@/types/Team";
 
 export const fetchTeams = async () => {
     const userId = await getUserDbId();
@@ -11,6 +11,12 @@ export const fetchTeams = async () => {
         queries.teams.getJoinedTeams(userId),
     ]);
     return { owned, joined };
+};
+
+export const fetchTeamBySlug = async ({ slug }: Partial<Team>) => {
+    const userId = await getUserDbId();
+    const team = await queries.teams.getBySlug(slug!, userId);
+    return team;
 };
 
 export const createTeam = async ({ name }: Partial<Team>) => {

@@ -2,7 +2,7 @@
 
 import { queries } from "@/lib/db";
 import { getUserDbId } from "./sessionActions";
-import { Project } from "@/types";
+import { Project } from "@/types/Project";
 
 export const fetchUserProjects = async () => {
     const userId = await getUserDbId();

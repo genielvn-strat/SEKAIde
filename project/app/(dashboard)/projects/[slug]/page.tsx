@@ -1,8 +1,6 @@
 "use client";
-
-import { useQuery } from "@tanstack/react-query";
-import { fetchProjectBySlug } from "@/actions/projectActions";
 import { notFound } from "next/navigation";
+import { useProjectDetails } from "@/hooks/useProjectDetails";
 
 interface ProjectProps {
     params: {
@@ -18,11 +16,7 @@ export default function ProjectDetails({ params }: ProjectProps) {
         isLoading,
         isError,
         error,
-    } = useQuery({
-        queryKey: ["project", slug],
-        queryFn: () => fetchProjectBySlug({ slug }),
-        enabled: !!slug,
-    });
+    } = useProjectDetails(slug);
 
     if (isLoading) {
         return <div className="loading">Loading project...</div>;
@@ -53,6 +47,9 @@ export default function ProjectDetails({ params }: ProjectProps) {
             </p>
             <pre className="mt-4 bg-muted p-4 rounded text-xs overflow-x-auto">
                 {JSON.stringify(project, null, 2)}
+            </pre>
+            <pre className="mt-4 bg-muted p-4 rounded text-xs overflow-x-auto">
+                TODO: Add tasks here. Comments here as well. Make list dropdown first.
             </pre>
         </div>
     );

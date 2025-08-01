@@ -78,13 +78,24 @@ export const tasks = pgTable("tasks", {
     id: uuid("id").defaultRandom().primaryKey(),
     title: text("title").notNull(),
     description: text("description"),
-    projectId: uuid("project_id").references(() => projects.id, {
-        onDelete: "cascade",
-    }),
-    listId: uuid("list_id").references(() => lists.id, { onDelete: "cascade" }),
-    assigneeId: uuid("assignee_id").references(() => users.id, {
-        onDelete: "cascade",
-    }),
+    projectId: uuid("project_id")
+        .references(() => projects.id, {
+            onDelete: "cascade",
+        })
+        .notNull(),
+    listId: uuid("list_id")
+        .references(() => lists.id, { onDelete: "cascade" })
+        .notNull(),
+    assigneeId: uuid("assignee_id")
+        .references(() => users.id, {
+            onDelete: "cascade",
+        })
+        .notNull(),
+    createdBy: uuid("created_by")
+        .references(() => users.id, {
+            onDelete: "cascade",
+        })
+        .notNull(),
     priority: priorityEnum("priority").default("low"),
     dueDate: timestamp("due_date"),
     position: integer("position").notNull(),

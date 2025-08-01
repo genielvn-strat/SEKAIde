@@ -3,16 +3,17 @@
 import { fetchProjectBySlug } from "@/actions/projectActions";
 import { useQuery } from "@tanstack/react-query";
 
-export function useProject(slug: string) {
+export function useProjectDetails(slug: string) {
     const {
         data: project,
         isLoading,
+        isError,
         error,
     } = useQuery({
-        queryKey: ["project", slug],
+        queryKey: ["projectDetails", slug],
         queryFn: () => fetchProjectBySlug({ slug }),
         enabled: !!slug,
     });
 
-    return { project, isLoading, error };
+    return { data: project, isLoading, isError, error };
 }

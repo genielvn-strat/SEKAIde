@@ -4,6 +4,7 @@ import { CreateTeamInput, teamSchema } from "@/lib/validations";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTeams } from "@/hooks/useTeams";
+import Link from "next/link";
 
 export default function TeamPage() {
     const {
@@ -86,10 +87,11 @@ export default function TeamPage() {
             </form>
 
             <div>
-                <h2 className="text-lg font-semibold mt-6">🛠️ Owned Teams</h2>
+                <h2 className="text-lg font-semibold mt-6">🤝 Joined Teams</h2>
                 <div className="space-y-2 mt-2">
-                    {ownedTeams.map((team) => (
-                        <div
+                    {joinedTeams.map((team) => (
+                        <Link
+                            href={`/teams/${team.slug}`}
                             key={team.id}
                             className="bg-gray-100 p-2 rounded text-sm"
                         >
@@ -116,18 +118,7 @@ export default function TeamPage() {
                                     Edit
                                 </button>
                             </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            <div>
-                <h2 className="text-lg font-semibold mt-6">🤝 Joined Teams</h2>
-                <div className="space-y-2 mt-2">
-                    {joinedTeams.map((team) => (
-                        <pre className="bg-gray-100 p-2 rounded text-sm">
-                            {JSON.stringify(team, null, 2)}
-                        </pre>
+                        </Link>
                     ))}
                 </div>
             </div>

@@ -10,7 +10,11 @@ import {
     comments,
 } from "./schema";
 import { and, eq, or } from "drizzle-orm";
-import { Project, Team, User } from "@/types";
+import { Task } from "@/types/Task";
+import { Project } from "@/types/Project";
+import { TeamMember } from "@/types/TeamMember";
+import { Team } from "@/types/Team";
+import { User } from "@/types/User";
 import { nanoid } from "nanoid";
 import slugify from "slugify";
 
@@ -78,8 +82,9 @@ export const queries = {
         getJoinedTeams: async (userId: string) => {
             return await db
                 .select({
-                    teamId: teams.id,
+                    id: teams.id,
                     teamName: teams.name,
+                    slug: teams.slug,
                     role: teamMembers.role,
                     inviteConfirmed: teamMembers.inviteConfirmed,
                     createdAt: teams.createdAt,
@@ -94,6 +99,33 @@ export const queries = {
                 .select()
                 .from(teams)
                 .where(eq(teams.ownerId, ownerId));
+        },
+        getBySlug: async (slug: string, userId: string) => {
+            if (!slug || !userId) throw new Error("Missing required fields");
+
+            const result = await db
+                .select({
+                    id: teams.id,
+                    name: teams.name,
+                    slug: teams.slug,
+                    ownerId: teams.ownerId,
+                    createdAt: teams.createdAt,
+                    updatedAt: teams.updatedAt,
+                })
+                .from(teams)
+                .leftJoin(teamMembers, eq(teams.id, teamMembers.teamId))
+                .where(
+                    and(
+                        eq(teams.slug, slug),
+                        or(
+                            eq(teams.ownerId, userId),
+                            eq(teamMembers.userId, userId)
+                        )
+                    )
+                )
+                .then((res) => res[0] || null);
+
+            return result;
         },
         create: async (data: Partial<Team>) => {
             const result = await db.transaction(async (tx) => {
@@ -186,13 +218,23 @@ export const queries = {
                 .from(teamMembers)
                 .where(eq(teamMembers.teamId, teamId));
         },
-        create: async (data: any) => {
+        accept: "", // Set invite to true
+        reject: "", // Delete the row
+        invite: async (data: Partial<TeamMember>) => {
+            if (!data.teamId || !data.userId)
+                throw new Error("Missing required fields");
             const result = await db
                 .insert(teamMembers)
-                .values(data)
+                .values({
+                    teamId: data.teamId,
+                    userId: data.userId,
+                    role: "member",
+                    inviteConfirmed: false,
+                })
                 .returning();
             return result[0];
         },
+        delete: "", // prolly like leave the team
         update: async (id: string, data: any) => {
             const result = await db
                 .update(teamMembers)
@@ -200,9 +242,6 @@ export const queries = {
                 .where(eq(teamMembers.id, id))
                 .returning();
             return result[0];
-        },
-        delete: async (id: string) => {
-            await db.delete(teamMembers).where(eq(teamMembers.id, id));
         },
     },
 
@@ -270,23 +309,41 @@ export const queries = {
             return result;
         },
         create: async (data: Partial<Project>) => {
-            if (!data.name || !data.ownerId || !data.teamId) {
-                throw new Error("Missing required fields.");
-            }
-            const result = await db
-                .insert(projects)
-                .values({
-                    name: data.name,
-                    ownerId: data.ownerId,
-                    teamId: data.teamId,
-                    description: data.description ?? "A project.",
-                    slug: `${slugify(data.name, {
-                        lower: true,
-                        strict: true,
-                    })}-${nanoid(6)}`,
-                })
-                .returning();
-            return result[0];
+            const result = await db.transaction(async (tx) => {
+                if (!data.name || !data.ownerId || !data.teamId) {
+                    throw new Error("Missing required fields.");
+                }
+                const inserted = await tx
+                    .insert(projects)
+                    .values({
+                        name: data.name,
+                        ownerId: data.ownerId,
+                        teamId: data.teamId,
+                        description: data.description ?? "A project.",
+                        slug: `${slugify(data.name, {
+                            lower: true,
+                            strict: true,
+                        })}-${nanoid(6)}`,
+                    })
+                    .returning();
+
+                const project = inserted[0];
+                if (!project) throw new Error("Project creation failed");
+
+                const defaultLists = ["Backlog", "Todo", "Doing", "Done"].map(
+                    (name, idx) => ({
+                        name,
+                        position: idx,
+                        projectId: project.id,
+                    })
+                );
+
+                await tx.insert(lists).values(defaultLists);
+
+                return project;
+            });
+
+            return result;
         },
         update: async (data: Partial<Project>) => {
             if (!data.id || !data.ownerId) {
@@ -356,18 +413,72 @@ export const queries = {
             await db.delete(lists).where(eq(lists.id, id));
         },
     },
-
     tasks: {
+        getByProjectSlug: async (slug: string) => {
+            return await db
+                .select()
+                .from(tasks)
+                .innerJoin(projects, eq(tasks.projectId, projects.id))
+                .where(eq(projects.slug, slug));
+        },
         getByProject: async (projectId: string) => {
             return await db
                 .select()
                 .from(tasks)
                 .where(eq(tasks.projectId, projectId));
         },
-        create: async (data: any) => {
-            const result = await db.insert(tasks).values(data).returning();
+        create: async (data: Partial<Task>, slug: string) => {
+            if (
+                !data.title ||
+                !data.assigneeId ||
+                !data.createdBy ||
+                !data.listId
+            )
+                throw new Error("Missing required fields");
+
+            const project = await db
+                .select({ teamId: projects.teamId, id: projects.id })
+                .from(projects)
+                .where(eq(projects.slug, slug))
+                .then((res) => res[0]);
+
+            if (!project) throw new Error("Project not found");
+
+            const isMember = await db
+                .select()
+                .from(teamMembers)
+                .where(
+                    and(
+                        eq(teamMembers.teamId, project.teamId!),
+                        eq(teamMembers.userId, data.assigneeId)
+                    )
+                )
+                .then((res) => res[0] ?? null);
+
+            if (!isMember) throw new Error("You are not part of the team");
+            if (isMember.role == "member")
+                throw new Error(
+                    "You are not the project manager or an admin to assign tasks."
+                );
+
+            const result = await db
+                .insert(tasks)
+                .values({
+                    ...data,
+                })
+                .returning();
+            // title: data.title!,
+            // description: data.description ?? "",
+            // projectId: project.id,
+            // assigneeId: data.assigneeId,
+            // priority: data.priority ?? "low",
+            // createdBy: isMember.id,
+            // dueDate: data.dueDate ? new Date(data.dueDate) : null,
+            // position: data.position
+
             return result[0];
         },
+
         update: async (id: string, data: any) => {
             const result = await db
                 .update(tasks)
