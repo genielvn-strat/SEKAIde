@@ -6,6 +6,7 @@ import {
     deleteTeam,
     updateTeam,
 } from "@/actions/teamActions";
+import { UpdateTeamInput } from "@/lib/validations";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function useTeams() {
@@ -31,7 +32,13 @@ export function useTeams() {
     });
 
     const update = useMutation({
-        mutationFn: updateTeam,
+        mutationFn: ({
+            teamId,
+            data,
+        }: {
+            teamId: string;
+            data: UpdateTeamInput;
+        }) => updateTeam(teamId, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["teams"] });
         },

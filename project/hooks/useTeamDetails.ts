@@ -11,7 +11,7 @@ export function useTeamDetails(slug: string) {
         error,
     } = useQuery({
         queryKey: ["teamDetails", slug],
-        queryFn: () => fetchTeamBySlug({ slug }),
+        queryFn: () => fetchTeamBySlug(slug),
         enabled: !!slug,
     });
 

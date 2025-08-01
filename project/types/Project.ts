@@ -1,11 +1,16 @@
 export interface Project {
     id: string;
     name: string;
+    description: string | undefined;
     slug: string;
-    description: string | null;
-    ownerId: string | null;
-    teamId: string | null;
+    ownerId: string;
+    teamId: string;
     createdAt: Date;
     updatedAt: Date;
-    dueDate: Date | null;
+    dueDate: Date | undefined;
 }
+
+export type CreateProject = Omit<Project, "id" | "createdAt" | "updatedAt">;
+export type UpdateProject = Partial<
+    Omit<Project, "createdAt" | "updatedAt" | "ownerId" | "teamId" | "slug">
+>;

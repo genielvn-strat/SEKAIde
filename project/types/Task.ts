@@ -12,3 +12,10 @@ export interface Task {
     createdAt: Date;
     updatedAt: Date;
 }
+
+export type CreateTask = Omit<Task, "id" | "createdAt" | "updatedAt">;
+
+export type UpdateTask = Omit<
+    Task,
+    "id" | "createdAt" | "projectId" | "teamId"
+>;

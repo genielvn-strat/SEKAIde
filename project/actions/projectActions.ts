@@ -2,7 +2,10 @@
 
 import { queries } from "@/lib/db";
 import { getUserDbId } from "./sessionActions";
-import { Project } from "@/types/Project";
+import { CreateProject, Project, UpdateProject } from "@/types/Project";
+import { CreateProjectInput, UpdateProjectInput } from "@/lib/validations";
+import slugify from "slugify";
+import { nanoid } from "nanoid";
 
 export const fetchUserProjects = async () => {
     const userId = await getUserDbId();
@@ -10,27 +13,35 @@ export const fetchUserProjects = async () => {
     return projects;
 };
 
-export const fetchProjectBySlug = async ({ slug }: Partial<Project>) => {
+export const fetchProjectBySlug = async (slug: string) => {
     const userId = await getUserDbId();
-    const project = await queries.projects.getBySlug(slug!, userId);
+    const project = await queries.projects.getBySlug(slug, userId);
     return project;
 };
 
-export const createProject = async ({
-    name,
-    description,
-    teamId,
-}: Partial<Project>) => {
+export const createProject = async (data: CreateProjectInput) => {
     const ownerId = await getUserDbId();
-    await queries.projects.create({ name, description, ownerId, teamId });
+    const project: CreateProject = {
+        name: data.name,
+        description: data.description,
+        ownerId: ownerId,
+        dueDate: data.dueDate,
+        slug: `${slugify(data.name, {
+            lower: true,
+            strict: true,
+        })}-${nanoid(6)}`,
+        teamId: data.teamId,
+    };
+
+    await queries.projects.create(project);
 };
 
-export const deleteProject = async ({ id: projectId }: Partial<Project>) => {
+export const deleteProject = async (id: string) => {
     const ownerId = await getUserDbId();
-    await queries.projects.delete({ id: projectId, ownerId });
+    await queries.projects.delete(id, ownerId);
 };
 
-export const updateProject = async (data: Partial<Project>) => {
-    const ownerId = await getUserDbId();
-    await queries.projects.update({ ...data, ownerId: ownerId });
+export const updateProject = async (projectId: string, data: UpdateProjectInput) => {
+    const user = await getUserDbId();
+    await queries.projects.update(projectId, data, user);
 };

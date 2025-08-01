@@ -3,6 +3,11 @@ export interface Team {
     name: string;
     slug: string;
     ownerId: string;
-    createdAt: Date | null;
-    updatedAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
 }
+
+export type CreateTeam = Omit<Team, "id" | "createdAt" | "updatedAt">;
+export type UpdateTeam = Partial<
+    Omit<Team, "id" | "createdAt" | "updatedAt" | "slug" | "ownerId">
+>;

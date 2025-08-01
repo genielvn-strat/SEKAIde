@@ -11,7 +11,7 @@ export function useProjectDetails(slug: string) {
         error,
     } = useQuery({
         queryKey: ["projectDetails", slug],
-        queryFn: () => fetchProjectBySlug({ slug }),
+        queryFn: () => fetchProjectBySlug(slug),
         enabled: !!slug,
     });
 

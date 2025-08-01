@@ -5,7 +5,6 @@ import { useTeams } from "@/hooks/useTeams";
 import { CreateProjectInput, projectSchema } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import React, { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 
@@ -117,9 +116,7 @@ export default function ProjectsPage() {
                                     </pre>
                                     <button
                                         onClick={() => {
-                                            deleteProject({
-                                                id: project.projectId,
-                                            });
+                                            deleteProject(project.projectId);
                                         }}
                                         className="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
                                     >

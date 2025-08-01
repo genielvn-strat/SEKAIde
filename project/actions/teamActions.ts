@@ -2,7 +2,10 @@
 
 import { queries } from "@/lib/db";
 import { getUserDbId } from "./sessionActions";
-import { Team } from "@/types/Team";
+import { CreateTeam, Team, UpdateTeam } from "@/types/Team";
+import { CreateTeamInput, UpdateTeamInput } from "@/lib/validations";
+import slugify from "slugify";
+import { nanoid } from "nanoid";
 
 export const fetchTeams = async () => {
     const userId = await getUserDbId();
@@ -13,23 +16,34 @@ export const fetchTeams = async () => {
     return { owned, joined };
 };
 
-export const fetchTeamBySlug = async ({ slug }: Partial<Team>) => {
+export const fetchTeamBySlug = async (slug: string) => {
     const userId = await getUserDbId();
-    const team = await queries.teams.getBySlug(slug!, userId);
+    const team = await queries.teams.getBySlug(slug, userId);
     return team;
 };
 
-export const createTeam = async ({ name }: Partial<Team>) => {
+export const createTeam = async (data: CreateTeamInput) => {
     const ownerId = await getUserDbId();
-    return await queries.teams.create({ name, ownerId });
+    const team: CreateTeam = {
+        name: data.name,
+        ownerId: ownerId,
+        slug: `${slugify(data.name, {
+            lower: true,
+            strict: true,
+        })}-${nanoid(6)}`,
+    };
+    return await queries.teams.create(team);
 };
 
-export const deleteTeam = async ({ id: teamId }: Partial<Team>) => {
+export const deleteTeam = async (teamId: string) => {
     const ownerId = await getUserDbId();
-    await queries.teams.delete({ id: teamId, ownerId });
+    await queries.teams.delete(teamId, ownerId);
 };
 
-export const updateTeam = async (data: Partial<Team>) => {
+export const updateTeam = async (teamId: string, data: UpdateTeamInput) => {
     const ownerId = await getUserDbId();
-    await queries.teams.update({ ...data, ownerId: ownerId });
+    const team: UpdateTeam = {
+        name: data.name,
+    };
+    await queries.teams.update(teamId, team, ownerId);
 };

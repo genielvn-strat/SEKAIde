@@ -1,3 +1,5 @@
+import { Team } from "./Team";
+
 export interface TeamMember {
     id: string;
     userId: string;
@@ -6,3 +8,5 @@ export interface TeamMember {
     inviteConfirmed: boolean;
     createdAt: Date;
 }
+
+export type CreateTeam = Omit<TeamMember, "id" | "createdAt">;

@@ -11,9 +11,9 @@ import {
 } from "./schema";
 import { and, eq, or } from "drizzle-orm";
 import { Task } from "@/types/Task";
-import { Project } from "@/types/Project";
+import { CreateProject, Project, UpdateProject } from "@/types/Project";
 import { TeamMember } from "@/types/TeamMember";
-import { Team } from "@/types/Team";
+import { CreateTeam, Team, UpdateTeam } from "@/types/Team";
 import { User } from "@/types/User";
 import { nanoid } from "nanoid";
 import slugify from "slugify";
@@ -127,7 +127,7 @@ export const queries = {
 
             return result;
         },
-        create: async (data: Partial<Team>) => {
+        create: async (data: CreateTeam) => {
             const result = await db.transaction(async (tx) => {
                 if (!data.name || !data.ownerId) {
                     throw new Error("Missing required fields");
@@ -135,14 +135,7 @@ export const queries = {
 
                 const insertedTeam = await tx
                     .insert(teams)
-                    .values({
-                        name: data.name,
-                        ownerId: data.ownerId,
-                        slug: `${slugify(data.name, {
-                            lower: true,
-                            strict: true,
-                        })}-${nanoid(6)}`,
-                    })
+                    .values(data)
                     .returning();
                 const team = insertedTeam[0];
 
@@ -160,48 +153,48 @@ export const queries = {
 
             return result;
         },
-        update: async (data: Partial<Team>) => {
-            if (!data.id || !data.ownerId) {
+        update: async (teamId: string, data: UpdateTeam, ownerId: string) => {
+            if (!teamId || !ownerId) {
                 throw new Error("Missing required fields");
             }
             const team = await db
                 .select()
                 .from(teams)
-                .where(eq(teams.id, data.id));
+                .where(eq(teams.id, teamId));
 
             if (!team[0]) {
                 throw new Error("Team not found");
             }
 
-            if (team[0].ownerId !== data.ownerId) {
+            if (team[0].ownerId !== ownerId) {
                 throw new Error("You are not authorized to delete this team");
             }
 
             const result = await db
                 .update(teams)
                 .set({ ...data, updatedAt: new Date() })
-                .where(eq(teams.id, data.id))
+                .where(eq(teams.id, teamId))
                 .returning();
             return result[0];
         },
-        delete: async (data: Partial<Team>) => {
-            if (!data.id || !data.ownerId) {
+        delete: async (teamId: string, ownerId: string) => {
+            if (!teamId || !ownerId) {
                 throw new Error("Missing required fields");
             }
             const team = await db
                 .select()
                 .from(teams)
-                .where(eq(teams.id, data.id));
+                .where(eq(teams.id, teamId));
 
             if (!team[0]) {
                 throw new Error("Team not found");
             }
 
-            if (team[0].ownerId !== data.ownerId) {
+            if (team[0].ownerId !== ownerId) {
                 throw new Error("You are not authorized to delete this team");
             }
 
-            await db.delete(teams).where(eq(teams.id, data.id));
+            await db.delete(teams).where(eq(teams.id, teamId));
         },
     },
 
@@ -308,7 +301,7 @@ export const queries = {
                 .where(eq(teamMembers.userId, userId));
             return result;
         },
-        create: async (data: Partial<Project>) => {
+        create: async (data: CreateProject) => {
             const result = await db.transaction(async (tx) => {
                 if (!data.name || !data.ownerId || !data.teamId) {
                     throw new Error("Missing required fields.");
@@ -316,14 +309,8 @@ export const queries = {
                 const inserted = await tx
                     .insert(projects)
                     .values({
-                        name: data.name,
-                        ownerId: data.ownerId,
-                        teamId: data.teamId,
-                        description: data.description ?? "A project.",
-                        slug: `${slugify(data.name, {
-                            lower: true,
-                            strict: true,
-                        })}-${nanoid(6)}`,
+                        ...data,
+                        updatedAt: new Date(),
                     })
                     .returning();
 
@@ -345,48 +332,49 @@ export const queries = {
 
             return result;
         },
-        update: async (data: Partial<Project>) => {
-            if (!data.id || !data.ownerId) {
-                throw new Error("Missing required fields");
-            }
+        update: async (
+            projectId: string,
+            data: UpdateProject,
+            user: string
+        ) => {
             const project = await db
                 .select()
                 .from(projects)
-                .where(eq(projects.id, data.id));
+                .where(eq(projects.id, projectId));
 
             if (!project[0]) {
                 throw new Error("Project not found");
             }
 
-            if (project[0].ownerId !== data.ownerId) {
+            if (project[0].ownerId !== user) {
                 throw new Error("You are not authorized to delete this team");
             }
 
             const result = await db
                 .update(projects)
                 .set({ ...data, updatedAt: new Date() })
-                .where(eq(projects.id, data.id))
+                .where(eq(projects.id, projectId))
                 .returning();
             return result[0];
         },
-        delete: async (data: Partial<Project>) => {
-            if (!data.id || !data.ownerId) {
+        delete: async (id: string, ownerId: string) => {
+            if (!id || !ownerId) {
                 throw new Error("Missing required fields");
             }
             const project = await db
                 .select()
                 .from(projects)
-                .where(eq(projects.id, data.id));
+                .where(eq(projects.id, id));
 
             if (!project[0]) {
                 throw new Error("Team not found");
             }
 
-            if (project[0].ownerId !== data.ownerId) {
+            if (project[0].ownerId !== ownerId) {
                 throw new Error("You are not authorized to delete this team");
             }
 
-            await db.delete(projects).where(eq(projects.id, data.id));
+            await db.delete(projects).where(eq(projects.id, id));
         },
     },
 
@@ -428,45 +416,40 @@ export const queries = {
                 .where(eq(tasks.projectId, projectId));
         },
         create: async (data: Partial<Task>, slug: string) => {
-            if (
-                !data.title ||
-                !data.assigneeId ||
-                !data.createdBy ||
-                !data.listId
-            )
-                throw new Error("Missing required fields");
-
-            const project = await db
-                .select({ teamId: projects.teamId, id: projects.id })
-                .from(projects)
-                .where(eq(projects.slug, slug))
-                .then((res) => res[0]);
-
-            if (!project) throw new Error("Project not found");
-
-            const isMember = await db
-                .select()
-                .from(teamMembers)
-                .where(
-                    and(
-                        eq(teamMembers.teamId, project.teamId!),
-                        eq(teamMembers.userId, data.assigneeId)
-                    )
-                )
-                .then((res) => res[0] ?? null);
-
-            if (!isMember) throw new Error("You are not part of the team");
-            if (isMember.role == "member")
-                throw new Error(
-                    "You are not the project manager or an admin to assign tasks."
-                );
-
-            const result = await db
-                .insert(tasks)
-                .values({
-                    ...data,
-                })
-                .returning();
+            // if (
+            //     !data.title ||
+            //     !data.assigneeId ||
+            //     !data.createdBy ||
+            //     !data.listId
+            // )
+            //     throw new Error("Missing required fields");
+            // const project = await db
+            //     .select({ teamId: projects.teamId, id: projects.id })
+            //     .from(projects)
+            //     .where(eq(projects.slug, slug))
+            //     .then((res) => res[0]);
+            // if (!project) throw new Error("Project not found");
+            // const isMember = await db
+            //     .select()
+            //     .from(teamMembers)
+            //     .where(
+            //         and(
+            //             eq(teamMembers.teamId, project.teamId!),
+            //             eq(teamMembers.userId, data.assigneeId)
+            //         )
+            //     )
+            //     .then((res) => res[0] ?? null);
+            // if (!isMember) throw new Error("You are not part of the team");
+            // if (isMember.role == "member")
+            //     throw new Error(
+            //         "You are not the project manager or an admin to assign tasks."
+            //     );
+            // const result = await db
+            //     .insert(tasks)
+            //     .values({
+            //         ...data,
+            //     })
+            //     .returning();
             // title: data.title!,
             // description: data.description ?? "",
             // projectId: project.id,
@@ -475,8 +458,7 @@ export const queries = {
             // createdBy: isMember.id,
             // dueDate: data.dueDate ? new Date(data.dueDate) : null,
             // position: data.position
-
-            return result[0];
+            // return result[0];
         },
 
         update: async (id: string, data: any) => {

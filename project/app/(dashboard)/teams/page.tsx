@@ -1,6 +1,10 @@
 "use client";
 
-import { CreateTeamInput, teamSchema } from "@/lib/validations";
+import {
+    CreateTeamInput,
+    teamSchema,
+    UpdateTeamInput,
+} from "@/lib/validations";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTeams } from "@/hooks/useTeams";
@@ -98,7 +102,7 @@ export default function TeamPage() {
                             <pre>{JSON.stringify(team, null, 2)}</pre>
                             <div className="mt-2 flex gap-2">
                                 <button
-                                    onClick={() => deleteTeam({ id: team.id })}
+                                    onClick={() => deleteTeam(team.id)}
                                     className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
                                 >
                                     Delete
@@ -109,8 +113,8 @@ export default function TeamPage() {
                                         if (!newName) return;
 
                                         updateTeam({
-                                            id: team.id,
-                                            name: newName,
+                                            teamId: team.id,
+                                            data: { name: newName },
                                         });
                                     }}
                                     className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"

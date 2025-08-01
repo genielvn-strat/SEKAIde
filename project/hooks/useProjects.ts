@@ -6,6 +6,7 @@ import {
     deleteProject,
     updateProject,
 } from "@/actions/projectActions";
+import { UpdateProjectInput } from "@/lib/validations";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function useProjects() {
@@ -35,7 +36,13 @@ export function useProjects() {
     });
 
     const update = useMutation({
-        mutationFn: updateProject,
+        mutationFn: ({
+            projectId,
+            data,
+        }: {
+            projectId: string;
+            data: UpdateProjectInput;
+        }) => updateProject(projectId, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["projects"] });
         },
