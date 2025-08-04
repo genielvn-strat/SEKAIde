@@ -47,6 +47,7 @@ export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
 
 export const listSchema = z.object({
     name: z.string().min(5, "Name is too short.").max(100, "Name is too long"),
+    description: z.string().max(200, "Description too long.").optional(),
 });
 export const createListSchema = listSchema;
 export const updateListSchema = listSchema.partial();

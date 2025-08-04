@@ -9,7 +9,6 @@ import {
     integer,
     pgEnum,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 
 export const role = pgEnum("role", ["member", "project_manager", "admin"]);
 export const taskPriority = pgEnum("task_priority", ["low", "medium", "high"]);
@@ -108,6 +107,7 @@ export const lists = pgTable(
     {
         id: uuid().defaultRandom().primaryKey().notNull(),
         name: text().notNull(),
+        description: text(),
         projectId: uuid("project_id"),
         position: integer().notNull(),
         createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),

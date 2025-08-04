@@ -1,8 +1,11 @@
 export interface List {
     id: string;
     name: string;
-    projectId: string | null;
+    description?: string | undefined;
+    projectId: string;
     position: number;
     createdAt: Date | string;
     updatedAt: Date | string;
 }
+
+export type CreateList = Omit<List, "id" | "createdAt" | "updatedAt">;

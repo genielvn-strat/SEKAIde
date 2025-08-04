@@ -1,6 +1,7 @@
 "use client";
 import { notFound } from "next/navigation";
 import { useProjectDetails } from "@/hooks/useProjectDetails";
+import { useLists } from "@/hooks/useLists";
 
 interface ProjectProps {
     params: {
@@ -18,6 +19,8 @@ export default function ProjectDetails({ params }: ProjectProps) {
         error,
     } = useProjectDetails(slug);
 
+    const { lists } = useLists(slug);
+
     if (isLoading) {
         return <div className="loading">Loading project...</div>;
     }
@@ -32,10 +35,6 @@ export default function ProjectDetails({ params }: ProjectProps) {
     }
 
     if (!project) {
-        // This lets tests assert against 404 logic
-        if (process.env.NODE_ENV === "test") {
-            return <div className="not-found">Project not found</div>;
-        }
         return notFound();
     }
 
@@ -48,8 +47,13 @@ export default function ProjectDetails({ params }: ProjectProps) {
             <pre className="mt-4 bg-muted p-4 rounded text-xs overflow-x-auto">
                 {JSON.stringify(project, null, 2)}
             </pre>
+            <h1 className="text-lg font-semibold mt-6">Lists</h1>
             <pre className="mt-4 bg-muted p-4 rounded text-xs overflow-x-auto">
-                TODO: Add tasks here. Comments here as well. Make list dropdown first.
+                {JSON.stringify(lists, null, 2)}
+            </pre>
+            <pre className="mt-4 bg-muted p-4 rounded text-xs overflow-x-auto">
+                TODO: Add tasks here. Comments here as well. Make list dropdown
+                first.
             </pre>
         </div>
     );

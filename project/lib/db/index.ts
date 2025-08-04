@@ -9,7 +9,7 @@ import {
     lists,
     comments,
 } from "@/migrations/schema";
-import { and, eq, or } from "drizzle-orm";
+import { and, asc, eq, or } from "drizzle-orm";
 import { Task } from "@/types/Task";
 import { CreateProject, Project, UpdateProject } from "@/types/Project";
 import { TeamMember } from "@/types/TeamMember";
@@ -385,6 +385,20 @@ export const queries = {
                 .select()
                 .from(lists)
                 .where(eq(lists.projectId, projectId));
+        },
+        getByProjectSlug: async (projectSlug: string) => {
+            return await db
+                .select({
+                    id: lists.id,
+                    name: lists.name,
+                    description: lists.description,
+                    position: lists.position,
+                    // I wanna add all tasks here, is it possible?
+                })
+                .from(lists)
+                .leftJoin(projects, eq(lists.projectId, projects.id))
+                .where(eq(projects.slug, projectSlug))
+                .orderBy(asc(lists.position));
         },
         create: async (data: any) => {
             const result = await db.insert(lists).values(data).returning();
