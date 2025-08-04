@@ -8,13 +8,13 @@ import {
     teamMembers,
     lists,
     comments,
-} from "./schema";
+} from "@/migrations/schema";
 import { and, eq, or } from "drizzle-orm";
 import { Task } from "@/types/Task";
 import { CreateProject, Project, UpdateProject } from "@/types/Project";
 import { TeamMember } from "@/types/TeamMember";
 import { CreateTeam, Team, UpdateTeam } from "@/types/Team";
-import { User } from "@/types/User";
+import { CreateUser, UpdateUser, User } from "@/types/User";
 import { nanoid } from "nanoid";
 import slugify from "slugify";
 
@@ -37,23 +37,20 @@ export const queries = {
                 .where(eq(users.clerkId, clerkId));
             return result[0] || null;
         },
-        create: async (data: Partial<User>) => {
+        create: async (data: CreateUser) => {
             if (!data.name || !data.clerkId || !data.username || !data.email) {
                 throw new Error("Missing required fields");
             }
-            const result = await db
-                .insert(users)
-                .values(data as User)
-                .returning();
+            const result = await db.insert(users).values(data).returning();
             return result[0];
         },
-        update: async (data: Partial<User>) => {
-            if (!data.clerkId) throw new Error("Missing required fields.");
+        update: async (data: UpdateUser, clerkId: string) => {
+            if (clerkId) throw new Error("Missing required fields.");
 
             const user = await db
                 .select()
                 .from(users)
-                .where(eq(users.clerkId, data.clerkId));
+                .where(eq(users.clerkId, clerkId));
 
             if (!user) {
                 throw new Error("User not in the database.");
@@ -61,7 +58,7 @@ export const queries = {
 
             const result = await db
                 .update(users)
-                .set({ ...data, updatedAt: new Date() })
+                .set({ ...data })
                 .where(eq(users.id, user[0].id))
                 .returning();
             return result[0];
@@ -172,7 +169,7 @@ export const queries = {
 
             const result = await db
                 .update(teams)
-                .set({ ...data, updatedAt: new Date() })
+                .set({ ...data })
                 .where(eq(teams.id, teamId))
                 .returning();
             return result[0];
@@ -310,7 +307,7 @@ export const queries = {
                     .insert(projects)
                     .values({
                         ...data,
-                        updatedAt: new Date(),
+                        dueDate: data.dueDate?.toISOString(),
                     })
                     .returning();
 
@@ -352,7 +349,9 @@ export const queries = {
 
             const result = await db
                 .update(projects)
-                .set({ ...data, updatedAt: new Date() })
+                .set({
+                    ...data,
+                })
                 .where(eq(projects.id, projectId))
                 .returning();
             return result[0];
@@ -367,11 +366,13 @@ export const queries = {
                 .where(eq(projects.id, id));
 
             if (!project[0]) {
-                throw new Error("Team not found");
+                throw new Error("Project not found");
             }
 
             if (project[0].ownerId !== ownerId) {
-                throw new Error("You are not authorized to delete this team");
+                throw new Error(
+                    "You are not authorized to delete this project"
+                );
             }
 
             await db.delete(projects).where(eq(projects.id, id));

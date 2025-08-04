@@ -1,3 +1,22 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+export function useTasks(projectId: string) {
+    console.log(`TODO: Implement useTasks hook for project ${projectId}`);
+    return {
+        tasks: [],
+        isLoading: false,
+        error: null,
+        createTask: (data: any) => console.log("TODO: Create task", data),
+        updateTask: (id: string, data: any) =>
+            console.log(`TODO: Update task ${id}`, data),
+        deleteTask: (id: string) => console.log(`TODO: Delete task ${id}`),
+        moveTask: (taskId: string, newListId: string, position: number) =>
+            console.log(
+                `TODO: Move task ${taskId} to list ${newListId} at position ${position}`
+            ),
+    };
+}
+
 // TODO: Task 4.4 - Build task creation and editing functionality
 // TODO: Task 5.4 - Implement optimistic UI updates for smooth interactions
 
@@ -62,16 +81,3 @@ export function useTasks(projectId: string) {
 */
 
 // Placeholder to prevent import errors
-export function useTasks(projectId: string) {
-  console.log(`TODO: Implement useTasks hook for project ${projectId}`)
-  return {
-    tasks: [],
-    isLoading: false,
-    error: null,
-    createTask: (data: any) => console.log("TODO: Create task", data),
-    updateTask: (id: string, data: any) => console.log(`TODO: Update task ${id}`, data),
-    deleteTask: (id: string) => console.log(`TODO: Delete task ${id}`),
-    moveTask: (taskId: string, newListId: string, position: number) =>
-      console.log(`TODO: Move task ${taskId} to list ${newListId} at position ${position}`),
-  }
-}

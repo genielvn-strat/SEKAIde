@@ -7,10 +7,13 @@ export interface Project {
     teamId: string;
     createdAt: Date;
     updatedAt: Date;
-    dueDate: Date | undefined;
+    dueDate: Date | undefined | null;
 }
 
 export type CreateProject = Omit<Project, "id" | "createdAt" | "updatedAt">;
 export type UpdateProject = Partial<
-    Omit<Project, "createdAt" | "updatedAt" | "ownerId" | "teamId" | "slug">
+    Omit<
+        Project,
+        "dueDate" | "createdAt" | "updatedAt" | "ownerId" | "teamId" | "slug"
+    >
 >;

@@ -1,7 +1,7 @@
 "use server";
 
 import { queries } from "@/lib/db";
-import { User } from "@/types/User";
+import { CreateUser, UpdateUser, User } from "@/types/User";
 import { WebhookEvent } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { Webhook } from "svix";
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
             evt.data;
 
         try {
-            const data: Partial<User> = {
+            const data: CreateUser = {
                 clerkId: id,
                 username: String(username),
                 name: `${first_name} ${last_name}`,
@@ -89,14 +89,13 @@ export async function POST(req: Request) {
         const { id, email_addresses, first_name, last_name, username } =
             evt.data;
 
-        const data: Partial<User> = {
-            clerkId: id,
+        const data: UpdateUser = {
             username: String(username),
             name: `${first_name} ${last_name}`,
             email: email_addresses[0].email_address,
         };
 
-        await queries.users.update(data);
+        await queries.users.update(data, id);
     }
 
     return new Response("Webhook received", { status: 200 });
