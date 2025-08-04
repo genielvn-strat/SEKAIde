@@ -6,7 +6,10 @@ import {
     deleteList,
     updateList,
 } from "@/actions/listActions";
-import { UpdateListInput, UpdateProjectInput } from "@/lib/validations";
+import {
+    CreateListInput,
+    UpdateListInput,
+} from "@/lib/validations";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function useLists(projectSlug: string) {
@@ -23,7 +26,13 @@ export function useLists(projectSlug: string) {
     });
 
     const create = useMutation({
-        mutationFn: createList,
+        mutationFn: ({
+            projectSlug,
+            data,
+        }: {
+            projectSlug: string;
+            data: CreateListInput;
+        }) => createList(projectSlug, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["lists"] });
         },

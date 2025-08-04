@@ -1,11 +1,14 @@
 export interface List {
     id: string;
     name: string;
-    description?: string | undefined;
+    description: string | undefined;
     projectId: string;
     position: number;
     createdAt: Date | string;
     updatedAt: Date | string;
 }
 
-export type CreateList = Omit<List, "id" | "createdAt" | "updatedAt">;
+export type CreateList = Omit<
+    List,
+    "id" | "createdAt" | "updatedAt" | "projectId"
+>;

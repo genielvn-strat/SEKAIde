@@ -9,7 +9,7 @@ import {
     lists,
     comments,
 } from "@/migrations/schema";
-import { and, asc, eq, or } from "drizzle-orm";
+import { and, asc, eq, or, sql } from "drizzle-orm";
 import { Task } from "@/types/Task";
 import { CreateProject, Project, UpdateProject } from "@/types/Project";
 import { TeamMember } from "@/types/TeamMember";
@@ -17,6 +17,7 @@ import { CreateTeam, Team, UpdateTeam } from "@/types/Team";
 import { CreateUser, UpdateUser, User } from "@/types/User";
 import { nanoid } from "nanoid";
 import slugify from "slugify";
+import { CreateList } from "@/types/List";
 
 config({ path: ".env" });
 export const db = drizzle(process.env.DATABASE_URL!);
@@ -393,15 +394,68 @@ export const queries = {
                     name: lists.name,
                     description: lists.description,
                     position: lists.position,
-                    // I wanna add all tasks here, is it possible?
                 })
                 .from(lists)
                 .leftJoin(projects, eq(lists.projectId, projects.id))
                 .where(eq(projects.slug, projectSlug))
                 .orderBy(asc(lists.position));
         },
-        create: async (data: any) => {
-            const result = await db.insert(lists).values(data).returning();
+        create: async (
+            data: CreateList,
+            userId: string,
+            projectSlug: string
+        ) => {
+            // 1. Find the project by slug
+            const project = await db
+                .select({ id: projects.id })
+                .from(projects)
+                .where(eq(projects.slug, projectSlug))
+                .then((res) => res[0] ?? null);
+
+            if (!project) {
+                throw new Error("Project not found");
+            }
+
+            // 2. Check if the user is part of the team and is a project_manager or admin
+            const member = await db
+                .select({
+                    role: teamMembers.role,
+                    userId: teamMembers.userId,
+                })
+                .from(teamMembers)
+                .where(
+                    and(
+                        eq(teamMembers.userId, userId),
+                        or(
+                            eq(teamMembers.role, "project_manager"),
+                            eq(teamMembers.role, "admin")
+                        )
+                    )
+                )
+                .then((res) => res[0] ?? null);
+
+            if (!member) {
+                throw new Error(
+                    "Not authorized to create list in this project"
+                );
+            }
+
+            const listCount = await db
+                .select({ count: sql<number>`count(*)` })
+                .from(lists)
+                .where(eq(lists.projectId, project.id));
+
+            const position = listCount[0].count ?? 0;
+
+            const result = await db
+                .insert(lists)
+                .values({
+                    ...data,
+                    projectId: project.id,
+                    position,
+                })
+                .returning();
+
             return result[0];
         },
         update: async (id: string, data: any) => {

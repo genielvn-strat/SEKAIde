@@ -2,17 +2,26 @@
 
 import { queries } from "@/lib/db";
 import { getUserDbId } from "./sessionActions";
-import { UpdateListInput } from "@/lib/validations";
+import { CreateListInput, UpdateListInput } from "@/lib/validations";
+import { CreateList } from "@/types/List";
 
 export const fetchProjectLists = async (projectSlug: string) => {
-    const userId = await getUserDbId();
+    await getUserDbId();
     const lists = await queries.lists.getByProjectSlug(projectSlug);
-    console.log(lists);
     return lists;
 };
 
-export const createList = async () => {
-    console.log("Create");
+export const createList = async (
+    projectSlug: string,
+    data: CreateListInput
+) => {
+    const userId = await getUserDbId();
+    const list: CreateList = {
+        name: data.name,
+        description: data.description,
+        position: 0,
+    };
+    await queries.lists.create(list, userId, projectSlug);
 };
 export const deleteList = async () => {
     console.log("Delete");
