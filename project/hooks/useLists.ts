@@ -6,10 +6,7 @@ import {
     deleteList,
     updateList,
 } from "@/actions/listActions";
-import {
-    CreateListInput,
-    UpdateListInput,
-} from "@/lib/validations";
+import { CreateListInput, UpdateListInput } from "@/lib/validations";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function useLists(projectSlug: string) {
@@ -39,7 +36,13 @@ export function useLists(projectSlug: string) {
     });
 
     const del = useMutation({
-        mutationFn: deleteList,
+        mutationFn: ({
+            listId,
+            projectSlug,
+        }: {
+            listId: string;
+            projectSlug: string;
+        }) => deleteList(listId, projectSlug),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["lists"] });
         },

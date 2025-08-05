@@ -9,15 +9,13 @@ import {
     lists,
     comments,
 } from "@/migrations/schema";
-import { and, asc, eq, or, sql } from "drizzle-orm";
-import { Task } from "@/types/Task";
+import { and, asc, desc, eq, or, sql } from "drizzle-orm";
+import { CreateTask, Task, UpdateTask } from "@/types/Task";
 import { CreateProject, Project, UpdateProject } from "@/types/Project";
 import { TeamMember } from "@/types/TeamMember";
 import { CreateTeam, Team, UpdateTeam } from "@/types/Team";
 import { CreateUser, UpdateUser, User } from "@/types/User";
-import { nanoid } from "nanoid";
-import slugify from "slugify";
-import { CreateList } from "@/types/List";
+import { CreateList, UpdateList } from "@/types/List";
 
 config({ path: ".env" });
 export const db = drizzle(process.env.DATABASE_URL!);
@@ -46,7 +44,7 @@ export const queries = {
             return result[0];
         },
         update: async (data: UpdateUser, clerkId: string) => {
-            if (clerkId) throw new Error("Missing required fields.");
+            if (!clerkId) throw new Error("Missing required fields.");
 
             const user = await db
                 .select()
@@ -315,13 +313,28 @@ export const queries = {
                 const project = inserted[0];
                 if (!project) throw new Error("Project creation failed");
 
-                const defaultLists = ["Backlog", "Todo", "Doing", "Done"].map(
-                    (name, idx) => ({
-                        name,
-                        position: idx,
+                const defaultLists = [
+                    {
+                        name: "To Do",
+                        description: "Tasks to be done",
                         projectId: project.id,
-                    })
-                );
+                    },
+                    {
+                        name: "In Progress",
+                        description: "Tasks currently being worked on",
+                        projectId: project.id,
+                    },
+                    {
+                        name: "Done",
+                        description: "Completed tasks",
+                        projectId: project.id,
+                    },
+                ].map((lists, idx) => ({
+                    name: lists.name,
+                    description: lists.description,
+                    position: idx,
+                    projectId: project.id,
+                }));
 
                 await tx.insert(lists).values(defaultLists);
 
@@ -440,34 +453,111 @@ export const queries = {
                 );
             }
 
-            const listCount = await db
-                .select({ count: sql<number>`count(*)` })
-                .from(lists)
-                .where(eq(lists.projectId, project.id));
-
-            const position = listCount[0].count ?? 0;
-
             const result = await db
                 .insert(lists)
                 .values({
                     ...data,
                     projectId: project.id,
-                    position,
                 })
                 .returning();
 
             return result[0];
         },
-        update: async (id: string, data: any) => {
+        update: async (
+            list: UpdateList,
+            userId: string,
+            projectSlug: string
+        ) => {
+            // 1. Find the project by slug
+            const project = await db
+                .select({ id: projects.id })
+                .from(projects)
+                .where(eq(projects.slug, projectSlug))
+                .then((res) => res[0] ?? null);
+
+            if (!project) {
+                throw new Error("Project not found");
+            }
+
+            // 2. Check if the user is part of the team and is a project_manager or admin
+            const member = await db
+                .select({
+                    role: teamMembers.role,
+                    userId: teamMembers.userId,
+                })
+                .from(teamMembers)
+                .where(
+                    and(
+                        eq(teamMembers.userId, userId),
+                        or(
+                            eq(teamMembers.role, "project_manager"),
+                            eq(teamMembers.role, "admin")
+                        )
+                    )
+                )
+                .then((res) => res[0] ?? null);
+
+            if (!member) {
+                throw new Error(
+                    "Not authorized to create list in this project"
+                );
+            }
+
+            if (!list.id) {
+                throw new Error("List id is required for update.");
+            }
             const result = await db
                 .update(lists)
-                .set({ ...data, updatedAt: new Date() })
-                .where(eq(lists.id, id))
+                .set({
+                    ...list,
+                })
+                .where(eq(lists.id, list.id))
                 .returning();
+
             return result[0];
         },
-        delete: async (id: string) => {
-            await db.delete(lists).where(eq(lists.id, id));
+        delete: async (listId: string, projectSlug: string, userId: string) => {
+            const listWithProject = await db
+                .select({
+                    listId: lists.id,
+                    projectId: projects.id,
+                    teamId: projects.teamId,
+                })
+                .from(lists)
+                .innerJoin(projects, eq(lists.projectId, projects.id))
+                .where(
+                    and(eq(lists.id, listId), eq(projects.slug, projectSlug))
+                )
+                .then((res) => res[0] ?? null);
+
+            if (!listWithProject) {
+                throw new Error("List not found in this project");
+            }
+
+            if (!listWithProject.teamId) {
+                throw new Error("List's project does not have a valid teamId");
+            }
+
+            const isAuthorized = await db
+                .select({ role: teamMembers.role })
+                .from(teamMembers)
+                .where(
+                    and(
+                        eq(teamMembers.userId, userId),
+                        eq(teamMembers.teamId, listWithProject.teamId),
+                        or(
+                            eq(teamMembers.role, "admin"),
+                            eq(teamMembers.role, "project_manager")
+                        )
+                    )
+                )
+                .then((res) => res[0] ?? null);
+
+            if (!isAuthorized) {
+                throw new Error("Not authorized to delete this list");
+            }
+
+            await db.delete(lists).where(eq(lists.id, listWithProject.listId));
         },
     },
     tasks: {
@@ -478,68 +568,193 @@ export const queries = {
                 .innerJoin(projects, eq(tasks.projectId, projects.id))
                 .where(eq(projects.slug, slug));
         },
+        getByListId: async (projectSlug: string, listId: string) => {
+            const tasksInList = await db
+                .select({
+                    id: tasks.id,
+                    title: tasks.title,
+                    description: tasks.description,
+                    priority: tasks.priority,
+                    dueDate: tasks.dueDate,
+                    position: tasks.position,
+                    assigneeName: users.name,
+                    assigneeUsername: users.username,
+                    projectName: projects.name,
+                    projectSlug: projects.slug,
+                })
+                .from(tasks)
+                .innerJoin(users, eq(tasks.assigneeId, users.id))
+                .innerJoin(projects, eq(tasks.projectId, projects.id))
+                .where(
+                    and(
+                        eq(projects.slug, projectSlug),
+                        eq(tasks.listId, listId)
+                    )
+                )
+                .orderBy(asc(tasks.position));
+
+            if (!tasksInList) {
+                throw new Error("No tasks found for this list");
+            }
+
+            return tasksInList;
+        },
         getByProject: async (projectId: string) => {
             return await db
                 .select()
                 .from(tasks)
                 .where(eq(tasks.projectId, projectId));
         },
-        create: async (data: Partial<Task>, slug: string) => {
-            // if (
-            //     !data.title ||
-            //     !data.assigneeId ||
-            //     !data.createdBy ||
-            //     !data.listId
-            // )
-            //     throw new Error("Missing required fields");
-            // const project = await db
-            //     .select({ teamId: projects.teamId, id: projects.id })
-            //     .from(projects)
-            //     .where(eq(projects.slug, slug))
-            //     .then((res) => res[0]);
-            // if (!project) throw new Error("Project not found");
-            // const isMember = await db
-            //     .select()
-            //     .from(teamMembers)
-            //     .where(
-            //         and(
-            //             eq(teamMembers.teamId, project.teamId!),
-            //             eq(teamMembers.userId, data.assigneeId)
-            //         )
-            //     )
-            //     .then((res) => res[0] ?? null);
-            // if (!isMember) throw new Error("You are not part of the team");
-            // if (isMember.role == "member")
-            //     throw new Error(
-            //         "You are not the project manager or an admin to assign tasks."
-            //     );
-            // const result = await db
-            //     .insert(tasks)
-            //     .values({
-            //         ...data,
-            //     })
-            //     .returning();
-            // title: data.title!,
-            // description: data.description ?? "",
-            // projectId: project.id,
-            // assigneeId: data.assigneeId,
-            // priority: data.priority ?? "low",
-            // createdBy: isMember.id,
-            // dueDate: data.dueDate ? new Date(data.dueDate) : null,
-            // position: data.position
-            // return result[0];
+        create: async (
+            projectSlug: string,
+            data: CreateTask,
+            userId: string
+        ) => {
+            if (!data.title || !data.listId) {
+                throw new Error("Missing required fields");
+            }
+
+            // Check if the user is part of the team and is a project_manager or admin
+            const member = await db
+                .select({
+                    role: teamMembers.role,
+                    userId: teamMembers.userId,
+                })
+                .from(teamMembers)
+                .where(
+                    and(
+                        eq(teamMembers.userId, userId),
+                        or(
+                            eq(teamMembers.role, "project_manager"),
+                            eq(teamMembers.role, "admin")
+                        )
+                    )
+                )
+                .then((res) => res[0] ?? null);
+
+            if (!member) {
+                throw new Error(
+                    "Not authorized to create task in this project"
+                );
+            }
+
+            const project = await db
+                .select()
+                .from(projects)
+                .where(eq(projects.slug, projectSlug))
+                .then((res) => res[0] ?? null);
+
+            if (!project) {
+                throw new Error("Project not found");
+            }
+
+            const result = await db
+                .insert(tasks)
+                .values({
+                    ...data,
+                    projectId: project.id,
+                    dueDate: data.dueDate?.toISOString(),
+                })
+                .returning();
+
+            return result[0];
         },
 
-        update: async (id: string, data: any) => {
+        update: async (
+            taskId: string,
+            data: UpdateTask,
+            projectSlug: string,
+            userId: string
+        ) => {
+            // Check if task exists in the project
+            const task = await db
+                .select({
+                    id: tasks.id,
+                    projectId: projects.id,
+                })
+                .from(tasks)
+                .innerJoin(projects, eq(tasks.projectId, projects.id))
+                .where(
+                    and(eq(tasks.id, taskId), eq(projects.slug, projectSlug))
+                )
+                .then((res) => res[0] ?? null);
+
+            if (!task) {
+                throw new Error("Task not found in this project");
+            }
+
+            // Check if the user is part of the team and is a project_manager or admin
+            const isAuthorized = await db
+                .select({ role: teamMembers.role })
+                .from(teamMembers)
+                .innerJoin(teams, eq(teamMembers.teamId, teams.id))
+                .where(
+                    and(
+                        eq(teamMembers.userId, userId),
+                        or(
+                            eq(teamMembers.role, "admin"),
+                            eq(teamMembers.role, "project_manager")
+                        )
+                    )
+                )
+                .then((res) => res[0] ?? null);
+
+            if (!isAuthorized) {
+                throw new Error("Not authorized to update this task");
+            }
+
             const result = await db
                 .update(tasks)
-                .set({ ...data, updatedAt: new Date() })
-                .where(eq(tasks.id, id))
+                .set({
+                    ...data,
+                    dueDate: data.dueDate ? data.dueDate.toISOString() : undefined,
+                    updatedAt: new Date().toISOString(),
+                })
+                .where(eq(tasks.id, task.id))
                 .returning();
             return result[0];
         },
-        delete: async (id: string) => {
-            await db.delete(tasks).where(eq(tasks.id, id));
+        delete: async (taskId: string, projectSlug: string, userId: string) => {
+            const task = await db
+                .select({
+                    id: tasks.id,
+                    projectId: projects.id,
+                })
+                .from(tasks)
+                .innerJoin(projects, eq(tasks.projectId, projects.id))
+                .where(
+                    and(eq(tasks.id, taskId), eq(projects.slug, projectSlug))
+                )
+                .then((res) => res[0] ?? null);
+
+            if (!task) {
+                throw new Error("Task not found in this project");
+            }
+            if (!task.id) {
+                throw new Error("Task do not have an ID");
+            }
+
+            // Check if the user is authorized to delete the task
+            const isAuthorized = await db
+                .select({ role: teamMembers.role })
+                .from(teamMembers)
+                .innerJoin(teams, eq(teamMembers.teamId, teams.id))
+                .where(
+                    and(
+                        eq(teamMembers.userId, userId),
+                        or(
+                            eq(teamMembers.role, "admin"),
+                            eq(teamMembers.role, "project_manager")
+                        )
+                    )
+                )
+                .then((res) => res[0] ?? null);
+
+            if (!isAuthorized) {
+                throw new Error("Not authorized to delete this task");
+            }
+
+            await db.delete(tasks).where(eq(tasks.id, task.id));
         },
     },
 

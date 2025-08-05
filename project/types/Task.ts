@@ -1,21 +1,23 @@
 export interface Task {
     id: string;
     title: string;
-    description: string | null;
+    description?: string;
     projectId: string;
     listId: string;
-    assigneeId: string;
-    createdBy: string;
+    assigneeId?: string;
     priority: "low" | "medium" | "high";
-    dueDate: Date | null;
+    dueDate?: Date;
     position: number;
     createdAt: Date;
     updatedAt: Date;
 }
 
-export type CreateTask = Omit<Task, "id" | "createdAt" | "updatedAt">;
-
-export type UpdateTask = Omit<
+export type CreateTask = Omit<
     Task,
-    "id" | "createdAt" | "projectId" | "teamId"
+    "id" | "createdAt" | "updatedAt" | "projectId"
 >;
+
+export type UpdateTask = Partial<Omit<
+    Task,
+    "id" | "createdAt" | "updatedAt" | "projectId"
+>>;

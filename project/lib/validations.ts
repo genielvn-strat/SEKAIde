@@ -38,6 +38,7 @@ export const taskSchema = z.object({
     description: z.string().max(1000, "Description too long").optional(),
     priority: z.enum(["low", "medium", "high"]),
     assigneeId: z.string().uuid().optional(),
+    position: z.number().nonnegative(),
     dueDate: z.date().min(new Date(), "Due date must be in future").optional(),
 });
 export const createTaskSchema = taskSchema;
@@ -48,6 +49,7 @@ export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
 export const listSchema = z.object({
     name: z.string().min(5, "Name is too short.").max(100, "Name is too long"),
     description: z.string().max(200, "Description too long.").optional(),
+    position: z.number().nonnegative(),
 });
 export const createListSchema = listSchema;
 export const updateListSchema = listSchema.partial();

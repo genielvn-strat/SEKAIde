@@ -12,3 +12,7 @@ export type CreateList = Omit<
     List,
     "id" | "createdAt" | "updatedAt" | "projectId"
 >;
+
+export type UpdateList = Partial<
+    Pick<List, "id" | "name" | "description" | "position">
+>;
