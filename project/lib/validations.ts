@@ -14,12 +14,21 @@ export type UpdateUserInput = z.infer<typeof updateUserSchema>;
 export const projectSchema = z.object({
     name: z.string().min(1, "Name is required").max(100, "Name too long"),
     description: z.string().max(500, "Description too long").optional(),
+    teamId: z.string().min(1, "Please select a team."),
     dueDate: z.date().min(new Date(), "Due date must be in future").optional(),
 });
 export const createProjectSchema = projectSchema;
 export const updateProjectSchema = projectSchema.partial();
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;
 export type UpdateProjectInput = z.infer<typeof updateProjectSchema>;
+
+export const teamSchema = z.object({
+    name: z.string().min(1, "Name is required").max(100, "Name too long"),
+});
+export const createTeamSchema = teamSchema;
+export const updateTeamSchema = teamSchema.partial();
+export type CreateTeamInput = z.infer<typeof createTeamSchema>;
+export type UpdateTeamInput = z.infer<typeof updateTeamSchema>;
 
 export const taskSchema = z.object({
     title: z
@@ -29,6 +38,7 @@ export const taskSchema = z.object({
     description: z.string().max(1000, "Description too long").optional(),
     priority: z.enum(["low", "medium", "high"]),
     assigneeId: z.string().uuid().optional(),
+    position: z.number().nonnegative(),
     dueDate: z.date().min(new Date(), "Due date must be in future").optional(),
 });
 export const createTaskSchema = taskSchema;
@@ -38,6 +48,8 @@ export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
 
 export const listSchema = z.object({
     name: z.string().min(5, "Name is too short.").max(100, "Name is too long"),
+    description: z.string().max(200, "Description too long.").optional(),
+    position: z.number().nonnegative(),
 });
 export const createListSchema = listSchema;
 export const updateListSchema = listSchema.partial();

@@ -1,66 +1,135 @@
-import { Plus, Search, Filter } from "lucide-react";
-import { DashboardLayout } from "@/components/dashboard-layout";
+"use client";
+
+import { useProjects } from "@/hooks/useProjects";
+import { useTeams } from "@/hooks/useTeams";
+import { CreateProjectInput, projectSchema } from "@/lib/validations";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import React, { useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
 
 export default function ProjectsPage() {
+    const {
+        register,
+        handleSubmit,
+        setError,
+        reset,
+        formState: { errors, isSubmitting },
+    } = useForm<CreateProjectInput>({
+        resolver: zodResolver(projectSchema),
+    });
+    const { ownedTeams } = useTeams();
+    const { projects, createProject, deleteProject, isCreating } =
+        useProjects();
+
+    const onSubmit: SubmitHandler<CreateProjectInput> = async (data) => {
+        try {
+            await createProject(data);
+            reset();
+        } catch {
+            setError("root", { message: "Server error" });
+        }
+    };
+
     return (
-        <>
-            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-                <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">
-                    📋 Projects Page Implementation Tasks
-                </h3>
-                <ul className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1">
-                    <li>• Task 4.1: Implement project CRUD operations</li>
-                    <li>
-                        • Task 4.2: Create project listing and dashboard
-                        interface
-                    </li>
-                    <li>
-                        • Task 4.5: Design and implement project cards and
-                        layouts
-                    </li>
-                    <li>
-                        • Task 4.6: Add project and task search/filtering
-                        capabilities
-                    </li>
-                </ul>
+        <div className="space-y-6 max-w-2xl mx-auto p-4">
+            <div>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    <label
+                        htmlFor="team-select"
+                        className="block font-medium mb-2"
+                    >
+                        Select a Team
+                    </label>
+                    <label className="block text-sm font-medium mb-1">
+                        Project Name
+                    </label>
+                    <input
+                        {...register("name")}
+                        type="text"
+                        className="w-full border rounded p-2"
+                        placeholder="Enter Project name"
+                    />
+                    {errors.name && (
+                        <p className="text-sm text-red-500 mt-1">
+                            {errors.name.message}
+                        </p>
+                    )}
+                    <label className="block text-sm font-medium mb-1">
+                        Project Description
+                    </label>
+                    <textarea
+                        {...register("description")}
+                        className="w-full border rounded p-2"
+                        placeholder="Enter Project Description"
+                    />
+                    {errors.description && (
+                        <p className="text-sm text-red-500 mt-1">
+                            {errors.description.message}
+                        </p>
+                    )}
+                    <select
+                        {...register("teamId")}
+                        id="team-select"
+                        className="w-full border p-2 rounded"
+                    >
+                        <option value="" disabled>
+                            -- Select Team --
+                        </option>
+                        {ownedTeams?.length ? (
+                            ownedTeams.map((team) => (
+                                <option key={team.id} value={team.id}>
+                                    {team.name}
+                                </option>
+                            ))
+                        ) : (
+                            <option disabled>No owned teams found</option>
+                        )}
+                    </select>
+                    {errors.teamId && (
+                        <p className="text-sm text-red-500 mt-1">
+                            {errors.teamId.message}
+                        </p>
+                    )}
+                    <button
+                        type="submit"
+                        disabled={isCreating}
+                        className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
+                    >
+                        Create Test Project
+                    </button>
+                </form>
             </div>
-            <div className="mt-8 p-6 bg-gray-50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
-                <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4">
-                    📁 Components to Implement
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-400">
-                    <div>
-                        <strong>components/project-card.tsx</strong>
-                        <p>
-                            Project display component with progress, members,
-                            and actions
-                        </p>
-                    </div>
-                    <div>
-                        <strong>
-                            components/modals/create-project-modal.tsx
-                        </strong>
-                        <p>
-                            Modal for creating new projects with form validation
-                        </p>
-                    </div>
-                    <div>
-                        <strong>hooks/use-projects.ts</strong>
-                        <p>
-                            Custom hook for project data fetching and mutations
-                        </p>
-                    </div>
-                    <div>
-                        <strong>lib/db/schema.ts</strong>
-                        <p>Database schema for projects, lists, and tasks</p>
-                    </div>
-                </div>
+
+            <div>
+                <h2 className="font-bold text-lg mb-2">Projects</h2>
+                {projects?.length ? (
+                    <ul className="space-y-2">
+                        {projects.map((project) => (
+                            <Link href={`/projects/${project.slug}`}>
+                                <li
+                                    key={project.projectId}
+                                    className="bg-gray-100 p-2 rounded text-sm"
+                                >
+                                    <pre>
+                                        {JSON.stringify(project, null, 2)}
+                                    </pre>
+                                    <button
+                                        onClick={() => {
+                                            deleteProject(project.projectId);
+                                        }}
+                                        className="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                                    >
+                                        Delete
+                                    </button>
+                                </li>
+                            </Link>
+                        ))}
+                    </ul>
+                ) : (
+                    <p className="text-gray-500">No projects found.</p>
+                )}
             </div>
-            Projects
-            <div>list project here</div>
-            <div>add project form</div>
-            <Link href="/projects/sample">sample id</Link>
-        </>
+        </div>
     );
 }

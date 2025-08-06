@@ -30,7 +30,13 @@
         "app/(auth)/sign-in/[[...sign-in]]/page.tsx.back",
         "app/(auth)/sign-up/[[...sign-up]]/page.tsx.back",
         "app/page.tsx.back",
-        "app/(dashboard)/projects/page.tsx.back"
-, "app/(dashboard)/analytics/page.tsx", "app/(dashboard)/calendar/page.tsx.back", "app/(dashboard)/team/page.tsx.back", "app/(dashboard)/dashboard/page.tsx.back", "app/(dashboard)/projects/[id]/page.tsx.back"    ],
+        "app/(dashboard)/projects/page.tsx.back",
+        "app/(dashboard)/analytics/page.tsx",
+        "app/(dashboard)/calendar/page.tsx.back",
+        "app/(dashboard)/team/page.tsx.back",
+        "app/(dashboard)/dashboard/page.tsx.back",
+        "app/(dashboard)/projects/[slug]/page.tsx.back",
+        "lib/db/schema.ts.back"
+    ],
     "exclude": ["node_modules"]
 }
