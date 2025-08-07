@@ -26,8 +26,9 @@ export default function ProjectDetails({ params }: ProjectProps) {
     });
 
     const { project, isLoading, isError, error } = useProjectDetails(slug);
-
-    const { lists, createList, updateList, deleteList } = useLists(slug);
+    const { lists, createList, updateList, deleteList } = useLists(slug, {
+        enabled: !!project,
+    });
 
     if (isLoading) {
         return <div className="loading">Loading project...</div>;
