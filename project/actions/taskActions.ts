@@ -31,13 +31,13 @@ export const createTask = async (
     await queries.tasks.create(projectSlug, taskData, userId);
 };
 
-export const deleteTask = async (taskId: string, projectSlug: string) => {
+export const deleteTask = async (taskSlug: string, projectSlug: string) => {
     const userId = await getUserDbId();
-    await queries.tasks.delete(taskId, projectSlug, userId);
+    await queries.tasks.delete(taskSlug, projectSlug, userId);
 };
 
 export const updateTask = async (
-    taskId: string,
+    taskSlug: string,
     data: UpdateTaskInput,
     projectSlug: string
 ) => {
@@ -45,5 +45,5 @@ export const updateTask = async (
     const taskData: UpdateTask = {
         ...data,
     };
-    await queries.tasks.update(taskId, taskData, projectSlug, userId);
+    await queries.tasks.update(taskSlug, taskData, projectSlug, userId);
 };

@@ -6,7 +6,11 @@ import {
     deleteTask,
     updateTask,
 } from "@/actions/taskActions";
-import { CreateTaskInput, UpdateListInput, UpdateTaskInput } from "@/lib/validations";
+import {
+    CreateTaskInput,
+    UpdateListInput,
+    UpdateTaskInput,
+} from "@/lib/validations";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function useTasks(projectSlug: string, listId: string) {
@@ -39,12 +43,12 @@ export function useTasks(projectSlug: string, listId: string) {
 
     const del = useMutation({
         mutationFn: ({
-            taskId,
+            taskSlug,
             projectSlug,
         }: {
-            taskId: string;
+            taskSlug: string;
             projectSlug: string;
-        }) => deleteTask(taskId, projectSlug),
+        }) => deleteTask(taskSlug, projectSlug),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`tasks-${listId}`] });
         },
@@ -52,14 +56,14 @@ export function useTasks(projectSlug: string, listId: string) {
 
     const update = useMutation({
         mutationFn: ({
-            taskId,
+            taskSlug,
             data,
             projectSlug,
         }: {
-            taskId: string;
+            taskSlug: string;
             data: UpdateTaskInput;
             projectSlug: string;
-        }) => updateTask(taskId, data, projectSlug),
+        }) => updateTask(taskSlug, data, projectSlug),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`tasks-${listId}`] });
         },

@@ -168,17 +168,20 @@ export default function ProjectDetails({ params }: ProjectProps) {
                                 type="text"
                                 name="name"
                                 placeholder="New name"
+                                defaultValue={list.name}
                                 className="w-full border px-2 py-1 rounded"
-                            />
+                                />
                             <textarea
                                 name="description"
                                 placeholder="New description"
+                                defaultValue={list.description ?? ""}
                                 className="w-full border px-2 py-1 rounded"
-                            />
+                                />
                             <input
                                 name="position"
                                 type="number"
                                 placeholder="Position"
+                                defaultValue={list.position}
                                 className="w-full border px-2 py-1 rounded"
                             />
                             <button
