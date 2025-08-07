@@ -62,6 +62,28 @@ export const authorization = {
             .then((res) => res[0] || null);
         return result;
     },
+    checkIfProjectOwnedByUserBySlug: async (
+        projectSlug: string,
+        userId: string
+    ) => {
+        if (!projectSlug || !userId) {
+            throw new Error("Missing required fields");
+        }
+        const result = await db
+            .select({
+                id: projects.id,
+                ownerId: projects.ownerId,
+            })
+            .from(projects)
+            .where(
+                and(
+                    eq(projects.slug, projectSlug),
+                    eq(projects.ownerId, userId)
+                )
+            )
+            .then((res) => res[0] || null);
+        return result;
+    },
     checkIfProjectBelongsToTeam: async (teamId: string, projectId: string) => {
         if (!teamId || !projectId) {
             throw new Error("Missing required fields");
@@ -341,7 +363,7 @@ export const queries = {
                 );
 
             if (!isAuthorized) {
-                throw new Error("You are not authorized to view this project");
+                return null;
             }
 
             const result = await db
@@ -450,21 +472,17 @@ export const queries = {
             return result;
         },
         update: async (
-            projectId: string,
+            projectSlug: string,
             data: UpdateProject,
-            user: string
+            userId: string
         ) => {
-            const project = await db
-                .select()
-                .from(projects)
-                .where(eq(projects.id, projectId));
+            const project = await authorization.checkIfProjectOwnedByUserBySlug(
+                projectSlug,
+                userId
+            );
 
-            if (!project[0]) {
-                throw new Error("Project not found");
-            }
-
-            if (project[0].ownerId !== user) {
-                throw new Error("You are not authorized to delete this team");
+            if (!project) {
+                throw new Error("You are not authorized to update this team");
             }
 
             const result = await db
@@ -472,30 +490,26 @@ export const queries = {
                 .set({
                     ...data,
                 })
-                .where(eq(projects.id, projectId))
+                .where(eq(projects.id, project.id))
                 .returning();
             return result[0];
         },
-        delete: async (id: string, ownerId: string) => {
-            if (!id || !ownerId) {
+        delete: async (projectSlug: string, userId: string) => {
+            if (!projectSlug || !userId) {
                 throw new Error("Missing required fields");
             }
-            const project = await db
-                .select()
-                .from(projects)
-                .where(eq(projects.id, id));
+            const project = await authorization.checkIfProjectOwnedByUserBySlug(
+                projectSlug,
+                userId
+            );
 
-            if (!project[0]) {
-                throw new Error("Project not found");
-            }
-
-            if (project[0].ownerId !== ownerId) {
+            if (!project) {
                 throw new Error(
                     "You are not authorized to delete this project"
                 );
             }
 
-            await db.delete(projects).where(eq(projects.id, id));
+            await db.delete(projects).where(eq(projects.id, project.id));
         },
     },
 

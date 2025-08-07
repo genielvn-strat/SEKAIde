@@ -25,12 +25,7 @@ export default function ProjectDetails({ params }: ProjectProps) {
         resolver: zodResolver(listSchema),
     });
 
-    const {
-        data: project,
-        isLoading,
-        isError,
-        error,
-    } = useProjectDetails(slug);
+    const { project, isLoading, isError, error } = useProjectDetails(slug);
 
     const { lists, createList, updateList, deleteList } = useLists(slug);
 
@@ -170,13 +165,13 @@ export default function ProjectDetails({ params }: ProjectProps) {
                                 placeholder="New name"
                                 defaultValue={list.name}
                                 className="w-full border px-2 py-1 rounded"
-                                />
+                            />
                             <textarea
                                 name="description"
                                 placeholder="New description"
                                 defaultValue={list.description ?? ""}
                                 className="w-full border px-2 py-1 rounded"
-                                />
+                            />
                             <input
                                 name="position"
                                 type="number"
@@ -203,7 +198,7 @@ export default function ProjectDetails({ params }: ProjectProps) {
                             Delete List
                         </button>
                         {/* Add Task Form */}
-                        
+
                         {/* Task List */}
                         <TaskList listId={list.id} projectSlug={slug} />
                     </div>

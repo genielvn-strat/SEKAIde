@@ -15,5 +15,5 @@ export function useProjectDetails(slug: string) {
         enabled: !!slug,
     });
 
-    return { data: project, isLoading, isError, error };
+    return { project, isLoading, isError, error };
 }
