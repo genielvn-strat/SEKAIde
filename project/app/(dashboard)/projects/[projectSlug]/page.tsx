@@ -9,12 +9,12 @@ import TaskList from "@/components/TaskList";
 
 interface ProjectProps {
     params: {
-        slug: string;
+        projectSlug: string;
     };
 }
 
 export default function ProjectDetails({ params }: ProjectProps) {
-    const { slug } = params;
+    const { projectSlug } = params;
     const {
         register: listRegiter,
         handleSubmit: listHandleSubmit,
@@ -25,10 +25,14 @@ export default function ProjectDetails({ params }: ProjectProps) {
         resolver: zodResolver(listSchema),
     });
 
-    const { project, isLoading, isError, error } = useProjectDetails(slug);
-    const { lists, createList, updateList, deleteList } = useLists(slug, {
-        enabled: !!project,
-    });
+    const { project, isLoading, isError, error } =
+        useProjectDetails(projectSlug);
+    const { lists, createList, updateList, deleteList } = useLists(
+        projectSlug,
+        {
+            enabled: !!project,
+        }
+    );
 
     if (isLoading) {
         return <div className="loading">Loading project...</div>;
@@ -49,7 +53,7 @@ export default function ProjectDetails({ params }: ProjectProps) {
 
     const onListSubmit: SubmitHandler<CreateListInput> = async (data) => {
         try {
-            await createList({ projectSlug: slug, data });
+            await createList({ projectSlug: projectSlug, data });
             listReset();
         } catch {
             setListError("root", { message: "Server error" });
@@ -149,7 +153,7 @@ export default function ProjectDetails({ params }: ProjectProps) {
                                 );
 
                                 updateList({
-                                    projectSlug: slug,
+                                    projectSlug: projectSlug,
                                     listId: list.id,
                                     data: {
                                         name,
@@ -191,7 +195,7 @@ export default function ProjectDetails({ params }: ProjectProps) {
                             onClick={() => {
                                 deleteList({
                                     listId: list.id,
-                                    projectSlug: slug,
+                                    projectSlug: projectSlug,
                                 });
                             }}
                             className="mt-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
@@ -201,7 +205,7 @@ export default function ProjectDetails({ params }: ProjectProps) {
                         {/* Add Task Form */}
 
                         {/* Task List */}
-                        <TaskList listId={list.id} projectSlug={slug} />
+                        <TaskList listId={list.id} projectSlug={projectSlug} />
                     </div>
                 ))}
             </div>

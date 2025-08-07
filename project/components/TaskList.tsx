@@ -133,6 +133,11 @@ const TaskList: React.FC<TaskListProps> = ({ projectSlug, listId }) => {
                                 </span>
                             </div>
 
+                            {task.slug && (
+                                <p className="text-sm text-gray-700 mt-1">
+                                    {task.slug}
+                                </p>
+                            )}
                             {task.description && (
                                 <p className="text-sm text-gray-700 mt-1">
                                     {task.description}
