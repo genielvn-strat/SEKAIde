@@ -41,7 +41,13 @@ export const deleteProject = async (id: string) => {
     await queries.projects.delete(id, ownerId);
 };
 
-export const updateProject = async (projectId: string, data: UpdateProjectInput) => {
+export const updateProject = async (
+    projectSlug: string,
+    data: UpdateProjectInput
+) => {
     const user = await getUserDbId();
-    await queries.projects.update(projectId, data, user);
+    const project: UpdateProject = {
+        ...data,
+    };
+    await queries.projects.update(projectSlug, project, user);
 };
