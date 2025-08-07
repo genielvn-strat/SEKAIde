@@ -4,6 +4,8 @@ import { queries } from "@/lib/db";
 import { getUserDbId } from "./sessionActions";
 import { CreateTask, UpdateTask } from "@/types/Task";
 import { CreateTaskInput, UpdateTaskInput } from "@/lib/validations";
+import slugify from "slugify";
+import { nanoid } from "nanoid";
 
 export const fetchTasksList = async (projectSlug: string, listId: string) => {
     await getUserDbId();
@@ -19,19 +21,23 @@ export const createTask = async (
     const userId = await getUserDbId();
     const taskData: CreateTask = {
         ...data,
+        slug: `${slugify(data.title, {
+            lower: true,
+            strict: true,
+        })}-${nanoid(6)}`,
         assigneeId: userId, // TODO: Use assignee from what the user selects in the UI. For now, you are the assignee.
         listId: listId,
     };
     await queries.tasks.create(projectSlug, taskData, userId);
 };
 
-export const deleteTask = async (taskId: string, projectSlug: string) => {
+export const deleteTask = async (taskSlug: string, projectSlug: string) => {
     const userId = await getUserDbId();
-    await queries.tasks.delete(taskId, projectSlug, userId);
+    await queries.tasks.delete(taskSlug, projectSlug, userId);
 };
 
 export const updateTask = async (
-    taskId: string,
+    taskSlug: string,
     data: UpdateTaskInput,
     projectSlug: string
 ) => {
@@ -39,5 +45,5 @@ export const updateTask = async (
     const taskData: UpdateTask = {
         ...data,
     };
-    await queries.tasks.update(taskId, taskData, projectSlug, userId);
+    await queries.tasks.update(taskSlug, taskData, projectSlug, userId);
 };

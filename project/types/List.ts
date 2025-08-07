@@ -14,5 +14,5 @@ export type CreateList = Omit<
 >;
 
 export type UpdateList = Partial<
-    Pick<List, "id" | "name" | "description" | "position">
+    Pick<List, "name" | "description" | "position">
 >;

@@ -187,7 +187,7 @@ const TaskList: React.FC<TaskListProps> = ({ projectSlug, listId }) => {
 
                                     updateTask({
                                         projectSlug: task.projectSlug,
-                                        taskId: task.id,
+                                        taskSlug: task.slug,
                                         data: {
                                             title,
                                             description,
@@ -243,7 +243,7 @@ const TaskList: React.FC<TaskListProps> = ({ projectSlug, listId }) => {
                                 onClick={() =>
                                     deleteTask({
                                         projectSlug: task.projectSlug,
-                                        taskId: task.id,
+                                        taskSlug: task.slug,
                                     })
                                 }
                                 className="mt-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"

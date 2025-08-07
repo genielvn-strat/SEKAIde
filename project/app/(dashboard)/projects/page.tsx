@@ -106,7 +106,7 @@ export default function ProjectsPage() {
                 {projects?.length ? (
                     <ul className="space-y-2">
                         {projects.map((project) => (
-                            <Link href={`/projects/${project.slug}`}>
+                            // <Link href={`/projects/${project.slug}`}>
                                 <li
                                     key={project.projectId}
                                     className="bg-gray-100 p-2 rounded text-sm"
@@ -116,14 +116,16 @@ export default function ProjectsPage() {
                                     </pre>
                                     <button
                                         onClick={() => {
-                                            deleteProject(project.projectId);
+                                            deleteProject({
+                                                slug: project.slug,
+                                            });
                                         }}
                                         className="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
                                     >
                                         Delete
                                     </button>
                                 </li>
-                            </Link>
+                            // </Link>
                         ))}
                     </ul>
                 ) : (

@@ -29,6 +29,13 @@
       "when": 1754277316868,
       "tag": "0003_green_centennial",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1754466180152,
+      "tag": "0004_curly_radioactive_man",
+      "breakpoints": true
     }
   ]
 }

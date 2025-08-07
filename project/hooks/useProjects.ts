@@ -29,7 +29,7 @@ export function useProjects() {
     });
 
     const del = useMutation({
-        mutationFn: deleteProject,
+        mutationFn: ({ slug }: { slug: string }) => deleteProject(slug),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["projects"] });
         },

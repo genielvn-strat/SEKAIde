@@ -5,6 +5,7 @@ export interface Task {
     projectId: string;
     listId: string;
     assigneeId?: string;
+    slug: string;
     priority: "low" | "medium" | "high";
     dueDate?: Date;
     position: number;
@@ -17,7 +18,6 @@ export type CreateTask = Omit<
     "id" | "createdAt" | "updatedAt" | "projectId"
 >;
 
-export type UpdateTask = Partial<Omit<
-    Task,
-    "id" | "createdAt" | "updatedAt" | "projectId"
->>;
+export type UpdateTask = Partial<
+    Omit<Task, "id" | "createdAt" | "updatedAt" | "projectId" | "slug">
+>;
