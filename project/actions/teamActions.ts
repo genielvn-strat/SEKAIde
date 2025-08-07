@@ -23,10 +23,10 @@ export const fetchTeamBySlug = async (slug: string) => {
 };
 
 export const createTeam = async (data: CreateTeamInput) => {
-    const ownerId = await getUserDbId();
+    const userId = await getUserDbId();
     const team: CreateTeam = {
         name: data.name,
-        ownerId: ownerId,
+        ownerId: userId,
         slug: `${slugify(data.name, {
             lower: true,
             strict: true,
@@ -36,14 +36,14 @@ export const createTeam = async (data: CreateTeamInput) => {
 };
 
 export const deleteTeam = async (teamId: string) => {
-    const ownerId = await getUserDbId();
-    await queries.teams.delete(teamId, ownerId);
+    const userId = await getUserDbId();
+    await queries.teams.delete(teamId, userId);
 };
 
 export const updateTeam = async (teamId: string, data: UpdateTeamInput) => {
-    const ownerId = await getUserDbId();
+    const userId = await getUserDbId();
     const team: UpdateTeam = {
         name: data.name,
     };
-    await queries.teams.update(teamId, team, ownerId);
+    await queries.teams.update(teamId, team, userId);
 };

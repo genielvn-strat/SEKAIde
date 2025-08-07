@@ -266,44 +266,36 @@ export const queries = {
 
             return result;
         },
-        update: async (teamId: string, data: UpdateTeam, ownerId: string) => {
-            if (!teamId || !ownerId) {
+        update: async (teamId: string, data: UpdateTeam, userId: string) => {
+            if (!teamId || !userId) {
                 throw new Error("Missing required fields");
             }
-            const team = await db
-                .select()
-                .from(teams)
-                .where(eq(teams.id, teamId));
+            const team = await authorization.checkIfTeamMemberByTeamId(
+                teamId,
+                userId
+            );
 
-            if (!team[0]) {
-                throw new Error("Team not found");
-            }
-
-            if (team[0].ownerId !== ownerId) {
-                throw new Error("You are not authorized to delete this team");
+            if (!team) {
+                throw new Error("You are not authorized to update this team");
             }
 
             const result = await db
                 .update(teams)
                 .set({ ...data })
-                .where(eq(teams.id, teamId))
+                .where(eq(teams.id, team.id))
                 .returning();
             return result[0];
         },
-        delete: async (teamId: string, ownerId: string) => {
-            if (!teamId || !ownerId) {
+        delete: async (teamId: string, userId: string) => {
+            if (!teamId || !userId) {
                 throw new Error("Missing required fields");
             }
-            const team = await db
-                .select()
-                .from(teams)
-                .where(eq(teams.id, teamId));
+            const team = await authorization.checkIfTeamMemberByTeamId(
+                teamId,
+                userId
+            );
 
-            if (!team[0]) {
-                throw new Error("Team not found");
-            }
-
-            if (team[0].ownerId !== ownerId) {
+            if (!team) {
                 throw new Error("You are not authorized to delete this team");
             }
 
