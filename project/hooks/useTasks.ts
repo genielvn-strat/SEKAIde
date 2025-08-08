@@ -17,7 +17,7 @@ export function useTasks(projectSlug: string, listId: string) {
     const queryClient = useQueryClient();
 
     const {
-        data: tasks,
+        data: res,
         isLoading,
         error,
     } = useQuery({
@@ -70,12 +70,12 @@ export function useTasks(projectSlug: string, listId: string) {
     });
 
     return {
-        tasks: tasks,
+        tasks: res?.success ? res.data : null,
         isLoading,
-        error,
-        createTask: create.mutate,
-        deleteTask: del.mutate,
-        updateTask: update.mutate,
+        error: !res?.success ? res?.message : error,
+        createTask: create.mutateAsync,
+        deleteTask: del.mutateAsync,
+        updateTask: update.mutateAsync,
         isCreating: create.isPending,
     };
 }

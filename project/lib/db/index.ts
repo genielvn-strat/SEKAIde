@@ -815,39 +815,43 @@ export const queries = {
                 );
 
             if (!isAuthorized) {
-                throw new Error("Not authorized to view this task.");
+                return failure(404, "Not found.");
             }
 
-            const result = await db
-                .select({
-                    id: tasks.id,
-                    title: tasks.title,
-                    description: tasks.description,
-                    priority: tasks.priority,
-                    dueDate: tasks.dueDate,
-                    position: tasks.position,
-                    slug: tasks.slug,
-                    assigneeName: users.name,
-                    assigneeUsername: users.username,
-                    projectName: projects.name,
-                    projectSlug: projects.slug,
-                })
-                .from(tasks)
-                .innerJoin(projects, eq(tasks.projectId, projects.id))
-                .innerJoin(users, eq(tasks.assigneeId, users.id))
-                .where(
-                    and(
-                        eq(tasks.slug, taskSlug),
-                        eq(projects.slug, projectSlug)
+            try {
+                const result = await db
+                    .select({
+                        id: tasks.id,
+                        title: tasks.title,
+                        description: tasks.description,
+                        priority: tasks.priority,
+                        dueDate: tasks.dueDate,
+                        position: tasks.position,
+                        slug: tasks.slug,
+                        assigneeName: users.name,
+                        assigneeUsername: users.username,
+                        projectName: projects.name,
+                        projectSlug: projects.slug,
+                    })
+                    .from(tasks)
+                    .innerJoin(projects, eq(tasks.projectId, projects.id))
+                    .innerJoin(users, eq(tasks.assigneeId, users.id))
+                    .where(
+                        and(
+                            eq(tasks.slug, taskSlug),
+                            eq(projects.slug, projectSlug)
+                        )
                     )
-                )
-                .then((res) => res[0] || null);
+                    .then((res) => res[0] || null);
 
-            return result;
+                return success(200, "Task fetched successfully", result);
+            } catch {
+                return failure(500, "Failed to fetch task");
+            }
         },
         getByListId: async (projectSlug: string, listId: string) => {
             if (!projectSlug || !listId) {
-                throw new Error("Missing required fields");
+                return failure(400, "Missing required fields");
             }
 
             const list = await authorization.checkIfListBelongsToProjectBySlug(
@@ -856,39 +860,47 @@ export const queries = {
             );
 
             if (!list || !list.id || !list.projectId) {
-                throw new Error("List not found in this project");
+                return failure(500, "List not found in this project");
             }
 
-            const tasksInList = await db
-                .select({
-                    id: tasks.id,
-                    title: tasks.title,
-                    description: tasks.description,
-                    priority: tasks.priority,
-                    dueDate: tasks.dueDate,
-                    position: tasks.position,
-                    slug: tasks.slug,
-                    assigneeName: users.name,
-                    assigneeUsername: users.username,
-                    projectName: projects.name,
-                    projectSlug: projects.slug,
-                })
-                .from(tasks)
-                .innerJoin(users, eq(tasks.assigneeId, users.id))
-                .innerJoin(projects, eq(tasks.projectId, projects.id))
-                .where(
-                    and(
-                        eq(projects.id, list.projectId),
-                        eq(tasks.listId, list.id)
+            try {
+                const tasksInList = await db
+                    .select({
+                        id: tasks.id,
+                        title: tasks.title,
+                        description: tasks.description,
+                        priority: tasks.priority,
+                        dueDate: tasks.dueDate,
+                        position: tasks.position,
+                        slug: tasks.slug,
+                        assigneeName: users.name,
+                        assigneeUsername: users.username,
+                        projectName: projects.name,
+                        projectSlug: projects.slug,
+                    })
+                    .from(tasks)
+                    .innerJoin(users, eq(tasks.assigneeId, users.id))
+                    .innerJoin(projects, eq(tasks.projectId, projects.id))
+                    .where(
+                        and(
+                            eq(projects.id, list.projectId),
+                            eq(tasks.listId, list.id)
+                        )
                     )
-                )
-                .orderBy(asc(tasks.position));
+                    .orderBy(asc(tasks.position));
 
-            if (!tasksInList) {
-                throw new Error("No tasks found for this list");
+                if (!tasksInList) {
+                    return failure(500, "No tasks found for this list");
+                }
+
+                return success(
+                    200,
+                    "Task list fetched successfully",
+                    tasksInList
+                );
+            } catch {
+                return failure(500, "Failed to fetch task list");
             }
-
-            return tasksInList;
         },
         getByProject: async (projectId: string) => {
             return await db
@@ -902,7 +914,7 @@ export const queries = {
             userId: string
         ) => {
             if (!data.title || !data.listId) {
-                throw new Error("Missing required fields");
+                return failure(400, "Missing required fields");
             }
 
             // Check if the user is part of the team and is a project_manager or admin
@@ -912,7 +924,8 @@ export const queries = {
             );
 
             if (!member) {
-                throw new Error(
+                return failure(
+                    400,
                     "Not authorized to create task in this project"
                 );
             }
@@ -924,19 +937,22 @@ export const queries = {
                 .then((res) => res[0] ?? null);
 
             if (!project) {
-                throw new Error("Project not found");
+                return failure(500, "Project not found");
             }
+            try {
+                const result = await db
+                    .insert(tasks)
+                    .values({
+                        ...data,
+                        projectId: project.id,
+                        dueDate: data.dueDate?.toISOString(),
+                    })
+                    .returning();
 
-            const result = await db
-                .insert(tasks)
-                .values({
-                    ...data,
-                    projectId: project.id,
-                    dueDate: data.dueDate?.toISOString(),
-                })
-                .returning();
-
-            return result[0];
+                return success(200, "Task created successfully", result[0]);
+            } catch {
+                return failure(400, "Failed to create task");
+            }
         },
 
         update: async (
@@ -951,12 +967,8 @@ export const queries = {
                 taskSlug
             );
 
-            if (!task) {
-                throw new Error("Task not found in this project");
-            }
-
-            if (!task.id || !task.projectId || !task.teamId) {
-                throw new Error("Task does not have a valid ID or project");
+            if (!task || !task.id || !task.projectId || !task.teamId) {
+                return failure(500, "Task not found in this project");
             }
 
             // Check if the user is part of the team and is a project_manager or admin
@@ -970,21 +982,24 @@ export const queries = {
                 (isAuthorized.role !== "project_manager" &&
                     isAuthorized.role !== "admin")
             ) {
-                throw new Error("Not authorized to update this task");
+                return failure(400, "Not authorized to update this task");
             }
-
-            const result = await db
-                .update(tasks)
-                .set({
-                    ...data,
-                    dueDate: data.dueDate
-                        ? data.dueDate.toISOString()
-                        : undefined,
-                    updatedAt: new Date().toISOString(),
-                })
-                .where(eq(tasks.id, task.id))
-                .returning();
-            return result[0];
+            try {
+                const result = await db
+                    .update(tasks)
+                    .set({
+                        ...data,
+                        dueDate: data.dueDate
+                            ? data.dueDate.toISOString()
+                            : undefined,
+                        updatedAt: new Date().toISOString(),
+                    })
+                    .where(eq(tasks.id, task.id))
+                    .returning();
+                return success(200, "Task updated successfully", result[0]);
+            } catch {
+                return failure(200, "Failed to update task");
+            }
         },
         delete: async (
             taskSlug: string,
@@ -996,23 +1011,31 @@ export const queries = {
                 taskSlug
             );
 
-            if (!task) {
-                throw new Error("Task not found in this project");
-            }
-            if (!task.id || !task.projectId || !task.teamId) {
-                throw new Error("Task do not have an ID");
+            if (!task || !task.id || !task.projectId || !task.teamId) {
+                return failure(500, "Task not found in this project");
             }
 
-            const isAuthorized = await authorization.checkIfTeamMemberByTeamId(
+            const member = await authorization.checkIfTeamMemberByTeamId(
                 task.teamId,
                 userId
             );
 
-            if (!isAuthorized) {
-                throw new Error("Not authorized to delete this task");
+            if (
+                !member ||
+                (member.role != "admin" && member.role != "project_manager")
+            ) {
+                return failure(400, "Not authorized to delete this task");
             }
 
-            await db.delete(tasks).where(eq(tasks.id, task.id));
+            try {
+                const result = await db
+                    .delete(tasks)
+                    .where(eq(tasks.id, task.id))
+                    .returning();
+                return success(200, "Task deleted successfully", result);
+            } catch {
+                return failure(500, "Failed to delete task");
+            }
         },
     },
 
