@@ -88,7 +88,6 @@ export const authorization = {
                 )
             )
             .then((res) => res[0] || null);
-        console.log(result);
         return result;
     },
     checkIfTeamMemberByTeamSlug: async (teamSlug: string, userId: string) => {
@@ -290,7 +289,7 @@ export const queries = {
                 await authorization.checkIfTeamMemberByTeamSlug(slug, userId);
 
             if (!isAuthorized) return failure(404, "Not Found");
-            
+
             try {
                 const result: FetchTeamDetails = await db
                     .select({
@@ -649,12 +648,6 @@ export const queries = {
     },
 
     lists: {
-        getByProject: async (projectId: string) => {
-            return await db
-                .select()
-                .from(lists)
-                .where(eq(lists.projectId, projectId));
-        },
         getByProjectSlug: async (projectSlug: string, userId: string) => {
             const member = await authorization.checkIfTeamMemberByProjectSlug(
                 projectSlug,
@@ -662,20 +655,24 @@ export const queries = {
             );
 
             if (!member) {
-                throw new Error("Not authorized to view this project.");
+                return failure(404, "Not found");
             }
-
-            return await db
-                .select({
-                    id: lists.id,
-                    name: lists.name,
-                    description: lists.description,
-                    position: lists.position,
-                })
-                .from(lists)
-                .leftJoin(projects, eq(lists.projectId, projects.id))
-                .where(eq(projects.slug, projectSlug))
-                .orderBy(asc(lists.position));
+            try {
+                const result = await db
+                    .select({
+                        id: lists.id,
+                        name: lists.name,
+                        description: lists.description,
+                        position: lists.position,
+                    })
+                    .from(lists)
+                    .leftJoin(projects, eq(lists.projectId, projects.id))
+                    .where(eq(projects.slug, projectSlug))
+                    .orderBy(asc(lists.position));
+                return success(200, "Fetched lists successfully", result);
+            } catch {
+                return failure(500, "Failed to fetch list");
+            }
         },
         create: async (
             data: CreateList,
@@ -690,7 +687,7 @@ export const queries = {
                 .then((res) => res[0] ?? null);
 
             if (!project) {
-                throw new Error("Project not found");
+                return failure(500, "Project not found");
             }
 
             // 2. Check if the user is part of the team and is a project_manager or admin
@@ -703,20 +700,22 @@ export const queries = {
                 !member ||
                 (member.role != "project_manager" && member.role != "admin")
             ) {
-                throw new Error(
-                    "Not authorized to create list in this project"
-                );
+                return failure(400, "Not authorized to delete this list");
             }
 
-            const result = await db
-                .insert(lists)
-                .values({
-                    ...data,
-                    projectId: project.id,
-                })
-                .returning();
+            try {
+                const result = await db
+                    .insert(lists)
+                    .values({
+                        ...data,
+                        projectId: project.id,
+                    })
+                    .returning();
 
-            return result[0];
+                return success(200, "List created successfully", result[0]);
+            } catch {
+                return failure(500, "Failed to create list");
+            }
         },
         update: async (
             data: UpdateList,
@@ -734,7 +733,7 @@ export const queries = {
             );
 
             if (!list || !list.id || !list.projectId || !list.teamId) {
-                throw new Error("List not found in this project");
+                return failure(500, "List not found in this project");
             }
 
             const member = await authorization.checkIfTeamMemberByTeamId(
@@ -746,20 +745,22 @@ export const queries = {
                 !member ||
                 (member?.role !== "project_manager" && member?.role !== "admin")
             ) {
-                throw new Error(
-                    "Not authorized to create list in this project"
-                );
+                return failure(400, "Not authorized to delete this list");
             }
 
-            const result = await db
-                .update(lists)
-                .set({
-                    ...data,
-                })
-                .where(eq(lists.id, list.id))
-                .returning();
+            try {
+                const result = await db
+                    .update(lists)
+                    .set({
+                        ...data,
+                    })
+                    .where(eq(lists.id, list.id))
+                    .returning();
 
-            return result[0];
+                return success(200, "List updated successfully", result[0]);
+            } catch {
+                return failure(500, "Failed to update list");
+            }
         },
         delete: async (listId: string, projectSlug: string, userId: string) => {
             const list = await authorization.checkIfListBelongsToProjectBySlug(
@@ -767,24 +768,31 @@ export const queries = {
                 listId
             );
 
-            if (!list) {
-                throw new Error("List not found in this project");
+            if (!list || !list.teamId || !list.id) {
+                return failure(500, "List not found in this project");
             }
 
-            if (!list.teamId || !list.id) {
-                throw new Error("List's project does not have a valid teamId");
-            }
-
-            const isAuthorized = await authorization.checkIfTeamMemberByTeamId(
+            const member = await authorization.checkIfTeamMemberByTeamId(
                 list.teamId,
                 userId
             );
 
-            if (!isAuthorized) {
-                throw new Error("Not authorized to delete this list");
+            if (
+                !member ||
+                (member.role != "admin" && member.role != "project_manager")
+            ) {
+                return failure(400, "Not authorized to delete this list");
             }
 
-            await db.delete(lists).where(eq(lists.id, list.id));
+            try {
+                const result = await db
+                    .delete(lists)
+                    .where(eq(lists.id, list.id))
+                    .returning();
+                return success(200, "List deleted successfully", result);
+            } catch {
+                return failure(500, "Failed to delete list.");
+            }
         },
     },
     tasks: {

@@ -50,14 +50,8 @@ export function useTeams() {
     });
 
     return {
-        ownedTeams:
-            res?.success && "owned" in (res?.data ?? {})
-                ? (res.data as FetchTeams).owned
-                : [],
-        joinedTeams:
-            res?.success && "joined" in (res?.data ?? {})
-                ? (res.data as FetchTeams).joined
-                : [],
+        ownedTeams: res?.success ? (res?.data as FetchTeams).owned : null,
+        joinedTeams: res?.success ? (res?.data as FetchTeams).joined : null,
         isLoading,
         error: !res?.success ? res?.message : error,
         createTeam: create.mutateAsync,

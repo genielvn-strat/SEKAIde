@@ -16,7 +16,7 @@ export function useLists(
     const queryClient = useQueryClient();
 
     const {
-        data: lists,
+        data: res,
         isLoading,
         error,
     } = useQuery({
@@ -67,12 +67,12 @@ export function useLists(
     });
 
     return {
-        lists: lists,
+        lists: res?.success ? res.data : null,
         isLoading,
-        error,
-        createList: create.mutate,
-        deleteList: del.mutate,
-        updateList: update.mutate,
+        error: !res?.success ? res?.message : error,
+        createList: create.mutateAsync,
+        deleteList: del.mutateAsync,
+        updateList: update.mutateAsync,
         isCreating: create.isPending,
     };
 }
