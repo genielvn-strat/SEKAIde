@@ -67,7 +67,7 @@ export function useLists(
     });
 
     return {
-        lists: res?.success ? res.data : null,
+        lists: res?.success ? res?.data : null,
         isLoading,
         error: !res?.success ? res?.message : error,
         createList: create.mutateAsync,
