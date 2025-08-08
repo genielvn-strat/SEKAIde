@@ -13,8 +13,9 @@ export function useProjects() {
     const queryClient = useQueryClient();
 
     const {
-        data: projects,
+        data: res,
         isLoading,
+        isError,
         error,
     } = useQuery({
         queryKey: ["projects"],
@@ -49,12 +50,13 @@ export function useProjects() {
     });
 
     return {
-        projects: projects,
+        projects: res?.success ? res?.data : [],
+        isError: !res?.success,
         isLoading,
-        error,
-        createProject: create.mutate,
-        deleteProject: del.mutate,
-        updateProject: update.mutate,
+        error: !res?.success ? res?.message : error,
+        createProject: create.mutateAsync,
+        deleteProject: del.mutateAsync,
+        updateProject: update.mutateAsync,
         isCreating: create.isPending,
     };
 }

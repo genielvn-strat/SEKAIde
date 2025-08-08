@@ -22,7 +22,6 @@ export default function TeamPage() {
     });
 
     const {
-        ownedTeams,
         joinedTeams,
         isLoading,
         createTeam,

@@ -22,6 +22,7 @@ import { fail } from "assert";
 import {
     FetchJoinedTeams,
     FetchOwnedTeams,
+    FetchProject,
     FetchTeamDetails,
 } from "@/types/ServerResponses";
 
@@ -80,7 +81,16 @@ export const authorization = {
             .from(teamMembers)
             .innerJoin(teams, eq(teamMembers.teamId, teams.id))
             .innerJoin(projects, eq(teams.id, projects.teamId))
-            .where(eq(projects.slug, projectSlug))
+            .where(
+                and(
+                    eq(projects.slug, projectSlug),
+                    eq(teamMembers.userId, userId)
+                )
+            )
+            .then((res) => res[0] || null);
+        console.log(result);
+        return result;
+    },
     checkIfTeamMemberByTeamSlug: async (teamSlug: string, userId: string) => {
         if (!teamSlug || !userId) {
             throw new Error("Missing required fields");
@@ -98,6 +108,7 @@ export const authorization = {
                 and(eq(teams.slug, teamSlug), eq(teamMembers.userId, userId))
             )
             .then((res) => res[0] || null);
+        console.log(result);
         return result;
     },
     checkIfProjectOwnedByUserBySlug: async (
@@ -279,6 +290,7 @@ export const queries = {
                 await authorization.checkIfTeamMemberByTeamSlug(slug, userId);
 
             if (!isAuthorized) return failure(404, "Not Found");
+            
             try {
                 const result: FetchTeamDetails = await db
                     .select({
@@ -440,7 +452,7 @@ export const queries = {
     projects: {
         getBySlug: async (projectSlug: string, userId: string) => {
             if (!projectSlug || !userId)
-                throw new Error("Missing required fields");
+                return failure(400, "Missing require fields");
 
             const isAuthorized =
                 await authorization.checkIfTeamMemberByProjectSlug(
@@ -449,37 +461,40 @@ export const queries = {
                 );
 
             if (!isAuthorized) {
-                return null;
+                return failure(404, "Not found");
             }
-
-            const result = await db
-                .select({
-                    id: projects.id,
-                    name: projects.name,
-                    slug: projects.slug,
-                    description: projects.description,
-                    ownerId: projects.ownerId,
-                    teamId: projects.teamId,
-                    teamName: teams.name,
-                    createdAt: projects.createdAt,
-                    updatedAt: projects.updatedAt,
-                    dueDate: projects.dueDate,
-                })
-                .from(projects)
-                .leftJoin(teams, eq(projects.teamId, teams.id))
-                .leftJoin(teamMembers, eq(teams.id, teamMembers.teamId))
-                .where(
-                    and(
-                        eq(projects.slug, projectSlug),
-                        or(
-                            eq(projects.ownerId, userId),
-                            eq(teamMembers.userId, userId)
+            try {
+                const result: FetchProject = await db
+                    .select({
+                        id: projects.id,
+                        name: projects.name,
+                        slug: projects.slug,
+                        description: projects.description,
+                        ownerId: projects.ownerId,
+                        teamId: projects.teamId,
+                        teamName: teams.name,
+                        createdAt: projects.createdAt,
+                        updatedAt: projects.updatedAt,
+                        dueDate: projects.dueDate,
+                    })
+                    .from(projects)
+                    .leftJoin(teams, eq(projects.teamId, teams.id))
+                    .leftJoin(teamMembers, eq(teams.id, teamMembers.teamId))
+                    .where(
+                        and(
+                            eq(projects.slug, projectSlug),
+                            or(
+                                eq(projects.ownerId, userId),
+                                eq(teamMembers.userId, userId)
+                            )
                         )
                     )
-                )
-                .then((res) => res[0] || null);
+                    .then((res) => res[0] || null);
 
-            return result;
+                return success(200, "Projects successfully fetched.", result);
+            } catch {
+                return failure(500, "Failed to fetch project");
+            }
         },
         getByTeamId: async (teamId: string) => {
             return await db
@@ -494,68 +509,86 @@ export const queries = {
                 .where(eq(projects.ownerId, ownerId));
         },
         getByUserTeams: async (userId: string) => {
-            const result = await db
-                .select({
-                    projectId: projects.id,
-                    name: projects.name,
-                    description: projects.description,
-                    createdAt: projects.createdAt,
-                    updatedAt: projects.updatedAt,
-                    teamId: projects.teamId,
-                    slug: projects.slug,
-                    teamName: teams.name,
-                })
-                .from(teamMembers)
-                .innerJoin(projects, eq(teamMembers.teamId, projects.teamId))
-                .innerJoin(teams, eq(teamMembers.teamId, teams.id))
-                .where(eq(teamMembers.userId, userId));
-            return result;
+            try {
+                const result: FetchProject[] = await db
+                    .select({
+                        id: projects.id,
+                        name: projects.name,
+                        slug: projects.slug,
+                        description: projects.description,
+                        ownerId: projects.ownerId,
+                        teamId: projects.teamId,
+                        teamName: teams.name,
+                        createdAt: projects.createdAt,
+                        updatedAt: projects.updatedAt,
+                        dueDate: projects.dueDate,
+                    })
+                    .from(teamMembers)
+                    .innerJoin(
+                        projects,
+                        eq(teamMembers.teamId, projects.teamId)
+                    )
+                    .innerJoin(teams, eq(teamMembers.teamId, teams.id))
+                    .where(eq(teamMembers.userId, userId));
+                return success(200, "Projects successfully fetched", result);
+            } catch {
+                return failure(500, "Failed to fetch projects");
+            }
         },
         create: async (data: CreateProject) => {
-            const result = await db.transaction(async (tx) => {
-                if (!data.name || !data.ownerId || !data.teamId) {
-                    throw new Error("Missing required fields.");
-                }
-                const inserted = await tx
-                    .insert(projects)
-                    .values({
-                        ...data,
-                        dueDate: data.dueDate?.toISOString(),
-                    })
-                    .returning();
+            try {
+                const result = await db.transaction(async (tx) => {
+                    if (!data.name || !data.ownerId || !data.teamId) {
+                        return failure(500, "Missing required fields");
+                    }
+                    const inserted = await tx
+                        .insert(projects)
+                        .values({
+                            ...data,
+                            dueDate: data.dueDate?.toISOString(),
+                        })
+                        .returning();
 
-                const project = inserted[0];
-                if (!project) throw new Error("Project creation failed");
+                    const project = inserted[0];
+                    if (!project)
+                        return failure(500, "Failed to create project");
 
-                const defaultLists = [
-                    {
-                        name: "To Do",
-                        description: "Tasks to be done",
+                    const defaultLists = [
+                        {
+                            name: "To Do",
+                            description: "Tasks to be done",
+                            projectId: project.id,
+                        },
+                        {
+                            name: "In Progress",
+                            description: "Tasks currently being worked on",
+                            projectId: project.id,
+                        },
+                        {
+                            name: "Done",
+                            description: "Completed tasks",
+                            projectId: project.id,
+                        },
+                    ].map((lists, idx) => ({
+                        name: lists.name,
+                        description: lists.description,
+                        position: idx,
                         projectId: project.id,
-                    },
-                    {
-                        name: "In Progress",
-                        description: "Tasks currently being worked on",
-                        projectId: project.id,
-                    },
-                    {
-                        name: "Done",
-                        description: "Completed tasks",
-                        projectId: project.id,
-                    },
-                ].map((lists, idx) => ({
-                    name: lists.name,
-                    description: lists.description,
-                    position: idx,
-                    projectId: project.id,
-                }));
+                    }));
 
-                await tx.insert(lists).values(defaultLists);
+                    await tx.insert(lists).values(defaultLists);
 
-                return project;
-            });
+                    return success(
+                        200,
+                        "Project successfully created",
+                        inserted
+                    );
+                });
 
-            return result;
+                return result;
+            } catch {
+                return failure(500, "Failed to create project");
+            }
         },
         update: async (
             projectSlug: string,
@@ -568,21 +601,28 @@ export const queries = {
             );
 
             if (!project) {
-                throw new Error("You are not authorized to update this team");
+                return failure(
+                    400,
+                    "You are not authorized to update this project"
+                );
             }
 
-            const result = await db
-                .update(projects)
-                .set({
-                    ...data,
-                })
-                .where(eq(projects.id, project.id))
-                .returning();
-            return result[0];
+            try {
+                const result = await db
+                    .update(projects)
+                    .set({
+                        ...data,
+                    })
+                    .where(eq(projects.id, project.id))
+                    .returning();
+                return success(200, "Project successfully updated", result);
+            } catch {
+                return failure(500, "Failed to update project");
+            }
         },
         delete: async (projectSlug: string, userId: string) => {
             if (!projectSlug || !userId) {
-                throw new Error("Missing required fields");
+                return failure(500, "Missing required fields");
             }
             const project = await authorization.checkIfProjectOwnedByUserBySlug(
                 projectSlug,
@@ -590,12 +630,21 @@ export const queries = {
             );
 
             if (!project) {
-                throw new Error(
+                return failure(
+                    400,
                     "You are not authorized to delete this project"
                 );
             }
 
-            await db.delete(projects).where(eq(projects.id, project.id));
+            try {
+                const result = await db
+                    .delete(projects)
+                    .where(eq(projects.id, project.id))
+                    .returning();
+                return success(200, "Project successfully deleted", result);
+            } catch {
+                return failure(500, "Failed to update project");
+            }
         },
     },
 

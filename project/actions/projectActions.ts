@@ -2,10 +2,17 @@
 
 import { queries } from "@/lib/db";
 import { getUserDbId } from "./sessionActions";
-import { CreateProject, Project, UpdateProject } from "@/types/Project";
-import { CreateProjectInput, UpdateProjectInput } from "@/lib/validations";
+import { CreateProject, UpdateProject } from "@/types/Project";
+import {
+    CreateProjectInput,
+    createProjectSchema,
+    UpdateProjectInput,
+    updateProjectSchema,
+} from "@/lib/validations";
 import slugify from "slugify";
 import { nanoid } from "nanoid";
+import { ZodError } from "zod";
+import { failure } from "@/types/Response";
 
 export const fetchUserProjects = async () => {
     const userId = await getUserDbId();
@@ -21,8 +28,16 @@ export const fetchProjectBySlug = async (slug: string) => {
 
 export const createProject = async (data: CreateProjectInput) => {
     const ownerId = await getUserDbId();
+    try {
+        createProjectSchema.parse(data);
+    } catch (err) {
+        if (err instanceof ZodError) {
+            return failure(400, `${err.errors[0].message}`);
+        }
+    }
+
     const project: CreateProject = {
-        name: data.name,
+        ...data,
         description: data.description,
         ownerId: ownerId,
         dueDate: data.dueDate,
@@ -30,15 +45,14 @@ export const createProject = async (data: CreateProjectInput) => {
             lower: true,
             strict: true,
         })}-${nanoid(6)}`,
-        teamId: data.teamId,
     };
 
-    await queries.projects.create(project);
+    return await queries.projects.create(project);
 };
 
 export const deleteProject = async (slug: string) => {
     const userId = await getUserDbId();
-    await queries.projects.delete(slug, userId);
+    return await queries.projects.delete(slug, userId);
 };
 
 export const updateProject = async (
@@ -46,8 +60,15 @@ export const updateProject = async (
     data: UpdateProjectInput
 ) => {
     const userId = await getUserDbId();
+    try {
+        updateProjectSchema.parse(data);
+    } catch (err) {
+        if (err instanceof ZodError) {
+            return failure(400, `${err.errors[0].message}`);
+        }
+    }
     const project: UpdateProject = {
         ...data,
     };
-    await queries.projects.update(projectSlug, project, userId);
+    return await queries.projects.update(projectSlug, project, userId);
 };
