@@ -17,6 +17,13 @@ import { CreateTeam, Team, UpdateTeam } from "@/types/Team";
 import { CreateUser, UpdateUser, User } from "@/types/User";
 import { CreateList, UpdateList } from "@/types/List";
 import { CreateComment, UpdateComment } from "@/types/Comment";
+import { failure, success } from "@/types/Response";
+import { fail } from "assert";
+import {
+    FetchJoinedTeams,
+    FetchOwnedTeams,
+    FetchTeamDetails,
+} from "@/types/ServerResponses";
 
 config({ path: ".env" });
 export const db = drizzle(process.env.DATABASE_URL!);
@@ -42,6 +49,20 @@ export const authorization = {
             .then((res) => res[0] || null);
         return result;
     },
+    checkIfTeamOwnedByUser: async (teamId: string, userId: string) => {
+        if (!teamId || !userId) {
+            throw new Error("Missing required fields");
+        }
+        const result = await db
+            .select({
+                id: teams.id,
+                ownerId: teams.ownerId,
+            })
+            .from(teams)
+            .where(and(eq(teams.id, teamId), eq(teams.ownerId, userId)))
+            .then((res) => res[0] || null);
+        return result;
+    },
     checkIfTeamMemberByProjectSlug: async (
         projectSlug: string,
         userId: string
@@ -60,6 +81,22 @@ export const authorization = {
             .innerJoin(teams, eq(teamMembers.teamId, teams.id))
             .innerJoin(projects, eq(teams.id, projects.teamId))
             .where(eq(projects.slug, projectSlug))
+    checkIfTeamMemberByTeamSlug: async (teamSlug: string, userId: string) => {
+        if (!teamSlug || !userId) {
+            throw new Error("Missing required fields");
+        }
+        const result = await db
+            .select({
+                id: teamMembers.id,
+                teamId: teams.id,
+                role: teamMembers.role,
+                inviteConfirmed: teamMembers.inviteConfirmed,
+            })
+            .from(teamMembers)
+            .innerJoin(teams, eq(teamMembers.teamId, teams.id))
+            .where(
+                and(eq(teams.slug, teamSlug), eq(teamMembers.userId, userId))
+            )
             .then((res) => res[0] || null);
         return result;
     },
@@ -194,113 +231,169 @@ export const queries = {
             return result[0] || null;
         },
         getJoinedTeams: async (userId: string) => {
-            return await db
-                .select({
-                    id: teams.id,
-                    teamName: teams.name,
-                    slug: teams.slug,
-                    role: teamMembers.role,
-                    inviteConfirmed: teamMembers.inviteConfirmed,
-                    createdAt: teams.createdAt,
-                    updatedAt: teams.updatedAt,
-                })
-                .from(teamMembers)
-                .innerJoin(teams, eq(teamMembers.teamId, teams.id))
-                .where(eq(teamMembers.userId, userId));
+            try {
+                const result: FetchJoinedTeams[] = await db
+                    .select({
+                        id: teams.id,
+                        teamName: teams.name,
+                        slug: teams.slug,
+                        role: teamMembers.role,
+                        inviteConfirmed: teamMembers.inviteConfirmed,
+                        createdAt: teams.createdAt,
+                        updatedAt: teams.updatedAt,
+                    })
+                    .from(teamMembers)
+                    .innerJoin(teams, eq(teamMembers.teamId, teams.id))
+                    .where(eq(teamMembers.userId, userId));
+                return success(
+                    200,
+                    "Joined teams successfully fetched",
+                    result
+                );
+            } catch {
+                return failure(500, "Failed to fetch joined teams");
+            }
         },
         getByOwner: async (ownerId: string) => {
-            return await db
-                .select()
-                .from(teams)
-                .where(eq(teams.ownerId, ownerId));
+            try {
+                const result: FetchOwnedTeams[] = await db
+                    .select({
+                        id: teams.id,
+                        teamName: teams.name,
+                        slug: teams.slug,
+                        createdAt: teams.createdAt,
+                        updatedAt: teams.updatedAt,
+                    })
+                    .from(teams)
+                    .where(eq(teams.ownerId, ownerId));
+                return success(200, "Owned teams successfully fetched", result);
+            } catch {
+                return failure(500, "Failed to fetch owned teams");
+            }
         },
         getBySlug: async (slug: string, userId: string) => {
-            if (!slug || !userId) throw new Error("Missing required fields");
+            if (!slug || !userId)
+                return failure(400, "Missing required fields.");
 
-            const result = await db
-                .select({
-                    id: teams.id,
-                    name: teams.name,
-                    slug: teams.slug,
-                    ownerId: teams.ownerId,
-                    createdAt: teams.createdAt,
-                    updatedAt: teams.updatedAt,
-                })
-                .from(teams)
-                .leftJoin(teamMembers, eq(teams.id, teamMembers.teamId))
-                .where(
-                    and(
-                        eq(teams.slug, slug),
-                        or(
-                            eq(teams.ownerId, userId),
-                            eq(teamMembers.userId, userId)
+            const isAuthorized =
+                await authorization.checkIfTeamMemberByTeamSlug(slug, userId);
+
+            if (!isAuthorized) return failure(404, "Not Found");
+            try {
+                const result: FetchTeamDetails = await db
+                    .select({
+                        id: teams.id,
+                        name: teams.name,
+                        slug: teams.slug,
+                        ownerId: teams.ownerId,
+                        createdAt: teams.createdAt,
+                        updatedAt: teams.updatedAt,
+                    })
+
+                    .from(teams)
+                    .leftJoin(teamMembers, eq(teams.id, teamMembers.teamId))
+                    .where(
+                        and(
+                            eq(teams.slug, slug),
+                            or(
+                                eq(teams.ownerId, userId),
+                                eq(teamMembers.userId, userId)
+                            )
                         )
                     )
-                )
-                .then((res) => res[0] || null);
+                    .then((res) => res[0] || null);
 
-            return result;
+                return success(
+                    200,
+                    "Team details successfully fetched.",
+                    result
+                );
+            } catch {
+                return failure(500, "Failed to fetch team details");
+            }
         },
         create: async (data: CreateTeam) => {
             const result = await db.transaction(async (tx) => {
                 if (!data.name || !data.ownerId) {
-                    throw new Error("Missing required fields");
+                    return failure(400, "Missing required fields.");
                 }
 
-                const insertedTeam = await tx
-                    .insert(teams)
-                    .values(data)
-                    .returning();
-                const team = insertedTeam[0];
+                try {
+                    const insertedTeam = await tx
+                        .insert(teams)
+                        .values(data)
+                        .returning();
+                    const team = insertedTeam[0];
 
-                if (!team) throw new Error("Failed to create team.");
+                    if (!team) throw new Error("Team creation failed");
 
-                // create a team member for this user as well
-                await tx.insert(teamMembers).values({
-                    teamId: team.id,
-                    userId: data.ownerId,
-                    role: "admin",
-                    inviteConfirmed: true,
-                });
-                return team;
+                    // create a team member for this user as well
+                    await tx.insert(teamMembers).values({
+                        teamId: team.id,
+                        userId: data.ownerId,
+                        role: "admin",
+                        inviteConfirmed: true,
+                    });
+                    return success(201, "Team created successfully", team);
+                } catch {
+                    return failure(500, "Team creation failed");
+                }
             });
 
             return result;
         },
         update: async (teamId: string, data: UpdateTeam, userId: string) => {
             if (!teamId || !userId) {
-                throw new Error("Missing required fields");
+                return failure(400, "Missing required fields");
             }
-            const team = await authorization.checkIfTeamMemberByTeamId(
+            const team = await authorization.checkIfTeamOwnedByUser(
                 teamId,
                 userId
             );
 
             if (!team) {
-                throw new Error("You are not authorized to update this team");
+                return failure(
+                    403,
+                    "You are not authorized to update this team"
+                );
             }
 
-            const result = await db
-                .update(teams)
-                .set({ ...data })
-                .where(eq(teams.id, team.id))
-                .returning();
-            return result[0];
+            try {
+                const result = await db
+                    .update(teams)
+                    .set({ ...data })
+                    .where(eq(teams.id, team.id))
+                    .returning();
+                return success(200, "Team updated successfully", result[0]);
+            } catch {
+                return failure(500, "Failed to update team");
+            }
         },
         delete: async (teamId: string, userId: string) => {
             if (!teamId || !userId) {
-                throw new Error("Missing required fields");
+                return failure(400, "Missing required fields");
             }
-            const team = await authorization.checkIfTeamMemberByTeamId(
+            const team = await authorization.checkIfTeamOwnedByUser(
                 teamId,
                 userId
             );
 
             if (!team) {
-                throw new Error("You are not authorized to delete this team");
+                return failure(
+                    403,
+                    "You are not authorized to delete this team"
+                );
             }
 
-            await db.delete(teams).where(eq(teams.id, teamId));
+            try {
+                const result = await db
+                    .delete(teams)
+                    .where(eq(teams.id, teamId))
+                    .returning();
+                return success(200, "Team deleted successfully", result[0]);
+            } catch {
+                return failure(500, "Failed to delete team");
+            }
         },
     },
 
