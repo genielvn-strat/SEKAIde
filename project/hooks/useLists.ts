@@ -9,7 +9,10 @@ import {
 import { CreateListInput, UpdateListInput } from "@/lib/validations";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-export function useLists(projectSlug: string) {
+export function useLists(
+    projectSlug: string,
+    options: { enabled?: boolean } = { enabled: true }
+) {
     const queryClient = useQueryClient();
 
     const {
@@ -19,7 +22,7 @@ export function useLists(projectSlug: string) {
     } = useQuery({
         queryKey: ["lists", projectSlug],
         queryFn: () => fetchProjectLists(projectSlug),
-        enabled: !!projectSlug,
+        enabled: !!projectSlug && options.enabled,
     });
 
     const create = useMutation({

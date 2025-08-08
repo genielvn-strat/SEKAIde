@@ -5,14 +5,14 @@ import { notFound } from "next/navigation";
 
 interface ProjectProps {
     params: {
-        slug: string;
+        teamSlug: string;
     };
 }
 
 export default function TeamDetails({ params }: ProjectProps) {
-    const { slug } = params;
+    const { teamSlug } = params;
 
-    const { data: team, isLoading, isError, error } = useTeamDetails(slug);
+    const { data: team, isLoading, isError, error } = useTeamDetails(teamSlug);
 
     if (isLoading) {
         return <div className="loading">Loading team...</div>;

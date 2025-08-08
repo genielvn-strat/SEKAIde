@@ -16,6 +16,7 @@ import { TeamMember } from "@/types/TeamMember";
 import { CreateTeam, Team, UpdateTeam } from "@/types/Team";
 import { CreateUser, UpdateUser, User } from "@/types/User";
 import { CreateList, UpdateList } from "@/types/List";
+import { CreateComment, UpdateComment } from "@/types/Comment";
 
 config({ path: ".env" });
 export const db = drizzle(process.env.DATABASE_URL!);
@@ -652,6 +653,48 @@ export const queries = {
                 .innerJoin(projects, eq(tasks.projectId, projects.id))
                 .where(eq(projects.slug, slug));
         },
+        getByTaskSlug: async (
+            taskSlug: string,
+            projectSlug: string,
+            userId: string
+        ) => {
+            const isAuthorized =
+                await authorization.checkIfTeamMemberByProjectSlug(
+                    projectSlug,
+                    userId
+                );
+
+            if (!isAuthorized) {
+                throw new Error("Not authorized to view this task.");
+            }
+
+            const result = await db
+                .select({
+                    id: tasks.id,
+                    title: tasks.title,
+                    description: tasks.description,
+                    priority: tasks.priority,
+                    dueDate: tasks.dueDate,
+                    position: tasks.position,
+                    slug: tasks.slug,
+                    assigneeName: users.name,
+                    assigneeUsername: users.username,
+                    projectName: projects.name,
+                    projectSlug: projects.slug,
+                })
+                .from(tasks)
+                .innerJoin(projects, eq(tasks.projectId, projects.id))
+                .innerJoin(users, eq(tasks.assigneeId, users.id))
+                .where(
+                    and(
+                        eq(tasks.slug, taskSlug),
+                        eq(projects.slug, projectSlug)
+                    )
+                )
+                .then((res) => res[0] || null);
+
+            return result;
+        },
         getByListId: async (projectSlug: string, listId: string) => {
             if (!projectSlug || !listId) {
                 throw new Error("Missing required fields");
@@ -824,26 +867,156 @@ export const queries = {
     },
 
     comments: {
-        getByTask: async (taskId: string) => {
-            return await db
-                .select()
-                .from(comments)
-                .where(eq(comments.taskId, taskId));
-        },
-        create: async (data: any) => {
-            const result = await db.insert(comments).values(data).returning();
-            return result[0];
-        },
-        update: async (id: string, data: any) => {
+        getByTaskSlug: async (
+            taskSlug: string,
+            projectSlug: string,
+            userId: string
+        ) => {
+            const isAuthorized =
+                await authorization.checkIfTeamMemberByProjectSlug(
+                    projectSlug,
+                    userId
+                );
+
+            if (!isAuthorized) {
+                throw new Error("Not authorized to view this task.");
+            }
+
+            const task = await authorization.checkIfTaskBelongsToProjectBySlug(
+                projectSlug,
+                taskSlug
+            );
+
+            if (!task) {
+                throw new Error("Task not found in this project");
+            }
+
             const result = await db
-                .update(comments)
-                .set({ ...data, updatedAt: new Date() })
-                .where(eq(comments.id, id))
+                .select({
+                    id: comments.id,
+                    content: comments.content,
+                    taskId: comments.taskId,
+                    authorId: comments.authorId,
+                    createdAt: comments.createdAt,
+                    updatedAt: comments.updatedAt,
+                    authorName: users.name,
+                    authorUsername: users.username,
+                })
+                .from(comments)
+                .innerJoin(users, eq(comments.authorId, users.id))
+                .where(eq(comments.taskId, task.id));
+
+            return result;
+        },
+        create: async (
+            taskSlug: string,
+            projectSlug: string,
+            userId: string,
+            data: CreateComment
+        ) => {
+            const isAuthorized =
+                await authorization.checkIfTeamMemberByProjectSlug(
+                    projectSlug,
+                    userId
+                );
+
+            if (!isAuthorized) {
+                throw new Error(
+                    "Not authorized to create comment in this task."
+                );
+            }
+
+            const task = await authorization.checkIfTaskBelongsToProjectBySlug(
+                projectSlug,
+                taskSlug
+            );
+
+            if (!task) {
+                throw new Error("Task not found in this project");
+            }
+
+            const result = await db
+                .insert(comments)
+                .values({
+                    ...data,
+                    taskId: task.id,
+                    authorId: userId,
+                })
                 .returning();
             return result[0];
         },
-        delete: async (id: string) => {
-            await db.delete(comments).where(eq(comments.id, id));
+        update: async (
+            commentId: string,
+            taskSlug: string,
+            projectSlug: string,
+            data: UpdateComment,
+            userId: string
+        ) => {
+            const isAuthorized =
+                await authorization.checkIfTeamMemberByProjectSlug(
+                    projectSlug,
+                    userId
+                );
+
+            if (!isAuthorized) {
+                throw new Error("Not authorized to update this comment.");
+            }
+
+            const task = await authorization.checkIfTaskBelongsToProjectBySlug(
+                projectSlug,
+                taskSlug
+            );
+
+            if (!task) {
+                throw new Error("Task not found in this project");
+            }
+
+            const result = await db
+                .update(comments)
+                .set({
+                    ...data,
+                    updatedAt: new Date().toISOString(),
+                })
+                .where(eq(comments.id, commentId))
+                .returning();
+            return result[0];
+        },
+        delete: async (
+            commentId: string,
+            taskSlug: string,
+            projectSlug: string,
+            userId: string
+        ) => {
+            const isAuthorized =
+                await authorization.checkIfTeamMemberByProjectSlug(
+                    projectSlug,
+                    userId
+                );
+
+            if (!isAuthorized) {
+                throw new Error("Not authorized to delete this comment.");
+            }
+
+            const task = await authorization.checkIfTaskBelongsToProjectBySlug(
+                projectSlug,
+                taskSlug
+            );
+
+            if (!task) {
+                throw new Error("Task not found in this project");
+            }
+
+            const comment = await db
+                .select()
+                .from(comments)
+                .where(eq(comments.id, commentId))
+                .then((res) => res[0] || null);
+
+            if (!comment || comment.taskId !== task.id) {
+                throw new Error("Comment not found in this task");
+            }
+
+            await db.delete(comments).where(eq(comments.id, commentId));
         },
     },
 };

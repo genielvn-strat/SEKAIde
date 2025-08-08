@@ -13,6 +13,12 @@ export const fetchTasksList = async (projectSlug: string, listId: string) => {
     return project;
 };
 
+export const fetchTaskBySlug = async (taskSlug: string, projectSlug: string) => {
+    const userId = await getUserDbId();
+    const task = await queries.tasks.getByTaskSlug(taskSlug, projectSlug, userId);
+    return task;
+};
+
 export const createTask = async (
     projectSlug: string,
     listId: string,
