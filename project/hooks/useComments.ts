@@ -16,7 +16,7 @@ export function useComments(
 ) {
     const queryClient = useQueryClient();
     const {
-        data: comments,
+        data: res,
         isLoading,
         error,
     } = useQuery({
@@ -79,11 +79,11 @@ export function useComments(
     });
 
     return {
-        comments,
+        comments: res?.success ? res.data : null,
         isLoading,
-        error,
-        createComment: create.mutate,
-        deleteComment: del.mutate,
-        updateComment: update.mutate,
+        error: !res?.success ? res?.message : error,
+        createComment: create.mutateAsync,
+        deleteComment: del.mutateAsync,
+        updateComment: update.mutateAsync,
     };
 }

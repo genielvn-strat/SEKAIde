@@ -2,8 +2,15 @@
 
 import { queries } from "@/lib/db";
 import { getUserDbId } from "./sessionActions";
-import { CreateListInput, UpdateListInput } from "@/lib/validations";
+import {
+    CreateListInput,
+    createListSchema,
+    UpdateListInput,
+    updateListSchema,
+} from "@/lib/validations";
 import { CreateList, UpdateList } from "@/types/List";
+import { ZodError } from "zod";
+import { failure } from "@/types/Response";
 
 export const fetchProjectLists = async (projectSlug: string) => {
     const userId = await getUserDbId();
@@ -16,12 +23,19 @@ export const createList = async (
     data: CreateListInput
 ) => {
     const userId = await getUserDbId();
+    try {
+        createListSchema.parse(data);
+    } catch (err) {
+        if (err instanceof ZodError) {
+            return failure(400, `${err.errors[0].message}`);
+        }
+    }
     const listData: CreateList = {
         name: data.name,
         description: data.description,
         position: data.position,
     };
-    await queries.lists.create(listData, userId, projectSlug);
+    return await queries.lists.create(listData, userId, projectSlug);
 };
 
 export const updateList = async (
@@ -30,13 +44,20 @@ export const updateList = async (
     data: UpdateListInput
 ) => {
     const userId = await getUserDbId();
+    try {
+        updateListSchema.parse(data);
+    } catch (err) {
+        if (err instanceof ZodError) {
+            return failure(400, `${err.errors[0].message}`);
+        }
+    }
     const listData: UpdateList = {
         ...data,
     };
-    await queries.lists.update(listData, listId, userId, projectSlug);
+    return await queries.lists.update(listData, listId, userId, projectSlug);
 };
 
 export const deleteList = async (listId: string, projectSlug: string) => {
     const userId = await getUserDbId();
-    await queries.lists.delete(listId, projectSlug, userId);
+    return await queries.lists.delete(listId, projectSlug, userId);
 };

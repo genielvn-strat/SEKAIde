@@ -2,28 +2,49 @@
 
 import { queries } from "@/lib/db";
 import { getUserDbId } from "./sessionActions";
-import { CreateTeam, Team, UpdateTeam } from "@/types/Team";
-import { CreateTeamInput, UpdateTeamInput } from "@/lib/validations";
+import { CreateTeam, UpdateTeam } from "@/types/Team";
+import {
+    CreateTeamInput,
+    createTeamSchema,
+    UpdateTeamInput,
+    updateTeamSchema,
+} from "@/lib/validations";
 import slugify from "slugify";
 import { nanoid } from "nanoid";
+import { ZodError } from "zod";
+import { failure, success } from "@/types/Response";
+import { FetchTeams } from "@/types/ServerResponses";
 
 export const fetchTeams = async () => {
     const userId = await getUserDbId();
-    const [owned, joined] = await Promise.all([
+    const [ownedRes, joinedRes] = await Promise.all([
         queries.teams.getByOwner(userId),
         queries.teams.getJoinedTeams(userId),
     ]);
-    return { owned, joined };
+
+    if (!ownedRes.success) return ownedRes;
+    if (!joinedRes.success) return joinedRes;
+
+    return success<FetchTeams>(200, "Team fetched successfully", {
+        owned: ownedRes.data ?? [],
+        joined: joinedRes.data ?? [],
+    });
 };
 
 export const fetchTeamBySlug = async (slug: string) => {
     const userId = await getUserDbId();
-    const team = await queries.teams.getBySlug(slug, userId);
-    return team;
+    return await queries.teams.getBySlug(slug, userId);
 };
 
 export const createTeam = async (data: CreateTeamInput) => {
     const userId = await getUserDbId();
+    try {
+        createTeamSchema.parse(data);
+    } catch (err) {
+        if (err instanceof ZodError) {
+            return failure(400, `${err.errors[0].message}`);
+        }
+    }
     const team: CreateTeam = {
         name: data.name,
         ownerId: userId,
@@ -37,13 +58,20 @@ export const createTeam = async (data: CreateTeamInput) => {
 
 export const deleteTeam = async (teamId: string) => {
     const userId = await getUserDbId();
-    await queries.teams.delete(teamId, userId);
+    return await queries.teams.delete(teamId, userId);
 };
 
 export const updateTeam = async (teamId: string, data: UpdateTeamInput) => {
     const userId = await getUserDbId();
+    try {
+        updateTeamSchema.parse(data);
+    } catch (err) {
+        if (err instanceof ZodError) {
+            return failure(400, `${err.errors[0].message}`);
+        }
+    }
     const team: UpdateTeam = {
         name: data.name,
     };
-    await queries.teams.update(teamId, team, userId);
+    return await queries.teams.update(teamId, team, userId);
 };
