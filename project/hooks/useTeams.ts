@@ -7,12 +7,17 @@ import {
     updateTeam,
 } from "@/actions/teamActions";
 import { UpdateTeamInput } from "@/lib/validations";
+import { FetchTeams } from "@/types/ServerResponses";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function useTeams() {
     const queryClient = useQueryClient();
 
-    const { data, isLoading, error } = useQuery({
+    const {
+        data: res,
+        isLoading,
+        error,
+    } = useQuery({
         queryKey: ["teams"],
         queryFn: () => fetchTeams(),
     });
@@ -45,13 +50,13 @@ export function useTeams() {
     });
 
     return {
-        ownedTeams: data?.owned ?? [],
-        joinedTeams: data?.joined ?? [],
+        ownedTeams: res?.success ? (res?.data as FetchTeams).owned : [],
+        joinedTeams: res?.success ? (res?.data as FetchTeams).joined : [],
         isLoading,
-        error,
-        createTeam: create.mutate,
-        deleteTeam: del.mutate,
-        updateTeam: update.mutate,
+        error: !res?.success ? res?.message : error,
+        createTeam: create.mutateAsync,
+        deleteTeam: del.mutateAsync,
+        updateTeam: update.mutateAsync,
         isCreating: create.isPending,
     };
 }

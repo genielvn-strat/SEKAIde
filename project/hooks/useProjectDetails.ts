@@ -1,11 +1,12 @@
 "use client";
 
 import { fetchProjectBySlug } from "@/actions/projectActions";
+import { FetchProject } from "@/types/ServerResponses";
 import { useQuery } from "@tanstack/react-query";
 
 export function useProjectDetails(slug: string) {
     const {
-        data: project,
+        data: res,
         isLoading,
         isError,
         error,
@@ -15,5 +16,10 @@ export function useProjectDetails(slug: string) {
         enabled: !!slug,
     });
 
-    return { project, isLoading, isError, error };
+    return {
+        project: res?.success ? res.data : null,
+        isLoading,
+        isError,
+        error,
+    };
 }

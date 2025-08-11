@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 
 export function useTaskDetails(taskSlug: string, projectSlug: string) {
     const {
-        data: task,
+        data: res,
         isLoading,
         isError,
         error,
@@ -15,5 +15,10 @@ export function useTaskDetails(taskSlug: string, projectSlug: string) {
         enabled: !!taskSlug,
     });
 
-    return { task, isLoading, isError, error };
+    return {
+        task: res?.success ? res.data : null,
+        isLoading,
+        isError,
+        error: !res?.success ? res?.message : error,
+    };
 }

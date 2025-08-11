@@ -24,10 +24,13 @@ export default function ProjectsPage() {
 
     const onSubmit: SubmitHandler<CreateProjectInput> = async (data) => {
         try {
-            await createProject(data);
+            const response = await createProject(data);
+            if (!response.success) throw new Error(response.message);
             reset();
-        } catch {
-            setError("root", { message: "Server error" });
+        } catch (e) {
+            if (e instanceof Error) {
+                setError("root", { message: e.message });
+            }
         }
     };
 
@@ -79,7 +82,7 @@ export default function ProjectsPage() {
                         {ownedTeams?.length ? (
                             ownedTeams.map((team) => (
                                 <option key={team.id} value={team.id}>
-                                    {team.name}
+                                    {team.teamName}
                                 </option>
                             ))
                         ) : (
@@ -89,6 +92,11 @@ export default function ProjectsPage() {
                     {errors.teamId && (
                         <p className="text-sm text-red-500 mt-1">
                             {errors.teamId.message}
+                        </p>
+                    )}
+                    {errors.root && (
+                        <p className="text-sm text-red-500 mt-1">
+                            {errors.root.message}
                         </p>
                     )}
                     <button
@@ -107,24 +115,22 @@ export default function ProjectsPage() {
                     <ul className="space-y-2">
                         {projects.map((project) => (
                             // <Link href={`/projects/${project.slug}`}>
-                                <li
-                                    key={project.projectId}
-                                    className="bg-gray-100 p-2 rounded text-sm"
+                            <li
+                                key={project.id}
+                                className="bg-gray-100 p-2 rounded text-sm"
+                            >
+                                <pre>{JSON.stringify(project, null, 2)}</pre>
+                                <button
+                                    onClick={() => {
+                                        deleteProject({
+                                            slug: project.slug,
+                                        });
+                                    }}
+                                    className="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
                                 >
-                                    <pre>
-                                        {JSON.stringify(project, null, 2)}
-                                    </pre>
-                                    <button
-                                        onClick={() => {
-                                            deleteProject({
-                                                slug: project.slug,
-                                            });
-                                        }}
-                                        className="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                                    >
-                                        Delete
-                                    </button>
-                                </li>
+                                    Delete
+                                </button>
+                            </li>
                             // </Link>
                         ))}
                     </ul>

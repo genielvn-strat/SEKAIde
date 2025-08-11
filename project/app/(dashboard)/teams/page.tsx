@@ -22,7 +22,6 @@ export default function TeamPage() {
     });
 
     const {
-        ownedTeams,
         joinedTeams,
         isLoading,
         createTeam,
@@ -33,7 +32,10 @@ export default function TeamPage() {
 
     const onSubmit: SubmitHandler<CreateTeamInput> = async (data) => {
         try {
-            await createTeam(data);
+            const response = await createTeam(data);
+            if (!response.success) {
+                throw new Error(response.message);
+            }
             reset();
         } catch (e) {
             if (e instanceof Error) {

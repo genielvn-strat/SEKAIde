@@ -1,11 +1,12 @@
 "use client";
 
 import { fetchTeamBySlug } from "@/actions/teamActions";
+import { FetchTeamDetails } from "@/types/ServerResponses";
 import { useQuery } from "@tanstack/react-query";
 
 export function useTeamDetails(slug: string) {
     const {
-        data: team,
+        data: res,
         isLoading,
         isError,
         error,
@@ -15,5 +16,10 @@ export function useTeamDetails(slug: string) {
         enabled: !!slug,
     });
 
-    return { data: team, isLoading, isError, error };
+    return {
+        data: res?.success ? (res.data as FetchTeamDetails) : null,
+        isLoading,
+        isError,
+        error: !res?.success ? res?.message : error,
+    };
 }
