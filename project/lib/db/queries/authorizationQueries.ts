@@ -63,6 +63,7 @@ export const authorization = {
         const result = await db
             .select({
                 id: teamMembers.id,
+                userId: teamMembers.userId,
                 teamId: teams.id,
                 role: teamMembers.role,
                 inviteConfirmed: teamMembers.inviteConfirmed,
@@ -94,7 +95,7 @@ export const authorization = {
             .then((res) => res[0] || null);
         return result;
     },
-    
+
     checkIfTeamMemberByTeamSlug: async (teamSlug: string, userId: string) => {
         if (!teamSlug || !userId) {
             throw new Error("Missing required fields");
@@ -102,6 +103,7 @@ export const authorization = {
         const result = await db
             .select({
                 id: teamMembers.id,
+                userId: teamMembers.userId,
                 teamId: teams.id,
                 role: teamMembers.role,
                 inviteConfirmed: teamMembers.inviteConfirmed,

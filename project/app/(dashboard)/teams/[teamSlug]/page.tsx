@@ -15,7 +15,9 @@ export default function TeamDetails({ params }: ProjectProps) {
     const { teamSlug } = params;
 
     const { teamDetails, isLoading, isError, error } = useTeamDetails(teamSlug);
-    const { members } = useTeamMembers(teamSlug, { enabled: !!teamDetails });
+    const { members, kick } = useTeamMembers(teamSlug, {
+        enabled: !!teamDetails,
+    });
     const { projects } = useTeamProjects(teamSlug, { enabled: !!teamDetails });
 
     if (isLoading) {
@@ -86,6 +88,17 @@ export default function TeamDetails({ params }: ProjectProps) {
                                             ? "Invited"
                                             : "Not invited"}
                                     </span>
+                                    <button
+                                        onClick={() =>
+                                            kick({
+                                                teamSlug: teamSlug,
+                                                targetUserId: member.userId,
+                                            })
+                                        }
+                                        className="mt-2 text-center px-3 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200 transition"
+                                    >
+                                        Kick
+                                    </button>
                                 </div>
                             </li>
                         ))}
@@ -94,40 +107,40 @@ export default function TeamDetails({ params }: ProjectProps) {
                     <p className="text-gray-500">No members found.</p>
                 )}
             </div>
-                <div className="bg-white shadow rounded-lg p-6">
-                    <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                        Projects
-                    </h2>
-                    {projects?.length ? (
-                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                            {projects.map((project) => (
-                                <div
-                                    key={project.id}
-                                    className="border rounded-lg p-4 hover:shadow transition"
-                                >
-                                    <h3 className="font-semibold text-gray-800">
-                                        {project.name}
-                                    </h3>
-                                    {project.description && (
-                                        <p className="text-sm text-gray-600 mt-1 line-clamp-3">
-                                            {project.description}
-                                        </p>
-                                    )}
-                                    {project.dueDate && (
-                                        <p className="text-xs text-gray-500 mt-2">
-                                            Due:{" "}
-                                            {new Date(
-                                                project.dueDate
-                                            ).toLocaleDateString()}
-                                        </p>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="text-gray-500">No projects found.</p>
-                    )}
-                </div>
+            <div className="bg-white shadow rounded-lg p-6">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                    Projects
+                </h2>
+                {projects?.length ? (
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {projects.map((project) => (
+                            <div
+                                key={project.id}
+                                className="border rounded-lg p-4 hover:shadow transition"
+                            >
+                                <h3 className="font-semibold text-gray-800">
+                                    {project.name}
+                                </h3>
+                                {project.description && (
+                                    <p className="text-sm text-gray-600 mt-1 line-clamp-3">
+                                        {project.description}
+                                    </p>
+                                )}
+                                {project.dueDate && (
+                                    <p className="text-xs text-gray-500 mt-2">
+                                        Due:{" "}
+                                        {new Date(
+                                            project.dueDate
+                                        ).toLocaleDateString()}
+                                    </p>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-gray-500">No projects found.</p>
+                )}
+            </div>
         </div>
     );
 }
