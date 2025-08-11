@@ -4,20 +4,22 @@ import { fetchTeamBySlug } from "@/actions/teamActions";
 import { FetchTeamDetails } from "@/types/ServerResponses";
 import { useQuery } from "@tanstack/react-query";
 
-export function useTeamDetails(slug: string) {
+export function useTeamDetails(
+    teamSlug: string,
+) {
     const {
         data: res,
         isLoading,
         isError,
         error,
     } = useQuery({
-        queryKey: ["teamDetails", slug],
-        queryFn: () => fetchTeamBySlug(slug),
-        enabled: !!slug,
+        queryKey: ["teamDetails", teamSlug],
+        queryFn: () => fetchTeamBySlug(teamSlug),
+        enabled: !!teamSlug 
     });
 
     return {
-        data: res?.success ? (res.data as FetchTeamDetails) : null,
+        teamDetails: res?.success ? (res.data as FetchTeamDetails) : null,
         isLoading,
         isError,
         error: !res?.success ? res?.message : error,

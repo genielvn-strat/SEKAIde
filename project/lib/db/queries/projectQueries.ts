@@ -11,12 +11,12 @@ export const projectQueries = {
         if (!projectSlug || !userId)
             return failure(400, "Missing require fields");
 
-        const isAuthorized = await authorization.checkIfTeamMemberByProjectSlug(
+        const member = await authorization.checkIfTeamMemberByProjectSlug(
             projectSlug,
             userId
         );
 
-        if (!isAuthorized) {
+        if (!member) {
             return failure(404, "Not found");
         }
         try {
@@ -50,6 +50,38 @@ export const projectQueries = {
             return success(200, "Projects successfully fetched.", result);
         } catch {
             return failure(500, "Failed to fetch project");
+        }
+    },
+    getByTeamSlug: async (teamSlug: string, userId: string) => {
+        const member = await authorization.checkIfTeamMemberByTeamSlug(
+            teamSlug,
+            userId
+        );
+        if (!member) {
+            return failure(
+                400,
+                "You are not authorized to see this team projects"
+            );
+        }
+
+        try {
+            const result = await db
+                .select({
+                    id: projects.id,
+                    name: projects.name,
+                    slug: projects.slug,
+                    description: projects.description,
+                    ownerId: projects.ownerId,
+                    createdAt: projects.createdAt,
+                    updatedAt: projects.updatedAt,
+                    dueDate: projects.dueDate,
+                })
+                .from(projects)
+                .innerJoin(teams, eq(teams.id, projects.teamId))
+                .where(eq(teams.slug, teamSlug));
+            return success(200, "Team projects fetched successfully", result);
+        } catch {
+            return failure(500, "Failed to fetch team projects");
         }
     },
     getByUserTeams: async (userId: string) => {

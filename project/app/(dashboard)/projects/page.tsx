@@ -19,8 +19,13 @@ export default function ProjectsPage() {
         resolver: zodResolver(projectSchema),
     });
     const { ownedTeams } = useTeams();
-    const { projects, createProject, deleteProject, isCreating } =
-        useProjects();
+    const {
+        projects,
+        createProject,
+        deleteProject,
+        updateProject,
+        isCreating,
+    } = useProjects();
 
     const onSubmit: SubmitHandler<CreateProjectInput> = async (data) => {
         try {
@@ -129,6 +134,20 @@ export default function ProjectsPage() {
                                     className="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
                                 >
                                     Delete
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        const newName = prompt("New Name");
+                                        if (!newName) return;
+
+                                        updateProject({
+                                            projectSlug: project.slug,
+                                            data: { name: newName },
+                                        });
+                                    }}
+                                    className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                                >
+                                    Edit
                                 </button>
                             </li>
                             // </Link>
