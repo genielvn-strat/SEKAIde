@@ -20,6 +20,12 @@ export const fetchUserProjects = async () => {
     return projects;
 };
 
+export const fetchTeamProjects = async (teamSlug: string) => {
+    const userId = await getUserDbId();
+    const projects = await queries.projects.getByTeamSlug(teamSlug, userId);
+    return projects;
+};
+
 export const fetchProjectBySlug = async (slug: string) => {
     const userId = await getUserDbId();
     const project = await queries.projects.getBySlug(slug, userId);

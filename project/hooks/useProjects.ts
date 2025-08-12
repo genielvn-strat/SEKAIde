@@ -38,12 +38,12 @@ export function useProjects() {
 
     const update = useMutation({
         mutationFn: ({
-            projectId,
+            projectSlug,
             data,
         }: {
-            projectId: string;
+            projectSlug: string;
             data: UpdateProjectInput;
-        }) => updateProject(projectId, data),
+        }) => updateProject(projectSlug, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["projects"] });
         },
@@ -51,7 +51,7 @@ export function useProjects() {
 
     return {
         projects: res?.success ? res?.data : [],
-        isError: !res?.success,
+        isError: !res?.success ? res?.message : isError,
         isLoading,
         error: !res?.success ? res?.message : error,
         createProject: create.mutateAsync,

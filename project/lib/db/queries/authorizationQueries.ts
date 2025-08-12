@@ -30,6 +30,57 @@ export const authorization = {
             .then((res) => res[0] || null);
         return result;
     },
+    checkIfTeamMemberBySlug: async (teamSlug: string, userId: string) => {
+        if (!teamSlug || !userId) {
+            throw new Error("Missing required fields");
+        }
+
+        const result = await db
+            .select({
+                id: teamMembers.id,
+                role: teamMembers.role,
+                inviteConfirmed: teamMembers.inviteConfirmed,
+            })
+            .from(teamMembers)
+            .innerJoin(teams, eq(teamMembers.teamId, teams.id))
+            .where(
+                and(
+                    eq(teams.slug, teamSlug),
+                    eq(teamMembers.userId, userId),
+                    eq(teamMembers.inviteConfirmed, true)
+                )
+            )
+            .then((res) => res[0] || null);
+        return result;
+    },
+    checkIfTeamMemberByProjectSlug: async (
+        projectSlug: string,
+        userId: string
+    ) => {
+        if (!projectSlug || !userId) {
+            throw new Error("Missing required fields");
+        }
+        const result = await db
+            .select({
+                id: teamMembers.id,
+                userId: teamMembers.userId,
+                teamId: teams.id,
+                role: teamMembers.role,
+                inviteConfirmed: teamMembers.inviteConfirmed,
+            })
+            .from(teamMembers)
+            .innerJoin(teams, eq(teamMembers.teamId, teams.id))
+            .innerJoin(projects, eq(teams.id, projects.teamId))
+            .where(
+                and(
+                    eq(projects.slug, projectSlug),
+                    eq(teamMembers.userId, userId),
+                    eq(teamMembers.inviteConfirmed, true)
+                )
+            )
+            .then((res) => res[0] || null);
+        return result;
+    },
     checkIfTeamOwnedByUser: async (teamId: string, userId: string) => {
         if (!teamId || !userId) {
             throw new Error("Missing required fields");
@@ -44,32 +95,7 @@ export const authorization = {
             .then((res) => res[0] || null);
         return result;
     },
-    checkIfTeamMemberByProjectSlug: async (
-        projectSlug: string,
-        userId: string
-    ) => {
-        if (!projectSlug || !userId) {
-            throw new Error("Missing required fields");
-        }
-        const result = await db
-            .select({
-                id: teamMembers.id,
-                teamId: teams.id,
-                role: teamMembers.role,
-                inviteConfirmed: teamMembers.inviteConfirmed,
-            })
-            .from(teamMembers)
-            .innerJoin(teams, eq(teamMembers.teamId, teams.id))
-            .innerJoin(projects, eq(teams.id, projects.teamId))
-            .where(
-                and(
-                    eq(projects.slug, projectSlug),
-                    eq(teamMembers.userId, userId)
-                )
-            )
-            .then((res) => res[0] || null);
-        return result;
-    },
+
     checkIfTeamMemberByTeamSlug: async (teamSlug: string, userId: string) => {
         if (!teamSlug || !userId) {
             throw new Error("Missing required fields");
@@ -77,6 +103,7 @@ export const authorization = {
         const result = await db
             .select({
                 id: teamMembers.id,
+                userId: teamMembers.userId,
                 teamId: teams.id,
                 role: teamMembers.role,
                 inviteConfirmed: teamMembers.inviteConfirmed,
@@ -84,7 +111,11 @@ export const authorization = {
             .from(teamMembers)
             .innerJoin(teams, eq(teamMembers.teamId, teams.id))
             .where(
-                and(eq(teams.slug, teamSlug), eq(teamMembers.userId, userId))
+                and(
+                    eq(teams.slug, teamSlug),
+                    eq(teamMembers.userId, userId),
+                    eq(teamMembers.inviteConfirmed, true)
+                )
             )
             .then((res) => res[0] || null);
         console.log(result);
