@@ -1,11 +1,12 @@
 "use client";
 import { notFound } from "next/navigation";
-import { useProjectDetails } from "@/hooks/useProjectDetails";
-import { useLists } from "@/hooks/useLists";
+import { useProjectDetails } from "@/hooks/useProjects";
+import { useListActions, useLists } from "@/hooks/useLists";
 import { CreateListInput, listSchema } from "@/lib/validations";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import TaskList from "@/components/TaskList";
+import { useTasks } from "@/hooks/useTasks";
 
 interface ProjectProps {
     params: {
@@ -27,14 +28,15 @@ export default function ProjectDetails({ params }: ProjectProps) {
 
     const { project, isLoading, isError, error } =
         useProjectDetails(projectSlug);
-    const { lists, createList, updateList, deleteList } = useLists(
-        projectSlug,
-        {
-            enabled: !!project,
-        }
-    );
+    const { lists, isLoading: listLoading } = useLists(projectSlug, {
+        enabled: !!project,
+    });
+    const { tasks, isLoading: taskLoading } = useTasks(projectSlug, {
+        enabled: !!project,
+    });
+    const { createList, updateList, deleteList } = useListActions();
 
-    if (isLoading) {
+    if (isLoading || listLoading || taskLoading) {
         return <div className="loading">Loading project...</div>;
     }
 
@@ -47,7 +49,7 @@ export default function ProjectDetails({ params }: ProjectProps) {
         );
     }
 
-    if (!project) {
+    if (!project || !lists || !tasks) {
         return notFound();
     }
 

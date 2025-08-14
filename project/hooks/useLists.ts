@@ -14,8 +14,6 @@ export function useLists(
     projectSlug: string,
     options: { enabled?: boolean } = { enabled: true }
 ) {
-    const queryClient = useQueryClient();
-
     const {
         data: res,
         isLoading,
@@ -26,6 +24,15 @@ export function useLists(
         enabled: !!projectSlug && options.enabled,
     });
 
+    return {
+        lists: res?.success ? (res?.data as FetchList[]) : null,
+        isLoading,
+        error: !res?.success ? res?.message : error,
+    };
+}
+
+export function useListActions() {
+    const queryClient = useQueryClient();
     const create = useMutation({
         mutationFn: ({
             projectSlug,
@@ -66,18 +73,13 @@ export function useLists(
             queryClient.invalidateQueries({ queryKey: ["lists"] });
         },
     });
-
     return {
-        lists: res?.success ? (res?.data as FetchList[]) : null,
-        isLoading,
-        error: !res?.success ? res?.message : error,
         createList: create.mutateAsync,
         deleteList: del.mutateAsync,
         updateList: update.mutateAsync,
         isCreating: create.isPending,
     };
 }
-
 // TODO: Task 4.1 - Implement project CRUD operations
 // TODO: Task 4.2 - Create project listing and dashboard interface
 

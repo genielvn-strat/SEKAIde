@@ -1,7 +1,7 @@
 "use client";
 
-import { useComments } from "@/hooks/useComments";
-import { useTaskDetails } from "@/hooks/useTaskDetails";
+import { useCommentActions, useComments } from "@/hooks/useComments";
+import { useTaskDetails } from "@/hooks/useTasks";
 import {
     commentSchema,
     CreateCommentInput,
@@ -36,10 +36,12 @@ export default function TaskDetails({ params }: TaskProps) {
         projectSlug
     );
 
-    const { comments, createComment, deleteComment, updateComment } =
-        useComments(taskSlug, projectSlug, {
-            enabled: !!task,
-        });
+    const { comments } = useComments(taskSlug, projectSlug, {
+        enabled: !!task,
+    });
+
+    const { createComment, deleteComment, updateComment } =
+        useCommentActions(taskSlug);
 
     if (isLoading) {
         return <div className="loading">Loading task...</div>;
