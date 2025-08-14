@@ -7,7 +7,7 @@ import {
 } from "@/lib/validations";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTeams } from "@/hooks/useTeams";
+import { useTeamActions, useTeams } from "@/hooks/useTeams";
 import Link from "next/link";
 
 export default function TeamPage() {
@@ -21,14 +21,9 @@ export default function TeamPage() {
         resolver: zodResolver(teamSchema),
     });
 
-    const {
-        joinedTeams,
-        isLoading,
-        createTeam,
-        deleteTeam,
-        updateTeam,
-        isCreating,
-    } = useTeams();
+    const { joinedTeams, isLoading } = useTeams();
+
+    const { createTeam, deleteTeam, updateTeam, isCreating } = useTeamActions();
 
     const onSubmit: SubmitHandler<CreateTeamInput> = async (data) => {
         try {

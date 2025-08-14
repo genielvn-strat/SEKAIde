@@ -1,8 +1,8 @@
 "use client";
 
-import { useTeamDetails } from "@/hooks/useTeamDetails";
-import { useTeamMembers } from "@/hooks/useTeamMembers";
-import { useTeamProjects } from "@/hooks/useTeamProjects";
+import { useTeamDetails } from "@/hooks/useTeams";
+import { useTeamMemberActions, useTeamMembers } from "@/hooks/useTeamMembers";
+import { useTeamProjects } from "@/hooks/useProjects";
 import { notFound } from "next/navigation";
 
 interface ProjectProps {
@@ -15,9 +15,10 @@ export default function TeamDetails({ params }: ProjectProps) {
     const { teamSlug } = params;
 
     const { teamDetails, isLoading, isError, error } = useTeamDetails(teamSlug);
-    const { members, kick } = useTeamMembers(teamSlug, {
+    const { members } = useTeamMembers(teamSlug, {
         enabled: !!teamDetails,
     });
+    const { kick } = useTeamMemberActions();
     const { projects } = useTeamProjects(teamSlug, { enabled: !!teamDetails });
 
     if (isLoading) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useProjects } from "@/hooks/useProjects";
+import { useProjectActions, useProjects } from "@/hooks/useProjects";
 import { useTeams } from "@/hooks/useTeams";
 import { CreateProjectInput, projectSchema } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,13 +19,9 @@ export default function ProjectsPage() {
         resolver: zodResolver(projectSchema),
     });
     const { ownedTeams } = useTeams();
-    const {
-        projects,
-        createProject,
-        deleteProject,
-        updateProject,
-        isCreating,
-    } = useProjects();
+    const { projects } = useProjects();
+    const { createProject, deleteProject, updateProject, isCreating } =
+        useProjectActions();
 
     const onSubmit: SubmitHandler<CreateProjectInput> = async (data) => {
         try {

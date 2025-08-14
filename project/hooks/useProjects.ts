@@ -5,13 +5,13 @@ import {
     createProject,
     deleteProject,
     updateProject,
+    fetchTeamProjects,
+    fetchProjectBySlug,
 } from "@/actions/projectActions";
 import { UpdateProjectInput } from "@/lib/validations";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function useProjects() {
-    const queryClient = useQueryClient();
-
     const {
         data: res,
         isLoading,
@@ -21,6 +21,57 @@ export function useProjects() {
         queryKey: ["projects"],
         queryFn: () => fetchUserProjects(),
     });
+
+    return {
+        projects: res?.success ? res?.data : [],
+        isError: !res?.success ? res?.message : isError,
+        isLoading,
+        error: !res?.success ? res?.message : error,
+    };
+}
+export function useTeamProjects(
+    slug: string,
+    options: { enabled?: boolean } = { enabled: true }
+) {
+    const {
+        data: res,
+        isLoading,
+        isError,
+        error,
+    } = useQuery({
+        queryKey: ["teamProjects", slug],
+        queryFn: () => fetchTeamProjects(slug),
+        enabled: !!slug && options.enabled,
+    });
+
+    return {
+        projects: res?.success ? res.data : null,
+        isLoading,
+        isError,
+        error: !res?.success ? res?.message : error,
+    };
+}
+export function useProjectDetails(slug: string) {
+    const {
+        data: res,
+        isLoading,
+        isError,
+        error,
+    } = useQuery({
+        queryKey: ["projectDetails", slug],
+        queryFn: () => fetchProjectBySlug(slug),
+        enabled: !!slug,
+    });
+
+    return {
+        project: res?.success ? res.data : null,
+        isLoading,
+        isError,
+        error,
+    };
+}
+export function useProjectActions() {
+    const queryClient = useQueryClient();
 
     const create = useMutation({
         mutationFn: createProject,
@@ -48,12 +99,7 @@ export function useProjects() {
             queryClient.invalidateQueries({ queryKey: ["projects"] });
         },
     });
-
     return {
-        projects: res?.success ? res?.data : [],
-        isError: !res?.success ? res?.message : isError,
-        isLoading,
-        error: !res?.success ? res?.message : error,
         createProject: create.mutateAsync,
         deleteProject: del.mutateAsync,
         updateProject: update.mutateAsync,

@@ -35,6 +35,7 @@ export const taskQueries = {
                     assigneeUsername: users.username,
                     projectName: projects.name,
                     projectSlug: projects.slug,
+                    listId: lists.id,
                     listName: lists.name,
                 })
                 .from(tasks)
@@ -50,6 +51,44 @@ export const taskQueries = {
                 .then((res) => res[0] || null);
 
             return success(200, "Task fetched successfully", result);
+        } catch {
+            return failure(500, "Failed to fetch task");
+        }
+    },
+    getByProjectSlug: async (projectSlug: string, userId: string) => {
+        const isAuthorized = await authorization.checkIfTeamMemberByProjectSlug(
+            projectSlug,
+            userId
+        );
+
+        if (!isAuthorized) {
+            return failure(500, "You are not authorized to view these tasks.");
+        }
+
+        try {
+            const result: FetchTask[] = await db
+                .select({
+                    id: tasks.id,
+                    title: tasks.title,
+                    description: tasks.description,
+                    priority: tasks.priority,
+                    dueDate: tasks.dueDate,
+                    position: tasks.position,
+                    slug: tasks.slug,
+                    assigneeName: users.name,
+                    assigneeUsername: users.username,
+                    projectName: projects.name,
+                    projectSlug: projects.slug,
+                    listId: lists.id,
+                    listName: lists.name,
+                })
+                .from(tasks)
+                .innerJoin(projects, eq(tasks.projectId, projects.id))
+                .innerJoin(users, eq(tasks.assigneeId, users.id))
+                .innerJoin(lists, eq(tasks.listId, lists.id))
+                .where(eq(projects.slug, projectSlug));
+
+            return success(200, "Project Tasks fetched successfully", result);
         } catch {
             return failure(500, "Failed to fetch task");
         }
@@ -82,6 +121,7 @@ export const taskQueries = {
                     assigneeUsername: users.username,
                     projectName: projects.name,
                     projectSlug: projects.slug,
+                    listId: lists.id,
                     listName: lists.name,
                 })
                 .from(tasks)
