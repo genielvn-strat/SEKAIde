@@ -10,7 +10,7 @@ import {
     DragEndEvent,
 } from "@dnd-kit/core";
 import { arrayMove, SortableContext } from "@dnd-kit/sortable";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { KanbanColumn } from "./KanbanColumn";
 import { KanbanTask } from "./KanbanTask";
 import { useTaskActions } from "@/hooks/useTasks";
@@ -29,6 +29,10 @@ export function KanbanBoardInterface({
     const [tasks, setTasks] = useState(initialTasks);
     const [activeTask, setActiveTask] = useState<FetchTask | null>(null);
     const { updateTask } = useTaskActions();
+
+    useEffect(() => {
+        setTasks(initialTasks)
+    }, [initialTasks])
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -128,7 +132,11 @@ export function KanbanBoardInterface({
                                 items={taskList.map((task) => task.id)}
                                 key={list.id}
                             >
-                                <KanbanColumn list={list} tasks={taskList} />
+                                <KanbanColumn
+                                    list={list}
+                                    tasks={taskList}
+                                    projectSlug={projectSlug}
+                                />
                             </SortableContext>
                         );
                     })}

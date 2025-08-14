@@ -73,7 +73,7 @@ export function useTasks(
         isLoading,
         error,
     } = useQuery({
-        queryKey: [`tasks`, projectSlug],
+        queryKey: [`tasks`],
         queryFn: () => fetchTasks(projectSlug),
         enabled: !!projectSlug && options.enabled,
     });
