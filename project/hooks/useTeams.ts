@@ -5,14 +5,13 @@ import {
     createTeam,
     deleteTeam,
     updateTeam,
+    fetchTeamBySlug,
 } from "@/actions/teamActions";
 import { UpdateTeamInput } from "@/lib/validations";
 import { FetchTeams } from "@/types/ServerResponses";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function useTeams() {
-    const queryClient = useQueryClient();
-
     const {
         data: res,
         isLoading,
@@ -21,6 +20,36 @@ export function useTeams() {
         queryKey: ["teams"],
         queryFn: () => fetchTeams(),
     });
+
+    return {
+        ownedTeams: res?.success ? (res?.data as FetchTeams).owned : [],
+        joinedTeams: res?.success ? (res?.data as FetchTeams).joined : [],
+        isLoading,
+        error: !res?.success ? res?.message : error,
+    };
+}
+export function useTeamDetails(teamSlug: string) {
+    const {
+        data: res,
+        isLoading,
+        isError,
+        error,
+    } = useQuery({
+        queryKey: ["teamDetails", teamSlug],
+        queryFn: () => fetchTeamBySlug(teamSlug),
+        enabled: !!teamSlug,
+    });
+
+    return {
+        teamDetails: res?.success ? res?.data : null,
+        isLoading,
+        isError,
+        error: !res?.success ? res?.message : error,
+    };
+}
+
+export function useTeamActions() {
+    const queryClient = useQueryClient();
 
     const create = useMutation({
         mutationFn: createTeam,
@@ -48,12 +77,7 @@ export function useTeams() {
             queryClient.invalidateQueries({ queryKey: ["teams"] });
         },
     });
-
     return {
-        ownedTeams: res?.success ? (res?.data as FetchTeams).owned : [],
-        joinedTeams: res?.success ? (res?.data as FetchTeams).joined : [],
-        isLoading,
-        error: !res?.success ? res?.message : error,
         createTeam: create.mutateAsync,
         deleteTeam: del.mutateAsync,
         updateTeam: update.mutateAsync,

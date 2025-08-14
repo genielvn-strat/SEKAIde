@@ -14,7 +14,6 @@ export function useComments(
     projectSlug: string,
     options: { enabled?: boolean } = { enabled: true }
 ) {
-    const queryClient = useQueryClient();
     const {
         data: res,
         isLoading,
@@ -25,6 +24,14 @@ export function useComments(
         enabled: !!projectSlug && !!taskSlug && options.enabled,
     });
 
+    return {
+        comments: res?.success ? res.data : null,
+        isLoading,
+        error: !res?.success ? res?.message : error,
+    };
+}
+export function useCommentActions(taskSlug: string) {
+    const queryClient = useQueryClient();
     const create = useMutation({
         mutationFn: ({
             taskSlug,
@@ -77,11 +84,7 @@ export function useComments(
             });
         },
     });
-
     return {
-        comments: res?.success ? res.data : null,
-        isLoading,
-        error: !res?.success ? res?.message : error,
         createComment: create.mutateAsync,
         deleteComment: del.mutateAsync,
         updateComment: update.mutateAsync,

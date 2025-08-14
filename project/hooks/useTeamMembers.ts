@@ -10,8 +10,6 @@ export function useTeamMembers(
     slug: string,
     options: { enabled?: boolean } = { enabled: true }
 ) {
-    const queryClient = useQueryClient();
-
     const {
         data: res,
         isLoading,
@@ -23,6 +21,15 @@ export function useTeamMembers(
         enabled: !!slug && options.enabled,
     });
 
+    return {
+        members: res?.success ? res.data : null,
+        isLoading,
+        isError,
+        error: !res?.success ? res?.message : error,
+    };
+}
+export function useTeamMemberActions() {
+    const queryClient = useQueryClient();
     // invite someone function
     const kick = useMutation({
         mutationFn: ({
@@ -36,12 +43,7 @@ export function useTeamMembers(
             queryClient.invalidateQueries({ queryKey: [`teamMembers`] });
         },
     });
-
     return {
-        members: res?.success ? res.data : null,
         kick: kick.mutateAsync,
-        isLoading,
-        isError,
-        error: !res?.success ? res?.message : error,
     };
 }

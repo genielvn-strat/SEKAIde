@@ -7,6 +7,7 @@ import {
     updateList,
 } from "@/actions/listActions";
 import { CreateListInput, UpdateListInput } from "@/lib/validations";
+import { FetchList } from "@/types/ServerResponses";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function useLists(
@@ -67,7 +68,7 @@ export function useLists(
     });
 
     return {
-        lists: res?.success ? res?.data : null,
+        lists: res?.success ? (res?.data as FetchList[]) : null,
         isLoading,
         error: !res?.success ? res?.message : error,
         createList: create.mutateAsync,
