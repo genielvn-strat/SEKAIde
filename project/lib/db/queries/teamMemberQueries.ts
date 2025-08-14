@@ -4,14 +4,9 @@ import { TeamMember } from "@/types/TeamMember";
 import { db } from "../db";
 import { authorization } from "./authorizationQueries";
 import { failure, success } from "@/types/Response";
+import { FetchTeamMember } from "@/types/ServerResponses";
 
 export const teamMemberQueries = {
-    getByUser: async (userId: string) => {
-        return await db
-            .select()
-            .from(teamMembers)
-            .where(eq(teamMembers.userId, userId));
-    },
     getByTeamSlug: async (teamSlug: string, userId: string) => {
         const member = await authorization.checkIfTeamMemberByTeamSlug(
             teamSlug,
@@ -25,7 +20,7 @@ export const teamMemberQueries = {
             );
 
         try {
-            const result = await db
+            const result: FetchTeamMember[] = await db
                 .select({
                     userId: users.id,
                     name: users.name,

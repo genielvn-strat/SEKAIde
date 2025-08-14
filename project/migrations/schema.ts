@@ -14,14 +14,14 @@ export const role = pgEnum("role", ["member", "project_manager", "admin"]);
 export const taskPriority = pgEnum("task_priority", ["low", "medium", "high"]);
 
 export const teams = pgTable(
-    "team",
+    "teams",
     {
         id: uuid().defaultRandom().primaryKey().notNull(),
         name: text().notNull(),
         ownerId: uuid("owner_id").notNull(),
+        slug: text().notNull(),
         createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
         updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow(),
-        slug: text().notNull(),
     },
     (table) => [
         foreignKey({
@@ -39,12 +39,12 @@ export const projects = pgTable(
         id: uuid().defaultRandom().primaryKey().notNull(),
         name: text().notNull(),
         description: text(),
-        ownerId: uuid("owner_id"),
-        teamId: uuid("team_id"),
+        ownerId: uuid("owner_id").notNull(),
+        teamId: uuid("team_id").notNull(),
+        slug: text().notNull(),
         createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
         updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow(),
         dueDate: timestamp("due_date", { mode: "string" }).defaultNow(),
-        slug: text().notNull(),
     },
     (table) => [
         foreignKey({
@@ -84,8 +84,8 @@ export const teamMembers = pgTable(
         id: uuid().defaultRandom().primaryKey().notNull(),
         userId: uuid("user_id").notNull(),
         teamId: uuid("team_id").notNull(),
-        role: role().default("member"),
-        inviteConfirmed: boolean("invite_confirmed").default(false),
+        role: role().default("member").notNull(),
+        inviteConfirmed: boolean("invite_confirmed").default(false).notNull(),
         createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
     },
     (table) => [
@@ -128,10 +128,10 @@ export const tasks = pgTable(
         id: uuid().defaultRandom().primaryKey().notNull(),
         title: text().notNull(),
         description: text(),
-        projectId: uuid("project_id"),
-        listId: uuid("list_id"),
+        projectId: uuid("project_id").notNull(),
+        listId: uuid("list_id").notNull(),
         assigneeId: uuid("assignee_id"),
-        priority: taskPriority().default("low"),
+        priority: taskPriority().default("low").notNull(),
         position: integer().notNull(),
         slug: text().notNull(),
         dueDate: timestamp("due_date", { mode: "string" }),
@@ -162,8 +162,8 @@ export const comments = pgTable(
     {
         id: uuid().defaultRandom().primaryKey().notNull(),
         content: text().notNull(),
-        taskId: uuid("task_id"),
-        authorId: uuid("author_id"),
+        taskId: uuid("task_id").notNull(),
+        authorId: uuid("author_id").notNull(),
         createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
         updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow(),
     },

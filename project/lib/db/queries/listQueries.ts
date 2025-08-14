@@ -4,6 +4,7 @@ import { CreateList, UpdateList } from "@/types/List";
 import { failure, success } from "@/types/Response";
 import { authorization } from "./authorizationQueries";
 import { db } from "../db";
+import { FetchList } from "@/types/ServerResponses";
 
 export const listQueries = {
     getByProjectSlug: async (projectSlug: string, userId: string) => {
@@ -16,7 +17,7 @@ export const listQueries = {
             return failure(404, "Not found");
         }
         try {
-            const result = await db
+            const result: FetchList[] = await db
                 .select({
                     id: lists.id,
                     name: lists.name,
@@ -24,7 +25,7 @@ export const listQueries = {
                     position: lists.position,
                 })
                 .from(lists)
-                .leftJoin(projects, eq(lists.projectId, projects.id))
+                .innerJoin(projects, eq(lists.projectId, projects.id))
                 .where(eq(projects.slug, projectSlug))
                 .orderBy(asc(lists.position));
             return success(200, "Fetched lists successfully", result);

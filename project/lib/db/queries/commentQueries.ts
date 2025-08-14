@@ -4,6 +4,7 @@ import { failure, success } from "@/types/Response";
 import { authorization } from "./authorizationQueries";
 import { db } from "../db";
 import { CreateComment, UpdateComment } from "@/types/Comment";
+import { FetchComment } from "@/types/ServerResponses";
 
 export const commentQueries = {
     getByTaskSlug: async (
@@ -30,7 +31,7 @@ export const commentQueries = {
         }
 
         try {
-            const result = await db
+            const result: FetchComment[] = await db
                 .select({
                     id: comments.id,
                     content: comments.content,

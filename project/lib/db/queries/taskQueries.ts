@@ -1,9 +1,10 @@
-import { users, tasks, projects } from "@/migrations/schema";
+import { users, tasks, projects, lists } from "@/migrations/schema";
 import { and, asc, eq } from "drizzle-orm";
 import { CreateTask, UpdateTask } from "@/types/Task";
 import { failure, success } from "@/types/Response";
 import { authorization } from "./authorizationQueries";
 import { db } from "../db";
+import { FetchTask } from "@/types/ServerResponses";
 
 export const taskQueries = {
     getByTaskSlug: async (
@@ -21,7 +22,7 @@ export const taskQueries = {
         }
 
         try {
-            const result = await db
+            const result: FetchTask = await db
                 .select({
                     id: tasks.id,
                     title: tasks.title,
@@ -34,10 +35,12 @@ export const taskQueries = {
                     assigneeUsername: users.username,
                     projectName: projects.name,
                     projectSlug: projects.slug,
+                    listName: lists.name,
                 })
                 .from(tasks)
                 .innerJoin(projects, eq(tasks.projectId, projects.id))
                 .innerJoin(users, eq(tasks.assigneeId, users.id))
+                .innerJoin(lists, eq(tasks.listId, lists.id))
                 .where(
                     and(
                         eq(tasks.slug, taskSlug),
@@ -66,7 +69,7 @@ export const taskQueries = {
         }
 
         try {
-            const tasksInList = await db
+            const tasksInList: FetchTask[] = await db
                 .select({
                     id: tasks.id,
                     title: tasks.title,
@@ -79,10 +82,12 @@ export const taskQueries = {
                     assigneeUsername: users.username,
                     projectName: projects.name,
                     projectSlug: projects.slug,
+                    listName: lists.name,
                 })
                 .from(tasks)
                 .innerJoin(users, eq(tasks.assigneeId, users.id))
                 .innerJoin(projects, eq(tasks.projectId, projects.id))
+                .innerJoin(lists, eq(tasks.listId, lists.id))
                 .where(
                     and(
                         eq(projects.id, list.projectId),

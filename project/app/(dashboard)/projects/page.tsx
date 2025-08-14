@@ -119,7 +119,7 @@ export default function ProjectsPage() {
                 {projects?.length ? (
                     <ul className="space-y-2">
                         {projects.map((project) => (
-                            // <Link href={`/projects/${project.slug}`}>
+                            <Link href={`/projects/${project.slug}`}>
                             <li
                                 key={project.id}
                                 className="bg-gray-100 p-2 rounded text-sm"
@@ -150,7 +150,7 @@ export default function ProjectsPage() {
                                     Edit
                                 </button>
                             </li>
-                            // </Link>
+                            </Link>
                         ))}
                     </ul>
                 ) : (

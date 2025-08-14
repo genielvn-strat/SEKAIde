@@ -34,8 +34,8 @@ export const projectQueries = {
                     dueDate: projects.dueDate,
                 })
                 .from(projects)
-                .leftJoin(teams, eq(projects.teamId, teams.id))
-                .leftJoin(teamMembers, eq(teams.id, teamMembers.teamId))
+                .innerJoin(teams, eq(projects.teamId, teams.id))
+                .innerJoin(teamMembers, eq(teams.id, teamMembers.teamId))
                 .where(
                     and(
                         eq(projects.slug, projectSlug),

@@ -36,6 +36,27 @@
       "when": 1754466180152,
       "tag": "0004_curly_radioactive_man",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1755137217548,
+      "tag": "0005_concerned_kang",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1755138403611,
+      "tag": "0006_smooth_tempest",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1755138431414,
+      "tag": "0007_overconfident_silverclaw",
+      "breakpoints": true
     }
   ]
 }

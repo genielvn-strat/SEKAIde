@@ -70,7 +70,7 @@ export const teamQueries = {
                 })
 
                 .from(teams)
-                .leftJoin(teamMembers, eq(teams.id, teamMembers.teamId))
+                .innerJoin(teamMembers, eq(teams.id, teamMembers.teamId))
                 .where(
                     and(
                         eq(teams.slug, slug),

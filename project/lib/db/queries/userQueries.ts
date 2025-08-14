@@ -4,10 +4,6 @@ import { CreateUser, UpdateUser } from "@/types/User";
 import { db } from "../db";
 
 export const userQueries = {
-    getById: async (id: string) => {
-        const result = await db.select().from(users).where(eq(users.id, id));
-        return result[0] || null;
-    },
     getByClerkId: async (clerkId: string) => {
         const result = await db
             .select()
