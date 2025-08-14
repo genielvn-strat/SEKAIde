@@ -19,7 +19,7 @@ export function useLists(
         isLoading,
         error,
     } = useQuery({
-        queryKey: ["lists", projectSlug],
+        queryKey: ["lists"],
         queryFn: () => fetchProjectLists(projectSlug),
         enabled: !!projectSlug && options.enabled,
     });

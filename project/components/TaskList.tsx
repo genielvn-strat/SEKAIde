@@ -1,6 +1,6 @@
 "use client";
 
-import { useTasks } from "@/hooks/useTasks";
+import { useTaskActions, useTasksList } from "@/hooks/useTasks";
 import { CreateTaskInput, taskSchema } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
@@ -12,9 +12,11 @@ interface TaskListProps {
 }
 
 const TaskList: React.FC<TaskListProps> = ({ projectSlug, listId }) => {
-    const { tasks, isLoading, error, createTask, updateTask, deleteTask } =
-        useTasks(projectSlug, listId);
-
+    const { tasks, isLoading, error } = useTasksList(projectSlug, listId);
+    const { createTask, updateTask, deleteTask } = useTaskActions(
+        projectSlug,
+        listId
+    );
     const {
         register,
         handleSubmit,
