@@ -6,6 +6,7 @@ import { CreateListInput, listSchema } from "@/lib/validations";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import TaskList from "@/components/TaskList";
+import { KanbanBoardInterface } from "@/components/KanbanBoardInterface";
 import { useTasks } from "@/hooks/useTasks";
 
 interface ProjectProps {
@@ -63,7 +64,7 @@ export default function ProjectDetails({ params }: ProjectProps) {
     };
 
     return (
-        <div className="project max-w-3xl mx-auto">
+        <div className="project mx-auto h-full">
             <h1 className="text-xl font-semibold">{project.name}</h1>
             <p className="text-sm text-muted-foreground">
                 {project.description}
@@ -123,94 +124,98 @@ export default function ProjectDetails({ params }: ProjectProps) {
                     {listSubmitting ? "Creating..." : "Add List"}
                 </button>
             </form>
-
-            <h2 className="text-lg font-semibold mb-2">Lists</h2>
-            <div className="space-y-4">
-                {lists?.map((list) => (
-                    <div
-                        key={list.id}
-                        className="border rounded p-4 shadow-sm bg-white"
-                    >
-                        <h3 className="text-md font-semibold">{list.name}</h3>
-                        {list.description && (
-                            <p className="text-sm text-gray-600 mt-1">
-                                {list.description}
-                            </p>
-                        )}
-
-                        {/* Edit List Form */}
-                        <form
-                            className="mt-4 space-y-2"
-                            onSubmit={(e) => {
-                                e.preventDefault();
-                                const formData = new FormData(
-                                    e.currentTarget as HTMLFormElement
-                                );
-                                const name = formData.get("name") as string;
-                                const description = formData.get(
-                                    "description"
-                                ) as string;
-                                const position = Number(
-                                    formData.get("position")
-                                );
-
-                                updateList({
-                                    projectSlug: projectSlug,
-                                    listId: list.id,
-                                    data: {
-                                        name,
-                                        description,
-                                        position,
-                                    },
-                                });
-                            }}
-                        >
-                            <h4 className="text-sm font-medium">Edit List</h4>
-                            <input
-                                type="text"
-                                name="name"
-                                placeholder="New name"
-                                defaultValue={list.name}
-                                className="w-full border px-2 py-1 rounded"
-                            />
-                            <textarea
-                                name="description"
-                                placeholder="New description"
-                                defaultValue={list.description ?? ""}
-                                className="w-full border px-2 py-1 rounded"
-                            />
-                            <input
-                                name="position"
-                                type="number"
-                                placeholder="Position"
-                                defaultValue={list.position}
-                                className="w-full border px-2 py-1 rounded"
-                            />
-                            <button
-                                type="submit"
-                                className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
-                            >
-                                Save
-                            </button>
-                        </form>
-                        <button
-                            onClick={() => {
-                                deleteList({
-                                    listId: list.id,
-                                    projectSlug: projectSlug,
-                                });
-                            }}
-                            className="mt-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
-                        >
-                            Delete List
-                        </button>
-                        {/* Add Task Form */}
-
-                        {/* Task List */}
-                        <TaskList listId={list.id} projectSlug={projectSlug} />
-                    </div>
-                ))}
-            </div>
+            <KanbanBoardInterface
+                projectSlug={projectSlug}
+                lists={lists}
+                tasks={tasks}
+            />
         </div>
     );
 }
+// <h2 className="text-lg font-semibold mb-2">Lists</h2>
+// <div className="space-y-4">
+//     {lists?.map((list) => (
+//         <div
+//             key={list.id}
+//             className="border rounded p-4 shadow-sm bg-white"
+//         >
+//             <h3 className="text-md font-semibold">{list.name}</h3>
+//             {list.description && (
+//                 <p className="text-sm text-gray-600 mt-1">
+//                     {list.description}
+//                 </p>
+//             )}
+
+//             {/* Edit List Form */}
+//             <form
+//                 className="mt-4 space-y-2"
+//                 onSubmit={(e) => {
+//                     e.preventDefault();
+//                     const formData = new FormData(
+//                         e.currentTarget as HTMLFormElement
+//                     );
+//                     const name = formData.get("name") as string;
+//                     const description = formData.get(
+//                         "description"
+//                     ) as string;
+//                     const position = Number(
+//                         formData.get("position")
+//                     );
+
+//                     updateList({
+//                         projectSlug: projectSlug,
+//                         listId: list.id,
+//                         data: {
+//                             name,
+//                             description,
+//                             position,
+//                         },
+//                     });
+//                 }}
+//             >
+//                 <h4 className="text-sm font-medium">Edit List</h4>
+//                 <input
+//                     type="text"
+//                     name="name"
+//                     placeholder="New name"
+//                     defaultValue={list.name}
+//                     className="w-full border px-2 py-1 rounded"
+//                 />
+//                 <textarea
+//                     name="description"
+//                     placeholder="New description"
+//                     defaultValue={list.description ?? ""}
+//                     className="w-full border px-2 py-1 rounded"
+//                 />
+//                 <input
+//                     name="position"
+//                     type="number"
+//                     placeholder="Position"
+//                     defaultValue={list.position}
+//                     className="w-full border px-2 py-1 rounded"
+//                 />
+//                 <button
+//                     type="submit"
+//                     className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
+//                 >
+//                     Save
+//                 </button>
+//             </form>
+//             <button
+//                 onClick={() => {
+//                     deleteList({
+//                         listId: list.id,
+//                         projectSlug: projectSlug,
+//                     });
+//                 }}
+//                 className="mt-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
+//             >
+//                 Delete List
+//             </button>
+//             {/* Add Task Form */}
+
+//             {/* Task List */}
+//             <TaskList listId={list.id} projectSlug={projectSlug} />
+//         </div>
+//     ))}
+// </div>

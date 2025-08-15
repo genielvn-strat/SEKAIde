@@ -20,6 +20,7 @@ export default function ProjectsPage() {
     });
     const { ownedTeams } = useTeams();
     const { projects } = useProjects();
+
     const { createProject, deleteProject, updateProject, isCreating } =
         useProjectActions();
 
@@ -116,36 +117,38 @@ export default function ProjectsPage() {
                     <ul className="space-y-2">
                         {projects.map((project) => (
                             <Link href={`/projects/${project.slug}`}>
-                            <li
-                                key={project.id}
-                                className="bg-gray-100 p-2 rounded text-sm"
-                            >
-                                <pre>{JSON.stringify(project, null, 2)}</pre>
-                                <button
-                                    onClick={() => {
-                                        deleteProject({
-                                            slug: project.slug,
-                                        });
-                                    }}
-                                    className="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                                <li
+                                    key={project.id}
+                                    className="bg-gray-100 p-2 rounded text-sm"
                                 >
-                                    Delete
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        const newName = prompt("New Name");
-                                        if (!newName) return;
+                                    <pre>
+                                        {JSON.stringify(project, null, 2)}
+                                    </pre>
+                                    <button
+                                        onClick={() => {
+                                            deleteProject({
+                                                slug: project.slug,
+                                            });
+                                        }}
+                                        className="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                                    >
+                                        Delete
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            const newName = prompt("New Name");
+                                            if (!newName) return;
 
-                                        updateProject({
-                                            projectSlug: project.slug,
-                                            data: { name: newName },
-                                        });
-                                    }}
-                                    className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-                                >
-                                    Edit
-                                </button>
-                            </li>
+                                            updateProject({
+                                                projectSlug: project.slug,
+                                                data: { name: newName },
+                                            });
+                                        }}
+                                        className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                                    >
+                                        Edit
+                                    </button>
+                                </li>
                             </Link>
                         ))}
                     </ul>

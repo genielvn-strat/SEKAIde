@@ -23,7 +23,10 @@ export type CreateProjectInput = z.infer<typeof createProjectSchema>;
 export type UpdateProjectInput = z.infer<typeof updateProjectSchema>;
 
 export const teamSchema = z.object({
-    name: z.string().min(1, "Your team name is required").max(100, "The team name is too long"),
+    name: z
+        .string()
+        .min(1, "Your team name is required")
+        .max(100, "The team name is too long"),
 });
 export const createTeamSchema = teamSchema;
 export const updateTeamSchema = teamSchema.partial();
@@ -37,6 +40,7 @@ export const taskSchema = z.object({
         .max(200, "Title is too long"),
     description: z.string().max(1000, "Description is too long").optional(),
     priority: z.enum(["low", "medium", "high"]),
+    listId: z.string(),
     assigneeId: z.string().uuid().optional(),
     position: z.number().nonnegative("Position must be positive"),
     dueDate: z.date().min(new Date(), "Due date must be in future").optional(),

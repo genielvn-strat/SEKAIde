@@ -12,7 +12,7 @@ import { CreateTaskInput, UpdateTaskInput } from "@/lib/validations";
 import { FetchTask } from "@/types/ServerResponses";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-export function useTaskActions(projectSlug: string, listId: string) {
+export function useTaskActions() {
     const queryClient = useQueryClient();
     const create = useMutation({
         mutationFn: ({
@@ -25,7 +25,7 @@ export function useTaskActions(projectSlug: string, listId: string) {
             data: CreateTaskInput;
         }) => createTask(projectSlug, listId, data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`tasks-${listId}`] });
+            queryClient.invalidateQueries({ queryKey: [`tasks`] });
         },
     });
 
@@ -38,7 +38,7 @@ export function useTaskActions(projectSlug: string, listId: string) {
             projectSlug: string;
         }) => deleteTask(taskSlug, projectSlug),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`tasks-${listId}`] });
+            queryClient.invalidateQueries({ queryKey: [`tasks`] });
         },
     });
 
@@ -53,7 +53,7 @@ export function useTaskActions(projectSlug: string, listId: string) {
             projectSlug: string;
         }) => updateTask(taskSlug, data, projectSlug),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`tasks-${listId}`] });
+            queryClient.invalidateQueries({ queryKey: [`tasks`] });
         },
     });
 
@@ -73,7 +73,7 @@ export function useTasks(
         isLoading,
         error,
     } = useQuery({
-        queryKey: [`tasks`, projectSlug],
+        queryKey: [`tasks`],
         queryFn: () => fetchTasks(projectSlug),
         enabled: !!projectSlug && options.enabled,
     });

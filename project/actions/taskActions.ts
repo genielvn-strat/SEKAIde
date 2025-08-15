@@ -14,10 +14,15 @@ import { nanoid } from "nanoid";
 import { failure } from "@/types/Response";
 import { ZodError } from "zod";
 
+export const fetchTasks = async (projectSlug: string) => {
+    const userId = await getUserDbId();
+    const tasks = await queries.tasks.getByProjectSlug(projectSlug, userId);
+    return tasks;
+};
 export const fetchTasksList = async (projectSlug: string, listId: string) => {
     await getUserDbId();
-    const project = await queries.tasks.getByListId(projectSlug, listId);
-    return project;
+    const tasks = await queries.tasks.getByListId(projectSlug, listId);
+    return tasks;
 };
 
 export const fetchTaskBySlug = async (
@@ -25,11 +30,7 @@ export const fetchTaskBySlug = async (
     projectSlug: string
 ) => {
     const userId = await getUserDbId();
-    return await queries.tasks.getByTaskSlug(
-        taskSlug,
-        projectSlug,
-        userId
-    );
+    return await queries.tasks.getByTaskSlug(taskSlug, projectSlug, userId);
 };
 
 export const createTask = async (
