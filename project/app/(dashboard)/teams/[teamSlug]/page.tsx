@@ -4,15 +4,16 @@ import { useTeamDetails } from "@/hooks/useTeams";
 import { useTeamMemberActions, useTeamMembers } from "@/hooks/useTeamMembers";
 import { useTeamProjects } from "@/hooks/useProjects";
 import { notFound } from "next/navigation";
+import { use } from "react";
 
 interface ProjectProps {
-    params: {
+    params: Promise<{
         teamSlug: string;
-    };
+    }>;
 }
 
 export default function TeamDetails({ params }: ProjectProps) {
-    const { teamSlug } = params;
+    const { teamSlug } = use(params);
 
     const { teamDetails, isLoading, isError, error } = useTeamDetails(teamSlug);
     const { members } = useTeamMembers(teamSlug, {

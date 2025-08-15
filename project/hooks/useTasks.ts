@@ -6,13 +6,12 @@ import {
     deleteTask,
     updateTask,
     fetchTaskBySlug,
-    fetchTasks,
 } from "@/actions/taskActions";
 import { CreateTaskInput, UpdateTaskInput } from "@/lib/validations";
 import { FetchTask } from "@/types/ServerResponses";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-export function useTaskActions(projectSlug: string, listId: string) {
+export function useTaskActions() {
     const queryClient = useQueryClient();
     const create = useMutation({
         mutationFn: ({
@@ -25,7 +24,7 @@ export function useTaskActions(projectSlug: string, listId: string) {
             data: CreateTaskInput;
         }) => createTask(projectSlug, listId, data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`tasks-${listId}`] });
+            queryClient.invalidateQueries({ queryKey: [`tasks`] });
         },
     });
 
@@ -38,7 +37,7 @@ export function useTaskActions(projectSlug: string, listId: string) {
             projectSlug: string;
         }) => deleteTask(taskSlug, projectSlug),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`tasks-${listId}`] });
+            queryClient.invalidateQueries({ queryKey: [`tasks`] });
         },
     });
 
@@ -53,7 +52,7 @@ export function useTaskActions(projectSlug: string, listId: string) {
             projectSlug: string;
         }) => updateTask(taskSlug, data, projectSlug),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`tasks-${listId}`] });
+            queryClient.invalidateQueries({ queryKey: [`tasks`] });
         },
     });
 
@@ -64,26 +63,7 @@ export function useTaskActions(projectSlug: string, listId: string) {
         isCreating: create.isPending,
     };
 }
-export function useTasks(
-    projectSlug: string,
-    options: { enabled?: boolean } = { enabled: true }
-) {
-    const {
-        data: res,
-        isLoading,
-        error,
-    } = useQuery({
-        queryKey: [`tasks`, projectSlug],
-        queryFn: () => fetchTasks(projectSlug),
-        enabled: !!projectSlug && options.enabled,
-    });
 
-    return {
-        tasks: res?.success ? (res.data as FetchTask[]) : null,
-        isLoading,
-        error: !res?.success ? res?.message : error,
-    };
-}
 export function useTasksList(projectSlug: string, listId: string) {
     const {
         data: res,

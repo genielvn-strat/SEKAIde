@@ -1,10 +1,10 @@
 "use server";
 
 import { queries } from "@/lib/db";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 
 export const getSession = async () => {
-    const session = auth();
+    const session = await auth();
     if (!session.userId) throw new Error("Not logged in");
     return session;
 };

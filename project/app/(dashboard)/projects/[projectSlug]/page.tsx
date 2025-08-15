@@ -6,16 +6,16 @@ import { CreateListInput, listSchema } from "@/lib/validations";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import TaskList from "@/components/TaskList";
-import { useTasks } from "@/hooks/useTasks";
+import { use } from "react";
 
 interface ProjectProps {
-    params: {
+    params: Promise<{
         projectSlug: string;
-    };
+    }>;
 }
 
 export default function ProjectDetails({ params }: ProjectProps) {
-    const { projectSlug } = params;
+    const { projectSlug } = use(params);
     const {
         register: listRegiter,
         handleSubmit: listHandleSubmit,
@@ -31,12 +31,10 @@ export default function ProjectDetails({ params }: ProjectProps) {
     const { lists, isLoading: listLoading } = useLists(projectSlug, {
         enabled: !!project,
     });
-    const { tasks, isLoading: taskLoading } = useTasks(projectSlug, {
-        enabled: !!project,
-    });
+
     const { createList, updateList, deleteList } = useListActions();
 
-    if (isLoading || listLoading || taskLoading) {
+    if (isLoading || listLoading) {
         return <div className="loading">Loading project...</div>;
     }
 
@@ -49,7 +47,7 @@ export default function ProjectDetails({ params }: ProjectProps) {
         );
     }
 
-    if (!project || !lists || !tasks) {
+    if (!project || !lists) {
         return notFound();
     }
 
