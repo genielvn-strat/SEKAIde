@@ -3,6 +3,8 @@ export type FetchOwnedTeams = {
     id: string;
     teamName: string;
     slug: string;
+    projectCount: number;
+    memberCount: number;
     createdAt: string | null;
     updatedAt: string | null;
 };
@@ -13,6 +15,8 @@ export type FetchJoinedTeams = {
     slug: string;
     role: string;
     inviteConfirmed: boolean;
+    projectCount: number;
+    memberCount: number;
     createdAt: string | null;
     updatedAt: string | null;
 };

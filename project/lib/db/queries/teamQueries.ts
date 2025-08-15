@@ -1,5 +1,5 @@
-import { teams, teamMembers } from "@/migrations/schema";
-import { and, eq, or } from "drizzle-orm";
+import { teams, teamMembers, projects } from "@/migrations/schema";
+import { and, count, eq, or } from "drizzle-orm";
 import { CreateTeam, UpdateTeam } from "@/types/Team";
 import { failure, success } from "@/types/Response";
 import {
@@ -13,19 +13,32 @@ import { db } from "../db";
 export const teamQueries = {
     getJoinedTeams: async (userId: string) => {
         try {
-            const result: FetchJoinedTeams[] = await db
+            const result = await db
                 .select({
                     id: teams.id,
                     teamName: teams.name,
                     slug: teams.slug,
                     role: teamMembers.role,
                     inviteConfirmed: teamMembers.inviteConfirmed,
+                    memberCount: count(teamMembers.id).as("memberCount"),
+                    projectCount: count(projects.id).as("projectCount"),
                     createdAt: teams.createdAt,
                     updatedAt: teams.updatedAt,
                 })
-                .from(teamMembers)
-                .innerJoin(teams, eq(teamMembers.teamId, teams.id))
-                .where(eq(teamMembers.userId, userId));
+                .from(teams)
+                .innerJoin(teamMembers, eq(teams.id, teamMembers.teamId))
+                .leftJoin(projects, eq(projects.teamId, teamMembers.teamId))
+                .where(eq(teamMembers.userId, userId))
+                .groupBy(
+                    teams.id,
+                    teams.name,
+                    teams.slug,
+                    teamMembers.role,
+                    teamMembers.inviteConfirmed,
+                    teams.createdAt,
+                    teams.updatedAt
+                );
+
             return success(200, "Joined teams successfully fetched", result);
         } catch {
             return failure(500, "Failed to fetch joined teams");
@@ -38,11 +51,24 @@ export const teamQueries = {
                     id: teams.id,
                     teamName: teams.name,
                     slug: teams.slug,
+                    memberCount: count(teamMembers.id).as("memberCount"),
+                    projectCount: count(projects.id).as("projectCount"),
                     createdAt: teams.createdAt,
                     updatedAt: teams.updatedAt,
                 })
                 .from(teams)
-                .where(eq(teams.ownerId, ownerId));
+                .innerJoin(teamMembers, eq(teams.id, teamMembers.teamId))
+                .leftJoin(projects, eq(projects.teamId, teamMembers.teamId))
+                .where(eq(teams.ownerId, ownerId))
+                .groupBy(
+                    teams.id,
+                    teams.name,
+                    teams.slug,
+                    teamMembers.role,
+                    teamMembers.inviteConfirmed,
+                    teams.createdAt,
+                    teams.updatedAt
+                );
             return success(200, "Owned teams successfully fetched", result);
         } catch {
             return failure(500, "Failed to fetch owned teams");

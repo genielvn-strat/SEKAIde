@@ -7,6 +7,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ClerkProvider } from "@clerk/nextjs";
 import { TanstackProvider } from "@/lib/tanstack-provider";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,6 +28,7 @@ export default function RootLayout({
                 <html lang="en" suppressHydrationWarning>
                     <body className={inter.className}>
                         <ThemeProvider>{children}</ThemeProvider>
+                        <Toaster richColors={true}/>
                     </body>
                 </html>
             </TanstackProvider>

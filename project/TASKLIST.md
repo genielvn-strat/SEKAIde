@@ -35,18 +35,18 @@ Each intern will work through all tasks below for their individual implementatio
 ### Phase 4: Core Features (Weeks 4-6)
 
 - [ ] 4.0 Core Project Management Features
-  - [ ] 4.1 Implement project CRUD operations (Create, Read, Update, Delete)
+  - [X] 4.1 Implement project CRUD operations (Create, Read, Update, Delete)
   - [ ] 4.2 Create project listing and dashboard interface
-  - [ ] 4.3 Implement list/column management within projects
-  - [ ] 4.4 Build task creation and editing functionality
+  - [X] 4.3 Implement list/column management within projects
+  - [X] 4.4 Build task creation and editing functionality
   - [ ] 4.5 Design and implement project cards and layouts
   - [ ] 4.6 Add project and task search/filtering capabilities
 
 ### Phase 5: Interactive UI (Weeks 5-7)
 
 - [ ] 5.0 Interactive Kanban Board
-  - [ ] 5.1 Design responsive Kanban board layout
-  - [ ] 5.2 Implement drag-and-drop functionality with dnd-kit
+  - [X] 5.1 Design responsive Kanban board layout
+  - [X] 5.2 Implement drag-and-drop functionality with dnd-kit
   - [ ] 5.3 Set up client-side state management with Zustand
   - [ ] 5.4 Implement optimistic UI updates for smooth interactions
   - [ ] 5.5 Add real-time persistence of board state changes
