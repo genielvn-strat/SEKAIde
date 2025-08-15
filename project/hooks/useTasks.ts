@@ -6,7 +6,6 @@ import {
     deleteTask,
     updateTask,
     fetchTaskBySlug,
-    fetchTasks,
 } from "@/actions/taskActions";
 import { CreateTaskInput, UpdateTaskInput } from "@/lib/validations";
 import { FetchTask } from "@/types/ServerResponses";
@@ -77,12 +76,6 @@ export function useTasks(
         queryFn: () => fetchTasks(projectSlug),
         enabled: !!projectSlug && options.enabled,
     });
-
-    return {
-        tasks: res?.success ? (res.data as FetchTask[]) : null,
-        isLoading,
-        error: !res?.success ? res?.message : error,
-    };
 }
 export function useTasksList(projectSlug: string, listId: string) {
     const {

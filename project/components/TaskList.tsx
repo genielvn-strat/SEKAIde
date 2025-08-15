@@ -13,10 +13,8 @@ interface TaskListProps {
 
 const TaskList: React.FC<TaskListProps> = ({ projectSlug, listId }) => {
     const { tasks, isLoading, error } = useTasksList(projectSlug, listId);
-    const { createTask, updateTask, deleteTask } = useTaskActions(
-        projectSlug,
-        listId
-    );
+
+    const { createTask, updateTask, deleteTask } = useTaskActions();
     const {
         register,
         handleSubmit,
