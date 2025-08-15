@@ -82,7 +82,7 @@ module.exports = {
   				'900': '#d9dbdc',
   				DEFAULT: '#46494c'
   			},
-  			'paynes_gray': {
+  			paynes_gray: {
   				'50': '#d9dfe3',
   				'100': '#b2bec7',
   				'200': '#8c9eab',

@@ -33,10 +33,13 @@ export default function ProjectDetails({ params }: ProjectProps) {
     const { lists, isLoading: listLoading } = useLists(projectSlug, {
         enabled: !!project,
     });
+    const { tasks, isLoading: taskLoading } = useTasks(projectSlug, {
+        enabled: !!project,
+    });
 
     const { createList, updateList, deleteList } = useListActions();
 
-    if (isLoading || listLoading) {
+    if (isLoading || listLoading || taskLoading) {
         return <div className="loading">Loading project...</div>;
     }
 
@@ -49,7 +52,7 @@ export default function ProjectDetails({ params }: ProjectProps) {
         );
     }
 
-    if (!project || !lists) {
+    if (!project || !lists || !tasks) {
         return notFound();
     }
 

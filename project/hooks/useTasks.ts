@@ -1,6 +1,7 @@
 "use client";
 
 import {
+    fetchTasks,
     fetchTasksList,
     createTask,
     deleteTask,
@@ -76,6 +77,12 @@ export function useTasks(
         queryFn: () => fetchTasks(projectSlug),
         enabled: !!projectSlug && options.enabled,
     });
+
+    return {
+        tasks: res?.success ? res.data : null,
+        isLoading,
+        error: !res?.success ? res?.message : error,
+    };
 }
 export function useTasksList(projectSlug: string, listId: string) {
     const {
