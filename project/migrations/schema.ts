@@ -68,6 +68,7 @@ export const users = pgTable(
         clerkId: text("clerk_id").notNull(),
         email: text().notNull(),
         name: text().notNull(),
+        displayPictureLink: text().notNull(),
         createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
         updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow(),
         username: text().notNull(),
