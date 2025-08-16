@@ -18,7 +18,8 @@ import {
     DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { ListFilter } from "lucide-react";
+import { ListFilter, MessageCircleQuestion } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function TeamPage() {
     const { joinedTeams, isLoading } = useTeams();
@@ -107,9 +108,17 @@ export default function TeamPage() {
                 </DropdownMenu>
             </div>
             <div className="flex flex-wrap gap-4">
-                {filteredAndSortedTeams.map((team) => (
-                    <TeamCard key={team.id} team={team} />
-                ))}
+                {filteredAndSortedTeams.length !== 0 ? (
+                    filteredAndSortedTeams.map((team) => (
+                        <TeamCard key={team.id} team={team} />
+                    ))
+                ) : (
+                    <Alert variant="default">
+                        <MessageCircleQuestion />
+                        <AlertTitle>No teams found</AlertTitle>
+                        <AlertDescription>Looks like you are not part of any teams yet. Create one or ask someone to invite you.</AlertDescription>
+                    </Alert>
+                )}
             </div>
         </>
     );
