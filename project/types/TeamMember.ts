@@ -9,4 +9,5 @@ export interface TeamMember {
     createdAt: Date;
 }
 
-export type CreateTeam = Omit<TeamMember, "id" | "createdAt">;
+export type CreateTeamMember = Omit<TeamMember, "id" | "createdAt">;
+export type UpdateTeamMember = Partial<Omit<TeamMember, "id" | "createdAt">>;

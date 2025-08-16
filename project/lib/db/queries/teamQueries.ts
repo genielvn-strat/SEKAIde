@@ -1,40 +1,47 @@
 import { teams, teamMembers, projects } from "@/migrations/schema";
-import { and, count, eq, or } from "drizzle-orm";
+import { and, countDistinct, eq, or } from "drizzle-orm";
 import { CreateTeam, UpdateTeam } from "@/types/Team";
 import { failure, success } from "@/types/Response";
-import {
-    FetchJoinedTeams,
-    FetchOwnedTeams,
-    FetchTeamDetails,
-} from "@/types/ServerResponses";
+import { FetchOwnedTeams, FetchTeamDetails } from "@/types/ServerResponses";
 import { authorization } from "./authorizationQueries";
 import { db } from "../db";
+import { alias } from "drizzle-orm/pg-core";
 
 export const teamQueries = {
     getJoinedTeams: async (userId: string) => {
         try {
+            const memberSelf = alias(teamMembers, "memberSelf");
+
             const result = await db
                 .select({
                     id: teams.id,
                     teamName: teams.name,
                     slug: teams.slug,
-                    role: teamMembers.role,
-                    inviteConfirmed: teamMembers.inviteConfirmed,
-                    memberCount: count(teamMembers.id).as("memberCount"),
-                    projectCount: count(projects.id).as("projectCount"),
+                    role: memberSelf.role, 
+                    inviteConfirmed: memberSelf.inviteConfirmed,
+                    memberCount: countDistinct(teamMembers.userId).as(
+                        "memberCount"
+                    ),
+                    projectCount: countDistinct(projects.id).as("projectCount"),
                     createdAt: teams.createdAt,
                     updatedAt: teams.updatedAt,
                 })
                 .from(teams)
-                .innerJoin(teamMembers, eq(teams.id, teamMembers.teamId))
-                .leftJoin(projects, eq(projects.teamId, teamMembers.teamId))
-                .where(eq(teamMembers.userId, userId))
+                .innerJoin(
+                    memberSelf,
+                    and(
+                        eq(memberSelf.teamId, teams.id),
+                        eq(memberSelf.userId, userId)
+                    )
+                )
+                .innerJoin(teamMembers, eq(teamMembers.teamId, teams.id))
+                .leftJoin(projects, eq(projects.teamId, teams.id))
                 .groupBy(
                     teams.id,
                     teams.name,
                     teams.slug,
-                    teamMembers.role,
-                    teamMembers.inviteConfirmed,
+                    memberSelf.role,
+                    memberSelf.inviteConfirmed,
                     teams.createdAt,
                     teams.updatedAt
                 );
@@ -51,24 +58,25 @@ export const teamQueries = {
                     id: teams.id,
                     teamName: teams.name,
                     slug: teams.slug,
-                    memberCount: count(teamMembers.id).as("memberCount"),
-                    projectCount: count(projects.id).as("projectCount"),
+                    memberCount: countDistinct(teamMembers.userId).as(
+                        "memberCount"
+                    ),
+                    projectCount: countDistinct(projects.id).as("projectCount"),
                     createdAt: teams.createdAt,
                     updatedAt: teams.updatedAt,
                 })
                 .from(teams)
-                .innerJoin(teamMembers, eq(teams.id, teamMembers.teamId))
-                .leftJoin(projects, eq(projects.teamId, teamMembers.teamId))
+                .innerJoin(teamMembers, eq(teams.id, teamMembers.teamId)) // join for counting
+                .leftJoin(projects, eq(projects.teamId, teams.id))
                 .where(eq(teams.ownerId, ownerId))
                 .groupBy(
                     teams.id,
                     teams.name,
                     teams.slug,
-                    teamMembers.role,
-                    teamMembers.inviteConfirmed,
                     teams.createdAt,
                     teams.updatedAt
                 );
+
             return success(200, "Owned teams successfully fetched", result);
         } catch {
             return failure(500, "Failed to fetch owned teams");

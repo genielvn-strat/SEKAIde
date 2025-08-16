@@ -55,6 +55,8 @@ export type FetchTeamMember = {
     userId: string;
     name: string;
     username: string;
+    email: string;
+    displayPictureLink: string;
     role: "admin" | "project_manager" | "member";
     inviteConfirmed: boolean;
 };
