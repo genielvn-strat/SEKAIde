@@ -34,7 +34,6 @@ const CreateTeam: React.FC = () => {
     } = useForm<CreateTeamInput>({
         resolver: zodResolver(teamSchema),
     });
-    console.log(errors);
     const onSubmit: SubmitHandler<CreateTeamInput> = async (data) => {
         try {
             const response = await createTeam(data);
@@ -47,6 +46,7 @@ const CreateTeam: React.FC = () => {
         } catch (e) {
             if (e instanceof Error) {
                 setError("root", { message: e.message });
+                toast.error(e.message);
                 return;
             }
             setError("root", {
