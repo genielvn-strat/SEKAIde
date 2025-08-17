@@ -5,33 +5,13 @@ import {
     uuid,
     text,
     timestamp,
-    boolean,
     integer,
+    boolean,
     pgEnum,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
-export const role = pgEnum("role", ["member", "project_manager", "admin"]);
 export const taskPriority = pgEnum("task_priority", ["low", "medium", "high"]);
-
-export const teams = pgTable(
-    "teams",
-    {
-        id: uuid().defaultRandom().primaryKey().notNull(),
-        name: text().notNull(),
-        ownerId: uuid("owner_id").notNull(),
-        slug: text().notNull(),
-        createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
-        updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow(),
-    },
-    (table) => [
-        foreignKey({
-            columns: [table.ownerId],
-            foreignColumns: [users.id],
-            name: "team_owner_id_users_id_fk",
-        }).onDelete("cascade"),
-        unique("team_slug_unique").on(table.slug),
-    ]
-);
 
 export const projects = pgTable(
     "projects",
@@ -61,44 +41,53 @@ export const projects = pgTable(
     ]
 );
 
-export const users = pgTable(
-    "users",
+export const permissions = pgTable("permissions", {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    name: text().notNull().unique(),
+    description: text(),
+});
+
+export const comments = pgTable(
+    "comments",
     {
         id: uuid().defaultRandom().primaryKey().notNull(),
-        clerkId: text("clerk_id").notNull(),
-        email: text().notNull(),
-        name: text().notNull(),
-        displayPictureLink: text().notNull(),
+        content: text().notNull(),
+        taskId: uuid("task_id").notNull(),
+        authorId: uuid("author_id").notNull(),
         createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
         updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow(),
-        username: text().notNull(),
     },
     (table) => [
-        unique("users_clerk_id_unique").on(table.clerkId),
-        unique("users_username_unique").on(table.username),
+        foreignKey({
+            columns: [table.taskId],
+            foreignColumns: [tasks.id],
+            name: "comments_task_id_tasks_id_fk",
+        }).onDelete("cascade"),
+        foreignKey({
+            columns: [table.authorId],
+            foreignColumns: [users.id],
+            name: "comments_author_id_users_id_fk",
+        }).onDelete("cascade"),
     ]
 );
 
-export const teamMembers = pgTable(
-    "team_members",
+export const rolePermissions = pgTable(
+    "role_permissions",
     {
         id: uuid().defaultRandom().primaryKey().notNull(),
-        userId: uuid("user_id").notNull(),
-        teamId: uuid("team_id").notNull(),
-        role: role().default("member").notNull(),
-        inviteConfirmed: boolean("invite_confirmed").default(false).notNull(),
-        createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+        roleId: uuid().notNull(),
+        permissionId: uuid().notNull(),
     },
     (table) => [
         foreignKey({
-            columns: [table.userId],
-            foreignColumns: [users.id],
-            name: "team_members_user_id_users_id_fk",
+            columns: [table.roleId],
+            foreignColumns: [roles.id],
+            name: "role_permissions_roleId_roles_id_fk",
         }).onDelete("cascade"),
         foreignKey({
-            columns: [table.teamId],
-            foreignColumns: [teams.id],
-            name: "team_members_team_id_team_id_fk",
+            columns: [table.permissionId],
+            foreignColumns: [permissions.id],
+            name: "role_permissions_permissionId_permissions_id_fk",
         }).onDelete("cascade"),
     ]
 );
@@ -158,26 +147,80 @@ export const tasks = pgTable(
     ]
 );
 
-export const comments = pgTable(
-    "comments",
+export const users = pgTable(
+    "users",
     {
         id: uuid().defaultRandom().primaryKey().notNull(),
-        content: text().notNull(),
-        taskId: uuid("task_id").notNull(),
-        authorId: uuid("author_id").notNull(),
+        clerkId: text("clerk_id").notNull(),
+        email: text().notNull(),
+        name: text().notNull(),
+        displayPictureLink: text().notNull(),
+        createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+        updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow(),
+        username: text().notNull(),
+    },
+    (table) => [
+        unique("users_clerk_id_unique").on(table.clerkId),
+        unique("users_username_unique").on(table.username),
+    ]
+);
+
+export const teams = pgTable(
+    "teams",
+    {
+        id: uuid().defaultRandom().primaryKey().notNull(),
+        name: text().notNull(),
+        ownerId: uuid("owner_id").notNull(),
+        slug: text().notNull(),
         createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
         updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow(),
     },
     (table) => [
         foreignKey({
-            columns: [table.taskId],
-            foreignColumns: [tasks.id],
-            name: "comments_task_id_tasks_id_fk",
+            columns: [table.ownerId],
+            foreignColumns: [users.id],
+            name: "team_owner_id_users_id_fk",
+        }).onDelete("cascade"),
+        unique("team_slug_unique").on(table.slug),
+    ]
+);
+
+export const roles = pgTable(
+    "roles",
+    {
+        id: uuid().defaultRandom().primaryKey().notNull(),
+        name: text().notNull(),
+        nameId: text().notNull(),
+        color: text().default("#0a0a0a").notNull(),
+    },
+    (table) => [unique("roles_nameId_unique").on(table.nameId)]
+);
+
+export const teamMembers = pgTable(
+    "team_members",
+    {
+        id: uuid().defaultRandom().primaryKey().notNull(),
+        userId: uuid("user_id").notNull(),
+        teamId: uuid("team_id").notNull(),
+        roleId: uuid("role_id").notNull(),
+        inviteConfirmed: boolean("invite_confirmed").default(false).notNull(),
+        createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+    },
+    (table) => [
+        foreignKey({
+            columns: [table.roleId],
+            foreignColumns: [roles.id],
+            name: "team_members_role_id_roles_id_fk",
         }).onDelete("cascade"),
         foreignKey({
-            columns: [table.authorId],
+            columns: [table.userId],
             foreignColumns: [users.id],
-            name: "comments_author_id_users_id_fk",
+            name: "team_members_user_id_users_id_fk",
+        }).onDelete("cascade"),
+        foreignKey({
+            columns: [table.teamId],
+            foreignColumns: [teams.id],
+            name: "team_members_team_id_team_id_fk",
         }).onDelete("cascade"),
     ]
 );
