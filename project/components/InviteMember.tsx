@@ -98,9 +98,9 @@ const InviteMember: React.FC<InviteMemberProps> = ({ teamSlug }) => {
                                 )}
                             </div>
                             <div className="grid gap-3">
-                                <Label htmlFor="role">Role</Label>
+                                <Label htmlFor="roleId">Role</Label>
                                 <Controller
-                                    name="role"
+                                    name="roleId"
                                     control={control}
                                     rules={{ required: "Role is required" }}
                                     render={({ field }) => (
@@ -130,9 +130,9 @@ const InviteMember: React.FC<InviteMemberProps> = ({ teamSlug }) => {
                                         </Select>
                                     )}
                                 />
-                                {errors.role && (
+                                {errors.roleId && (
                                     <p className="text-sm text-red-500 mt-1">
-                                        {errors.role.message}
+                                        {errors.roleId.message}
                                     </p>
                                 )}
                             </div>

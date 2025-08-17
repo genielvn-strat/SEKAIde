@@ -5,6 +5,9 @@ import {
     teamMembers,
     lists,
     comments,
+    rolePermissions,
+    roles,
+    permissions,
 } from "@/migrations/schema";
 import { and, eq } from "drizzle-orm";
 import { db } from "../db";
@@ -17,7 +20,7 @@ export const authorization = {
         const result = await db
             .select({
                 id: teamMembers.id,
-                role: teamMembers.role,
+                roleId: teamMembers.roleId,
                 inviteConfirmed: teamMembers.inviteConfirmed,
             })
             .from(teamMembers)
@@ -38,7 +41,7 @@ export const authorization = {
         const result = await db
             .select({
                 id: teamMembers.id,
-                role: teamMembers.role,
+                roleId: teamMembers.roleId,
                 inviteConfirmed: teamMembers.inviteConfirmed,
             })
             .from(teamMembers)
@@ -65,7 +68,8 @@ export const authorization = {
                 id: teamMembers.id,
                 userId: teamMembers.userId,
                 teamId: teams.id,
-                role: teamMembers.role,
+                roleId: teamMembers.roleId,
+                projectId: projects.id,
                 inviteConfirmed: teamMembers.inviteConfirmed,
             })
             .from(teamMembers)
@@ -78,7 +82,7 @@ export const authorization = {
                     eq(teamMembers.inviteConfirmed, true)
                 )
             )
-            .then((res) => res[0] || null);
+            .then((res) => res[0] ?? null);
         return result;
     },
     checkIfTeamOwnedByUser: async (teamId: string, userId: string) => {
@@ -104,8 +108,8 @@ export const authorization = {
             .select({
                 id: teamMembers.id,
                 userId: teamMembers.userId,
+                roleId: teamMembers.roleId,
                 teamId: teams.id,
-                role: teamMembers.role,
                 inviteConfirmed: teamMembers.inviteConfirmed,
             })
             .from(teamMembers)
@@ -211,7 +215,21 @@ export const authorization = {
             .then((res) => res[0] || null);
         return result;
     },
-    checkIfHasRole: (userRole: string, roles: string[]) => {
-        return roles.includes(userRole);
+    checkIfRoleHasPermission: async (userRoleId: string, action: string) => {
+        const result = await db
+            .select({
+                roleName: roles.name,
+                permissionName: permissions.name,
+            })
+            .from(rolePermissions)
+            .innerJoin(roles, eq(rolePermissions.roleId, roles.id))
+            .innerJoin(
+                permissions,
+                eq(rolePermissions.permissionId, permissions.id)
+            )
+            .where(and(eq(roles.id, userRoleId), eq(permissions.name, action)))
+            .then((res) => res[0] || null);
+
+        return result;
     },
 };

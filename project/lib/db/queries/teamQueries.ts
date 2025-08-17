@@ -1,4 +1,4 @@
-import { teams, teamMembers, projects } from "@/migrations/schema";
+import { teams, teamMembers, projects, roles } from "@/migrations/schema";
 import { and, countDistinct, eq, or } from "drizzle-orm";
 import { CreateTeam, UpdateTeam } from "@/types/Team";
 import { failure, success } from "@/types/Response";
@@ -17,8 +17,6 @@ export const teamQueries = {
                     id: teams.id,
                     teamName: teams.name,
                     slug: teams.slug,
-                    role: memberSelf.role, 
-                    inviteConfirmed: memberSelf.inviteConfirmed,
                     memberCount: countDistinct(teamMembers.userId).as(
                         "memberCount"
                     ),
@@ -40,8 +38,6 @@ export const teamQueries = {
                     teams.id,
                     teams.name,
                     teams.slug,
-                    memberSelf.role,
-                    memberSelf.inviteConfirmed,
                     teams.createdAt,
                     teams.updatedAt
                 );
@@ -123,24 +119,29 @@ export const teamQueries = {
     },
     create: async (data: CreateTeam) => {
         const result = await db.transaction(async (tx) => {
-            if (!data.name || !data.ownerId) {
-                return failure(400, "Missing required fields.");
-            }
-
             try {
+                if (!data.name || !data.ownerId) {
+                    return failure(400, "Missing required fields.");
+                }
+    
                 const insertedTeam = await tx
                     .insert(teams)
                     .values(data)
                     .returning();
                 const team = insertedTeam[0];
-
+    
                 if (!team) throw new Error("Team creation failed");
-
+    
                 // create a team member for this user as well
+                const ownerRole = await tx
+                    .select({ id: roles.id })
+                    .from(roles)
+                    .where(eq(roles.nameId, "owner")).then(res => res[0] ?? null);
+    
                 await tx.insert(teamMembers).values({
                     teamId: team.id,
                     userId: data.ownerId,
-                    role: "admin",
+                    roleId: ownerRole.id,
                     inviteConfirmed: true,
                 });
                 return success(201, "Team created successfully", team);

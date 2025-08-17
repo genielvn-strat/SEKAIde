@@ -163,12 +163,23 @@ export const projectQueries = {
         data: UpdateProject,
         userId: string
     ) => {
-        const project = await authorization.checkIfProjectOwnedByUserBySlug(
+        const member = await authorization.checkIfTeamMemberByProjectSlug(
             projectSlug,
             userId
         );
+        if (!member) {
+            return failure(
+                400,
+                "You are not authorized to update this project"
+            );
+        }
 
-        if (!project) {
+        const permission = await authorization.checkIfRoleHasPermission(
+            member.roleId,
+            "update_project"
+        );
+
+        if (!permission) {
             return failure(
                 400,
                 "You are not authorized to update this project"
@@ -181,7 +192,7 @@ export const projectQueries = {
                 .set({
                     ...data,
                 })
-                .where(eq(projects.id, project.id))
+                .where(eq(projects.id, member.projectId))
                 .returning();
             return success(200, "Project successfully updated", result);
         } catch {
@@ -192,12 +203,23 @@ export const projectQueries = {
         if (!projectSlug || !userId) {
             return failure(500, "Missing required fields");
         }
-        const project = await authorization.checkIfProjectOwnedByUserBySlug(
+        const member = await authorization.checkIfTeamMemberByProjectSlug(
             projectSlug,
             userId
         );
+        if (!member) {
+            return failure(
+                400,
+                "You are not authorized to delete this project"
+            );
+        }
 
-        if (!project) {
+        const permission = await authorization.checkIfRoleHasPermission(
+            member.roleId,
+            "delete_project"
+        );
+
+        if (!permission) {
             return failure(
                 400,
                 "You are not authorized to delete this project"
@@ -207,7 +229,7 @@ export const projectQueries = {
         try {
             const result = await db
                 .delete(projects)
-                .where(eq(projects.id, project.id))
+                .where(eq(projects.id, member.projectId))
                 .returning();
             return success(200, "Project successfully deleted", result);
         } catch {

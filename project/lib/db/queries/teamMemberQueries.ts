@@ -1,4 +1,4 @@
-import { teamMembers, teams, users } from "@/migrations/schema";
+import { roles, teamMembers, teams, users } from "@/migrations/schema";
 import { and, eq, ne, or } from "drizzle-orm";
 import { TeamMember } from "@/types/TeamMember";
 import { db } from "../db";
@@ -28,11 +28,13 @@ export const teamMemberQueries = {
                     username: users.username,
                     email: users.email,
                     displayPictureLink: users.displayPictureLink,
-                    role: teamMembers.role,
+                    roleName: roles.name,
+                    roleColor: roles.color,
                     inviteConfirmed: teamMembers.inviteConfirmed,
                 })
                 .from(teamMembers)
                 .innerJoin(users, eq(users.id, teamMembers.userId))
+                .innerJoin(roles, eq(roles.id, teamMembers.roleId))
                 .where(eq(teamMembers.teamId, member.teamId));
             return success(200, "Team members fetched successfully", result);
         } catch {
@@ -46,58 +48,58 @@ export const teamMemberQueries = {
         data: CreateTeamMemberInput,
         userId: string
     ) => {
-        const member = await authorization.checkIfTeamMemberByTeamSlug(
-            teamSlug,
-            userId
-        );
-
-        if (
-            !member ||
-            !member.role ||
-            !authorization.checkIfHasRole(member.role, [
-                "project_manager",
-                "admin",
-            ])
-        ) {
-            return failure(
-                400,
-                "Cannot invite this member (not found or admin)"
-            );
-        }
-        const user = await db
-            .select({ id: users.id })
-            .from(users)
-            .where(
-                or(eq(users.email, data.input), eq(users.username, data.input))
-            )
-            .then((res) => res[0] ?? null);
-        if (!user) return failure(404, "User not found");
-        if (user.id === userId)
-            return failure(400, "You cannot invite yourself");
-        const existing = await db
-            .select()
-            .from(teamMembers)
-            .where(
-                and(
-                    eq(teamMembers.userId, user.id),
-                    eq(teamMembers.teamId, member.teamId)
-                )
-            )
-            .then((res) => res[0] ?? null);
-        console.log(existing, user.id, member.teamId);
-        if (existing) return failure(409, "User is already a member");
-
-        const newMember = await db
-            .insert(teamMembers)
-            .values({
-                userId: user.id,
-                teamId: member.teamId,
-                role: data.role,
-                inviteConfirmed: false,
-            })
-            .returning();
-        return success(200, "Team Member invited successfully", newMember);
         try {
+            const member = await authorization.checkIfTeamMemberByTeamSlug(
+                teamSlug,
+                userId
+            );
+
+            if (!member) {
+                return failure(400, "Cannot invite this member (not a member)");
+            }
+            const permission = await authorization.checkIfRoleHasPermission(
+                member.roleId,
+                "invite_members"
+            );
+            if (!permission) {
+                return failure(400, "Cannot invite this member (unauthorized)");
+            }
+            const user = await db
+                .select({ id: users.id })
+                .from(users)
+                .where(
+                    or(
+                        eq(users.email, data.input),
+                        eq(users.username, data.input)
+                    )
+                )
+                .then((res) => res[0] ?? null);
+            if (!user) return failure(404, "User not found");
+            if (user.id === userId)
+                return failure(400, "You cannot invite yourself");
+            const existing = await db
+                .select()
+                .from(teamMembers)
+                .where(
+                    and(
+                        eq(teamMembers.userId, user.id),
+                        eq(teamMembers.teamId, member.teamId)
+                    )
+                )
+                .then((res) => res[0] ?? null);
+            console.log(existing, user.id, member.teamId);
+            if (existing) return failure(409, "User is already a member");
+
+            const newMember = await db
+                .insert(teamMembers)
+                .values({
+                    userId: user.id,
+                    teamId: member.teamId,
+                    roleId: data.roleId,
+                    inviteConfirmed: false,
+                })
+                .returning();
+            return success(200, "Team Member invited successfully", newMember);
         } catch {
             return failure(500, "Failed to invite member");
         }
@@ -108,29 +110,31 @@ export const teamMemberQueries = {
             userId
         );
 
-        if (
-            !member ||
-            !member.role ||
-            !authorization.checkIfHasRole(member.role, [
-                "project_manager",
-                "admin",
-            ])
-        )
-            return failure(400, "Cannot kick this member (not found or admin)");
-        console.log(targetUserId, member.userId);
+        if (!member)
+            return failure(400, "Cannot kick this member (not a member)");
+
+        const permission = await authorization.checkIfRoleHasPermission(
+            member.roleId,
+            "kick_members"
+        );
+
+        if (!permission)
+            return failure(400, "Cannot kick this member (unauthorized)");
+
         if (targetUserId === member.userId) {
             return failure(400, "You cannot kick yourself");
         }
 
         try {
             const targetMember = await db
-                .select({ id: teamMembers.id, role: teamMembers.role })
+                .select({ id: teamMembers.id, roleName: roles.name })
                 .from(teamMembers)
+                .innerJoin(roles, eq(roles.id, teamMembers.roleId))
                 .where(
                     and(
                         eq(teamMembers.userId, targetUserId),
                         eq(teamMembers.teamId, member.teamId),
-                        ne(teamMembers.role, "admin") // is not an admin
+                        ne(roles.nameId, "admin") // is not an admin
                     )
                 )
                 .then((res) => res[0] ?? null);

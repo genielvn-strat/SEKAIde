@@ -210,16 +210,15 @@ export const taskQueries = {
             userId
         );
 
-        if (
-            !member ||
-            !member.role ||
-            !authorization.checkIfHasRole(member.role, [
-                "project_manager",
-                "admin",
-            ])
-        ) {
+        if (!member) {
             return failure(400, "Not authorized to update this task");
         }
+        const permission = await authorization.checkIfRoleHasPermission(
+            member.roleId,
+            "update_task"
+        );
+        if (!permission)
+            return failure(400, "Not authorized to update this task");
         try {
             const result = await db
                 .update(tasks)
@@ -252,16 +251,16 @@ export const taskQueries = {
             userId
         );
 
-        if (
-            !member ||
-            !member.role ||
-            !authorization.checkIfHasRole(member.role, [
-                "project_manager",
-                "admin",
-            ])
-        ) {
+        if (!member) {
             return failure(400, "Not authorized to delete this task");
         }
+
+        const permission = await authorization.checkIfRoleHasPermission(
+            member.roleId,
+            "delete_task"
+        );
+        if (!permission)
+            return failure(400, "Not authorized to delete this task");
 
         try {
             const result = await db

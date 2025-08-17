@@ -35,7 +35,7 @@ export type UpdateTeamInput = z.infer<typeof updateTeamSchema>;
 
 export const teamMemberSchema = z.object({
     input: z.string().min(1, "Input an email or a username"),
-    role: z.enum(["admin", "project_manager", "member"]),
+    roleId: z.string().min(1, "Role selection is required"),
 });
 export const createTeamMemberSchema = teamMemberSchema;
 export const updateTeamMemberSchema = teamMemberSchema.partial();

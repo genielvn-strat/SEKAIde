@@ -43,34 +43,34 @@ export const columns: (teamSlug: string) => ColumnDef<FetchTeamMember>[] = (
         accessorKey: "email",
         header: "Email",
     },
-    {
-        accessorKey: "role",
-        header: "Role",
-        cell: ({ row }) => {
-            const role = row.original.role;
-            const roleConfig: Record<
-                typeof role,
-                { label: string; className: string }
-            > = {
-                admin: {
-                    label: "Admin",
-                    className: "bg-red-500/20 text-red-700 hover:bg-red-500/30",
-                },
-                project_manager: {
-                    label: "Project Manager",
-                    className:
-                        "bg-blue-500/20 text-blue-700 hover:bg-blue-500/30",
-                },
-                member: {
-                    label: "Member",
-                    className:
-                        "bg-gray-500/20 text-gray-700 hover:bg-gray-500/30",
-                },
-            };
-            const { label, className } = roleConfig[role];
-            return <Badge className={className}>{label}</Badge>;
-        },
-    },
+    // {
+    //     accessorKey: "role",
+    //     header: "Role",
+    //     cell: ({ row }) => {
+    //         const role = row.original.role;
+    //         const roleConfig: Record<
+    //             typeof role,
+    //             { label: string; className: string }
+    //         > = {
+    //             admin: {
+    //                 label: "Admin",
+    //                 className: "bg-red-500/20 text-red-700 hover:bg-red-500/30",
+    //             },
+    //             project_manager: {
+    //                 label: "Project Manager",
+    //                 className:
+    //                     "bg-blue-500/20 text-blue-700 hover:bg-blue-500/30",
+    //             },
+    //             member: {
+    //                 label: "Member",
+    //                 className:
+    //                     "bg-gray-500/20 text-gray-700 hover:bg-gray-500/30",
+    //             },
+    //         };
+    //         const { label, className } = roleConfig[role];
+    //         return <Badge className={className}>{label}</Badge>;
+    //     },
+    // },
     {
         accessorKey: "inviteConfirmed",
         header: "Status",
@@ -91,8 +91,6 @@ export const columns: (teamSlug: string) => ColumnDef<FetchTeamMember>[] = (
             const [kickDialog, showKickDialog] = useState(false);
             const memberId = row.original.userId;
             const memberName = row.original.name;
-            const memberRole = row.original.role;
-            if (memberRole === "admin") return null;
             return (
                 <>
                     <DropdownMenu>
