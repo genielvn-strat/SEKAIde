@@ -50,15 +50,17 @@ export const listQueries = {
             projectSlug,
             userId
         );
-
+        
         if (!member) {
             return failure(400, "Not authorized to create a list");
         }
-
+        
         const permission = await authorization.checkIfRoleHasPermission(
             member.roleId,
             "create_list"
         );
+        console.log(permission)
+
         if (!permission) return failure(400, "Not authorized to create a list");
 
         try {

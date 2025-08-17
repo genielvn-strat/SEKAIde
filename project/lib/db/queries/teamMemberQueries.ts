@@ -1,6 +1,5 @@
 import { roles, teamMembers, teams, users } from "@/migrations/schema";
 import { and, eq, ne, or } from "drizzle-orm";
-import { TeamMember } from "@/types/TeamMember";
 import { db } from "../db";
 import { authorization } from "./authorizationQueries";
 import { failure, success } from "@/types/Response";

@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { UserPlus } from "lucide-react";
 import InviteMember from "@/components/InviteMember";
 import KickMember from "@/components/KickMember";
+import { useAuthRoleByTeam } from "@/hooks/useRoles";
 
 interface ProjectProps {
     params: Promise<{
@@ -29,8 +30,13 @@ export default function TeamDetails({ params }: ProjectProps) {
     const { members, isLoading: memberLoading } = useTeamMembers(teamSlug, {
         enabled: !!teamDetails,
     });
-    const { kick } = useTeamMemberActions();
-    const { projects } = useTeamProjects(teamSlug, { enabled: !!teamDetails });
+    const { permitted: permittedInvite } = useAuthRoleByTeam(
+        teamSlug,
+        "invite_members",
+        {
+            enabled: !!teamDetails,
+        }
+    );
 
     if (isLoading || memberLoading) {
         return "Loading team";
@@ -67,9 +73,11 @@ export default function TeamDetails({ params }: ProjectProps) {
                 </TabsList>
                 <TabsContent value="members">
                     <div className="flex flex-col gap-4">
-                        <div className="flex flex-row justify-between items-center">
-                            <InviteMember teamSlug={teamSlug} />
-                        </div>
+                        {permittedInvite && (
+                            <div className="flex flex-row justify-between items-center">
+                                <InviteMember teamSlug={teamSlug} />
+                            </div>
+                        )}
                         <DataTable columns={columns(teamSlug)} data={members} />
                     </div>
                 </TabsContent>

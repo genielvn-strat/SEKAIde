@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import KickMember from "@/components/KickMember";
 import { useState } from "react";
+import { useAuthRoleByTeam } from "@/hooks/useRoles";
 
 export const columns: (teamSlug: string) => ColumnDef<FetchTeamMember>[] = (
     teamSlug
@@ -43,34 +44,14 @@ export const columns: (teamSlug: string) => ColumnDef<FetchTeamMember>[] = (
         accessorKey: "email",
         header: "Email",
     },
-    // {
-    //     accessorKey: "role",
-    //     header: "Role",
-    //     cell: ({ row }) => {
-    //         const role = row.original.role;
-    //         const roleConfig: Record<
-    //             typeof role,
-    //             { label: string; className: string }
-    //         > = {
-    //             admin: {
-    //                 label: "Admin",
-    //                 className: "bg-red-500/20 text-red-700 hover:bg-red-500/30",
-    //             },
-    //             project_manager: {
-    //                 label: "Project Manager",
-    //                 className:
-    //                     "bg-blue-500/20 text-blue-700 hover:bg-blue-500/30",
-    //             },
-    //             member: {
-    //                 label: "Member",
-    //                 className:
-    //                     "bg-gray-500/20 text-gray-700 hover:bg-gray-500/30",
-    //             },
-    //         };
-    //         const { label, className } = roleConfig[role];
-    //         return <Badge className={className}>{label}</Badge>;
-    //     },
-    // },
+    {
+        accessorKey: "role",
+        header: "Role",
+        cell: ({ row }) => {
+            const role = row.original.roleName;
+            return <Badge variant="outline">{role}</Badge>;
+        },
+    },
     {
         accessorKey: "inviteConfirmed",
         header: "Status",
@@ -89,35 +70,41 @@ export const columns: (teamSlug: string) => ColumnDef<FetchTeamMember>[] = (
         id: "actions",
         cell: ({ row }) => {
             const [kickDialog, showKickDialog] = useState(false);
+            const { permitted: permittedKick } = useAuthRoleByTeam(
+                teamSlug,
+                "kick_members"
+            );
             const memberId = row.original.userId;
             const memberName = row.original.name;
             return (
-                <>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                                className="text-destructive"
-                                onClick={() => showKickDialog(true)}
-                            >
-                                Kick
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    {kickDialog && (
-                        <KickMember
-                            teamSlug={teamSlug}
-                            memberUserId={memberId}
-                            memberName={memberName}
-                            setOpen={showKickDialog}
-                        />
-                    )}
-                </>
+                permittedKick && (
+                    <>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                    <span className="sr-only">Open menu</span>
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem
+                                    className="text-destructive"
+                                    onClick={() => showKickDialog(true)}
+                                >
+                                    Kick
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                        {kickDialog && (
+                            <KickMember
+                                teamSlug={teamSlug}
+                                memberUserId={memberId}
+                                memberName={memberName}
+                                setOpen={showKickDialog}
+                            />
+                        )}
+                    </>
+                )
             );
         },
     },

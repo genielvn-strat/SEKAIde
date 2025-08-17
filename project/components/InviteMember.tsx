@@ -27,6 +27,7 @@ import { SubmitHandler, useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTeamMemberActions } from "@/hooks/useTeamMembers";
 import { toast } from "sonner";
+import { useRoles } from "@/hooks/useRoles";
 
 interface InviteMemberProps {
     teamSlug: string;
@@ -34,6 +35,12 @@ interface InviteMemberProps {
 
 const InviteMember: React.FC<InviteMemberProps> = ({ teamSlug }) => {
     const { invite } = useTeamMemberActions();
+    const {
+        roles,
+        isLoading: rolesLoading,
+        error: rolesError,
+        isError: rolesIsError,
+    } = useRoles();
 
     const {
         register,
@@ -112,20 +119,12 @@ const InviteMember: React.FC<InviteMemberProps> = ({ teamSlug }) => {
                                                 <SelectValue placeholder="Select a role" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectGroup>
-                                                    <SelectLabel>
-                                                        Roles
-                                                    </SelectLabel>
-                                                    <SelectItem value="admin">
-                                                        Admin
-                                                    </SelectItem>
-                                                    <SelectItem value="project_manager">
-                                                        Project Manager
-                                                    </SelectItem>
-                                                    <SelectItem value="member">
-                                                        Member
-                                                    </SelectItem>
-                                                </SelectGroup>
+                                                {!roles ? (rolesLoading ?? (<SelectLabel>Loading</SelectLabel>)) : 
+                                                    roles.map((r) => (
+                                                        <SelectItem value={r.id} key={r.id}>{r.name}</SelectItem>
+                                                    ))
+                                                }
+                                                
                                             </SelectContent>
                                         </Select>
                                     )}
