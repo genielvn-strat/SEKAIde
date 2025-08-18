@@ -17,9 +17,9 @@ import KickMember from "@/components/KickMember";
 import { useState } from "react";
 import { useAuthRoleByTeam } from "@/hooks/useRoles";
 
-export const columns: (teamSlug: string) => ColumnDef<FetchTeamMember>[] = (
-    teamSlug
-) => [
+export const TeamMemberColumns: (
+    teamSlug: string
+) => ColumnDef<FetchTeamMember>[] = (teamSlug) => [
     {
         accessorKey: "name",
         header: "Member",

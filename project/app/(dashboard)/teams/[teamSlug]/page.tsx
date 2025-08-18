@@ -1,21 +1,13 @@
 "use client";
 
 import { useTeamDetails } from "@/hooks/useTeams";
-import { useTeamMemberActions, useTeamMembers } from "@/hooks/useTeamMembers";
-import { useTeamProjects } from "@/hooks/useProjects";
 import { notFound } from "next/navigation";
 import { use } from "react";
 import { TypographyH1 } from "@/components/typography/TypographyH1";
 import { TypographyMuted } from "@/components/typography/TypographyMuted";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { DataTable } from "@/components/DataTable";
-import { columns } from "@/app/(dashboard)/teams/[teamSlug]/columns";
-import { Button } from "@/components/ui/button";
-import { UserPlus } from "lucide-react";
-import InviteMember from "@/components/InviteMember";
-import KickMember from "@/components/KickMember";
-import { useAuthRoleByTeam } from "@/hooks/useRoles";
+import TeamMembersTab from "@/components/TeamMembersTab";
 
 interface ProjectProps {
     params: Promise<{
@@ -27,18 +19,8 @@ export default function TeamDetails({ params }: ProjectProps) {
     const { teamSlug } = use(params);
 
     const { teamDetails, isLoading, isError, error } = useTeamDetails(teamSlug);
-    const { members, isLoading: memberLoading } = useTeamMembers(teamSlug, {
-        enabled: !!teamDetails,
-    });
-    const { permitted: permittedInvite } = useAuthRoleByTeam(
-        teamSlug,
-        "invite_members",
-        {
-            enabled: !!teamDetails,
-        }
-    );
 
-    if (isLoading || memberLoading) {
+    if (isLoading) {
         return "Loading team";
     }
 
@@ -51,7 +33,7 @@ export default function TeamDetails({ params }: ProjectProps) {
         );
     }
 
-    if (!teamDetails || !members) {
+    if (!teamDetails) {
         return notFound();
     }
 
@@ -73,12 +55,7 @@ export default function TeamDetails({ params }: ProjectProps) {
                 </TabsList>
                 <TabsContent value="members">
                     <div className="flex flex-col gap-4">
-                        {permittedInvite && (
-                            <div className="flex flex-row justify-between items-center">
-                                <InviteMember teamSlug={teamSlug} />
-                            </div>
-                        )}
-                        <DataTable columns={columns(teamSlug)} data={members} />
+                        <TeamMembersTab teamSlug={teamSlug} />
                     </div>
                 </TabsContent>
             </Tabs>
