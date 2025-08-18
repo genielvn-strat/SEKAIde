@@ -20,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ListFilter, MessageCircleQuestion } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 
 export default function TeamPage() {
     const { joinedTeams, isLoading } = useTeams();
@@ -50,7 +51,7 @@ export default function TeamPage() {
     }, [joinedTeams, searchQuery, sortCriteria]);
 
     if (isLoading) {
-        return "Loading teams";
+        return <LoadingSkeleton />;
     }
 
     if (!joinedTeams) {
@@ -116,7 +117,10 @@ export default function TeamPage() {
                     <Alert variant="default">
                         <MessageCircleQuestion />
                         <AlertTitle>No teams found</AlertTitle>
-                        <AlertDescription>Looks like you are not part of any teams yet. Create one or ask someone to invite you.</AlertDescription>
+                        <AlertDescription>
+                            Looks like you are not part of any teams yet. Create
+                            one or ask someone to invite you.
+                        </AlertDescription>
                     </Alert>
                 )}
             </div>
