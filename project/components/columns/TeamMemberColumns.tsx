@@ -76,8 +76,10 @@ export const TeamMemberColumns: (
             );
             const memberId = row.original.userId;
             const memberName = row.original.name;
+            const memberRoleName = row.original.roleName;
             return (
-                permittedKick && (
+                permittedKick &&
+                memberRoleName != "Owner" && (
                     <>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
