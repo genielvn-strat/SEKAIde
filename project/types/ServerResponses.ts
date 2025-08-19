@@ -44,7 +44,7 @@ export type FetchProject = {
     ownerId: string;
     teamId?: string;
     teamName?: string;
-    activeTaskCount?: number;
+    finishedTaskCount?: number;
     totalTaskCount?: number;
     createdAt: string | null;
     updatedAt: string | null;

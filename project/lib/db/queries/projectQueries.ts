@@ -82,7 +82,7 @@ export const projectQueries = {
                     updatedAt: projects.updatedAt,
                     dueDate: projects.dueDate,
                     totalTaskCount: count(tasks.id).mapWith(Number),
-                    activeTaskCount: sql<number>`sum(case when ${tasks.finished} = false then 1 else 0 end)`,
+                    finishedTaskCount: sql<number>`sum(case when ${tasks.finished} = true then 1 else 0 end)`,
                 })
                 .from(projects)
                 .innerJoin(teams, eq(teams.id, projects.teamId))
@@ -109,7 +109,7 @@ export const projectQueries = {
                     updatedAt: projects.updatedAt,
                     dueDate: projects.dueDate,
                     totalTaskCount: count(tasks.id).mapWith(Number),
-                    activeTaskCount: sql<number>`sum(case when ${tasks.finished} = false then 1 else 0 end)`,
+                    activeTaskCount: sql<number>`sum(case when ${tasks.finished} = true then 1 else 0 end)`,
                 })
                 .from(teamMembers)
                 .innerJoin(projects, eq(teamMembers.teamId, projects.teamId))
@@ -164,7 +164,7 @@ export const projectQueries = {
 
                 await tx.insert(lists).values(defaultLists);
 
-                return success(200, "Project successfully created", inserted);
+                return success(200, "Project successfully created", project);
             });
 
             return result;

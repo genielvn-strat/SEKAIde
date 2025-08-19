@@ -24,7 +24,7 @@ export const projects = pgTable(
         slug: text().notNull(),
         createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
         updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow(),
-        dueDate: timestamp("due_date", { mode: "string" }).defaultNow(),
+        dueDate: timestamp("due_date", { mode: "string" }),
     },
     (table) => [
         foreignKey({

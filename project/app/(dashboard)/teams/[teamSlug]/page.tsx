@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import TeamMembersTab from "@/components/TeamMembersTab";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
+import TeamProjectsTab from "@/components/TeamProjectsTab";
 
 interface ProjectProps {
     params: Promise<{
@@ -54,11 +55,18 @@ export default function TeamDetails({ params }: ProjectProps) {
                     <TabsTrigger value="projects">Projects</TabsTrigger>
                     <TabsTrigger value="settings">Settings</TabsTrigger>
                 </TabsList>
-                <TabsContent value="members">
-                    <div className="flex flex-col gap-4">
-                        <TeamMembersTab teamSlug={teamSlug} />
-                    </div>
-                </TabsContent>
+                <div className="my-4">
+                    <TabsContent value="members">
+                        <div className="flex flex-col gap-4">
+                            <TeamMembersTab teamSlug={teamSlug} />
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="projects">
+                        <div className="flex flex-col gap-4">
+                            <TeamProjectsTab teamDetails={teamDetails} />
+                        </div>
+                    </TabsContent>
+                </div>
             </Tabs>
         </>
     );
