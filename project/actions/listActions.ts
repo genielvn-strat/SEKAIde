@@ -31,9 +31,7 @@ export const createList = async (
         }
     }
     const listData: CreateList = {
-        name: data.name,
-        description: data.description,
-        position: data.position,
+        ...data,
     };
     return await queries.lists.create(listData, userId, projectSlug);
 };

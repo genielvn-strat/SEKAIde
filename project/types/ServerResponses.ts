@@ -42,8 +42,10 @@ export type FetchProject = {
     description: string | null;
     slug: string;
     ownerId: string;
-    teamId: string;
-    teamName: string;
+    teamId?: string;
+    teamName?: string;
+    activeTaskCount?: number;
+    totalTaskCount?: number;
     createdAt: string | null;
     updatedAt: string | null;
     dueDate: string | null;

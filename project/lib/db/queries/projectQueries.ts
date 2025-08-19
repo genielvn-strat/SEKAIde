@@ -1,5 +1,11 @@
-import { projects, teams, teamMembers, lists } from "@/migrations/schema";
-import { and, eq, or } from "drizzle-orm";
+import {
+    projects,
+    teams,
+    teamMembers,
+    lists,
+    tasks,
+} from "@/migrations/schema";
+import { and, count, eq, or, sql } from "drizzle-orm";
 import { CreateProject, UpdateProject } from "@/types/Project";
 import { failure, success } from "@/types/Response";
 import { FetchProject } from "@/types/ServerResponses";
@@ -65,7 +71,7 @@ export const projectQueries = {
         }
 
         try {
-            const result = await db
+            const result: FetchProject[] = await db
                 .select({
                     id: projects.id,
                     name: projects.name,
@@ -75,10 +81,14 @@ export const projectQueries = {
                     createdAt: projects.createdAt,
                     updatedAt: projects.updatedAt,
                     dueDate: projects.dueDate,
+                    totalTaskCount: count(tasks.id).mapWith(Number),
+                    activeTaskCount: sql<number>`sum(case when ${tasks.finished} = false then 1 else 0 end)`,
                 })
                 .from(projects)
                 .innerJoin(teams, eq(teams.id, projects.teamId))
-                .where(eq(teams.slug, teamSlug));
+                .leftJoin(tasks, eq(tasks.projectId, projects.id)) // include tasks
+                .where(eq(teams.slug, teamSlug))
+                .groupBy(projects.id); // aggregate per project
             return success(200, "Team projects fetched successfully", result);
         } catch {
             return failure(500, "Failed to fetch team projects");
@@ -98,11 +108,15 @@ export const projectQueries = {
                     createdAt: projects.createdAt,
                     updatedAt: projects.updatedAt,
                     dueDate: projects.dueDate,
+                    totalTaskCount: count(tasks.id).mapWith(Number),
+                    activeTaskCount: sql<number>`sum(case when ${tasks.finished} = false then 1 else 0 end)`,
                 })
                 .from(teamMembers)
                 .innerJoin(projects, eq(teamMembers.teamId, projects.teamId))
                 .innerJoin(teams, eq(teamMembers.teamId, teams.id))
-                .where(eq(teamMembers.userId, userId));
+                .leftJoin(tasks, eq(tasks.projectId, projects.id)) // join tasks to projects
+                .where(eq(teamMembers.userId, userId))
+                .groupBy(projects.id, teams.name); // group to aggregate per project
             return success(200, "Projects successfully fetched", result);
         } catch {
             return failure(500, "Failed to fetch projects");

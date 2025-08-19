@@ -52,6 +52,7 @@ export const taskSchema = z.object({
     listId: z.string(),
     assigneeId: z.string().uuid().optional(),
     position: z.number().nonnegative("Position must be positive"),
+    finished: z.boolean(),
     dueDate: z.date().min(new Date(), "Due date must be in future").optional(),
 });
 export const createTaskSchema = taskSchema;
@@ -62,6 +63,7 @@ export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
 export const listSchema = z.object({
     name: z.string().min(5, "Name is too short.").max(100, "Name is too long"),
     description: z.string().max(200, "Description too long.").optional(),
+    isFinal: z.boolean(),
     position: z.number().nonnegative("Position must be positive"),
 });
 export const createListSchema = listSchema;
