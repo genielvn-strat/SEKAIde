@@ -12,7 +12,7 @@ export type CreateUserInput = z.infer<typeof createUserSchema>;
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;
 
 export const projectSchema = z.object({
-    name: z.string().min(1, "Name is required").max(100, "Name is too long"),
+    name: z.string().min(1, "Name is required").max(50, "Name is too long"),
     description: z.string().max(50, "Description is too long").optional(),
     teamId: z.string().min(1, "Please select a team."),
     dueDate: z.date().min(new Date(), "Due date must be in future").optional(),

@@ -4,7 +4,7 @@ import { useTeams } from "@/hooks/useTeams";
 import { TypographyH1 } from "@/components/typography/TypographyH1";
 import { TypographyMuted } from "@/components/typography/TypographyMuted";
 import { Separator } from "@/components/ui/separator";
-import CreateTeam from "@/components/CreateTeam";
+import CreateTeam from "@/components/buttons/CreateTeam";
 import TeamCard from "@/components/TeamCard";
 import { useState, useMemo } from "react"; // 👈 Add useMemo here
 import { Input } from "@/components/ui/input";
@@ -23,7 +23,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 
 export default function TeamPage() {
-    const { joinedTeams, isLoading } = useTeams();
+    const { joinedTeams, isLoading, isError } = useTeams();
 
     const [searchQuery, setSearchQuery] = useState("");
     const [sortCriteria, setSortCriteria] = useState("createdAt");
@@ -54,7 +54,7 @@ export default function TeamPage() {
         return <LoadingSkeleton />;
     }
 
-    if (!joinedTeams) {
+    if (!joinedTeams || isError) {
         return "Error loading teams";
     }
 

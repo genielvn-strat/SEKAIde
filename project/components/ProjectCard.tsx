@@ -22,8 +22,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
         <Card className="w-full max-w-sm" key={project.id}>
             <CardHeader>
                 <Link href={`/projects/${project.slug}`}>
-                    <CardTitle className="text-2xl">{project.name}</CardTitle>
-                    <CardDescription>{project.description}</CardDescription>
+                    <CardTitle className="text-2xl truncate">
+                        {project.name}
+                    </CardTitle>
+                    <CardDescription className="truncate">
+                        {project.description}
+                    </CardDescription>
                 </Link>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">

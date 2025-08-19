@@ -6,7 +6,7 @@ import ProjectCard from "./ProjectCard";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { MessageCircleQuestion } from "lucide-react";
 import { useAuthRoleByTeam } from "@/hooks/useRoles";
-import CreateTeamProject from "./CreateTeamProject";
+import CreateTeamProject from "./buttons/CreateTeamProject";
 import { FetchTeamDetails } from "@/types/ServerResponses";
 
 interface TeamProjectsTabProps {
@@ -16,8 +16,9 @@ interface TeamProjectsTabProps {
 const TeamProjectsTab: React.FC<TeamProjectsTabProps> = ({
     teamDetails: teamDetails,
 }) => {
-    const { projects, isLoading, error, isError } =
-        useTeamProjects(teamDetails.slug);
+    const { projects, isLoading, error, isError } = useTeamProjects(
+        teamDetails.slug
+    );
     const { permitted: permittedCreate } = useAuthRoleByTeam(
         teamDetails.slug,
         "create_project"

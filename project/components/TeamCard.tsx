@@ -18,21 +18,19 @@ const TeamCard: React.FC<TeamCardProps> = ({ team }) => {
                 </Link>
             </CardHeader>
             <CardContent>
-                <div className="">
-                    <div className="flex flex-row items-center gap-4">
-                        <FolderOpen />
-                        <TypographyP>
-                            {team.projectCount}{" "}
-                            {team.projectCount === 1 ? "project" : "projects"}
-                        </TypographyP>
-                    </div>
-                    <div className="flex flex-row items-center gap-4">
-                        <Users />
-                        <TypographyP>
-                            {team.memberCount}{" "}
-                            {team.memberCount === 1 ? "member" : "members"}
-                        </TypographyP>
-                    </div>
+                <div className="flex flex-row items-center gap-4">
+                    <FolderOpen />
+                    <TypographyP>
+                        {team.projectCount}{" "}
+                        {team.projectCount === 1 ? "project" : "projects"}
+                    </TypographyP>
+                </div>
+                <div className="flex flex-row items-center gap-4">
+                    <Users />
+                    <TypographyP>
+                        {team.memberCount}{" "}
+                        {team.memberCount === 1 ? "member" : "members"}
+                    </TypographyP>
                 </div>
             </CardContent>
         </Card>

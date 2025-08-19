@@ -111,6 +111,17 @@ export default function ProjectDetails({ params }: ProjectProps) {
                         {listErrors.position.message}
                     </p>
                 )}
+                <input
+                    type="checkbox"
+                    className="border px-2 py-1 rounded"
+                    {...listRegiter("isFinal")}
+                />
+                <label htmlFor="isFinal">isFinal</label>
+                {listErrors.isFinal && (
+                    <p className="text-sm text-red-600">
+                        {listErrors.isFinal.message}
+                    </p>
+                )}
 
                 {listErrors.root && (
                     <p className="text-sm text-red-600">

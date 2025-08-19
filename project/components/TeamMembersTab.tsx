@@ -2,7 +2,7 @@
 
 import { useAuthRoleByTeam } from "@/hooks/useRoles";
 import React from "react";
-import InviteMember from "./InviteMember";
+import InviteMember from "./buttons/InviteMember";
 import { DataTable } from "./DataTable";
 import { TeamMemberColumns } from "./columns/TeamMemberColumns";
 import { useTeamMembers } from "@/hooks/useTeamMembers";
@@ -18,7 +18,9 @@ const TeamMembersTab: React.FC<TeamMembersTabProps> = ({ teamSlug }) => {
         teamSlug,
         "invite_members"
     );
-    if (isError) return "An error has occurred while loading members";
+    if (isLoading) return <DataTableSkeleton />;
+    if (!members || isError)
+        return "An error has occurred while loading members";
     return (
         <>
             {permittedInvite && (
@@ -26,14 +28,8 @@ const TeamMembersTab: React.FC<TeamMembersTabProps> = ({ teamSlug }) => {
                     <InviteMember teamSlug={teamSlug} />
                 </div>
             )}
-            {!members || isLoading ? (
-                <DataTableSkeleton />
-            ) : (
-                <DataTable
-                    columns={TeamMemberColumns(teamSlug)}
-                    data={members}
-                />
-            )}
+
+            <DataTable columns={TeamMemberColumns(teamSlug)} data={members} />
         </>
     );
 };

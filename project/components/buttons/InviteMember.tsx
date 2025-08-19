@@ -1,5 +1,5 @@
 import React from "react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { UserPlus } from "lucide-react";
 import {
     Dialog,
@@ -25,8 +25,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useTeamMemberActions } from "@/hooks/useTeamMembers";
 import { toast } from "sonner";
 import { useRoles } from "@/hooks/useRoles";
-
-// shadcn form components
 import {
     Form,
     FormControl,
