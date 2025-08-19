@@ -12,22 +12,29 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
     Select,
     SelectContent,
-    SelectGroup,
     SelectItem,
-    SelectLabel,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
 import { CreateTeamMemberInput, teamMemberSchema } from "@/lib/validations";
-import { SubmitHandler, useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTeamMemberActions } from "@/hooks/useTeamMembers";
 import { toast } from "sonner";
 import { useRoles } from "@/hooks/useRoles";
+
+// shadcn form components
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
 
 interface InviteMemberProps {
     teamSlug: string;
@@ -38,36 +45,32 @@ const InviteMember: React.FC<InviteMemberProps> = ({ teamSlug }) => {
     const {
         roles,
         isLoading: rolesLoading,
-        error: rolesError,
         isError: rolesIsError,
     } = useRoles();
 
-    const {
-        register,
-        handleSubmit,
-        setError,
-        reset,
-        control,
-        formState: { errors, isSubmitting },
-    } = useForm<CreateTeamMemberInput>({
+    const form = useForm<CreateTeamMemberInput>({
         resolver: zodResolver(teamMemberSchema),
+        defaultValues: {
+            input: "",
+            roleId: "",
+        },
     });
 
-    const onSubmit: SubmitHandler<CreateTeamMemberInput> = async (data) => {
+    const onSubmit = async (data: CreateTeamMemberInput) => {
         try {
-            const response = await invite({ teamSlug: teamSlug, data: data });
+            const response = await invite({ teamSlug, data });
             if (!response.success) {
                 throw new Error(response.message);
             }
-            reset();
+            form.reset();
             toast.success("Member has been invited successfully.");
         } catch (e) {
             if (e instanceof Error) {
-                setError("root", { message: e.message });
+                form.setError("root", { message: e.message });
                 toast.error(e.message);
                 return;
             }
-            setError("root", {
+            form.setError("root", {
                 message:
                     "An error has occured while inviting a member. Please try again later or contact system administrator.",
             });
@@ -76,86 +79,114 @@ const InviteMember: React.FC<InviteMemberProps> = ({ teamSlug }) => {
 
     return (
         <Dialog>
-            <form onSubmit={handleSubmit(onSubmit)} id="invite-member">
-                <DialogTrigger asChild>
-                    <Button>
-                        <UserPlus /> Invite Members
-                    </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>Invite Members</DialogTitle>
-                        <DialogDescription>
-                            Invite new members to your team by entering their
-                            email address or their username.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4">
+            <DialogTrigger asChild>
+                <Button>
+                    <UserPlus /> Invite Members
+                </Button>
+            </DialogTrigger>
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} id="invite-member">
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Invite Members</DialogTitle>
+                            <DialogDescription>
+                                Invite new members to your team by entering
+                                their email address or their username.
+                            </DialogDescription>
+                        </DialogHeader>
+
                         <div className="grid gap-4">
-                            <div className="grid gap-3">
-                                <Label htmlFor="input">Email or Username</Label>
-                                <Input
-                                    {...register("input")}
-                                    placeholder="johndoe@example.com | johndoe"
-                                />
-                                {errors.input && (
-                                    <p className="text-sm text-red-500 mt-1">
-                                        {errors.input.message}
-                                    </p>
+                            {/* Input field */}
+                            <FormField
+                                control={form.control}
+                                name="input"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Email or Username</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                {...field}
+                                                placeholder="johndoe@example.com | johndoe"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
                                 )}
-                            </div>
-                            <div className="grid gap-3">
-                                <Label htmlFor="roleId">Role</Label>
-                                <Controller
-                                    name="roleId"
-                                    control={control}
-                                    rules={{ required: "Role is required" }}
-                                    render={({ field }) => (
-                                        <Select
-                                            onValueChange={field.onChange}
-                                            value={field.value}
-                                        >
-                                            <SelectTrigger id="role">
-                                                <SelectValue placeholder="Select a role" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {!roles ? (rolesLoading ?? (<SelectLabel>Loading</SelectLabel>)) : 
-                                                    roles.map((r) => (
-                                                        <SelectItem value={r.id} key={r.id}>{r.name}</SelectItem>
-                                                    ))
-                                                }
-                                                
-                                            </SelectContent>
-                                        </Select>
-                                    )}
-                                />
-                                {errors.roleId && (
-                                    <p className="text-sm text-red-500 mt-1">
-                                        {errors.roleId.message}
-                                    </p>
+                            />
+
+                            {/* Role select */}
+                            <FormField
+                                control={form.control}
+                                name="roleId"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Role</FormLabel>
+                                        <FormControl>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                                value={field.value}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select a role" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {rolesLoading ? (
+                                                        <SelectItem
+                                                            value="loading"
+                                                            disabled
+                                                        >
+                                                            Loading...
+                                                        </SelectItem>
+                                                    ) : rolesIsError ? (
+                                                        <SelectItem
+                                                            value="error"
+                                                            disabled
+                                                        >
+                                                            Failed to load roles
+                                                        </SelectItem>
+                                                    ) : (
+                                                        roles?.map((r) => (
+                                                            <SelectItem
+                                                                value={r.id}
+                                                                key={r.id}
+                                                            >
+                                                                {r.name}
+                                                            </SelectItem>
+                                                        ))
+                                                    )}
+                                                </SelectContent>
+                                            </Select>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
                                 )}
-                            </div>
-                            {errors.root && (
+                            />
+
+                            {/* Root error */}
+                            {form.formState.errors.root && (
                                 <p className="text-sm text-red-500 mt-1">
-                                    {errors.root.message}
+                                    {form.formState.errors.root.message}
                                 </p>
                             )}
                         </div>
-                    </div>
-                    <DialogFooter>
-                        <DialogClose asChild>
-                            <Button variant="outline">Cancel</Button>
-                        </DialogClose>
-                        <Button
-                            type="submit"
-                            disabled={isSubmitting}
-                            form="invite-member"
-                        >
-                            {isSubmitting ? "Inviting" : "Invite"}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </form>
+
+                        <DialogFooter className="mt-6">
+                            <DialogClose asChild>
+                                <Button variant="outline">Cancel</Button>
+                            </DialogClose>
+                            <Button
+                                type="submit"
+                                disabled={form.formState.isSubmitting}
+                                form="invite-member"
+                            >
+                                {form.formState.isSubmitting
+                                    ? "Inviting"
+                                    : "Invite"}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </form>
+            </Form>
         </Dialog>
     );
 };

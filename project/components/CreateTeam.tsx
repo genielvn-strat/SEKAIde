@@ -15,6 +15,15 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTeamActions } from "@/hooks/useTeams";
@@ -25,13 +34,7 @@ const CreateTeam: React.FC = () => {
     const router = useRouter();
 
     const { createTeam } = useTeamActions();
-    const {
-        register,
-        handleSubmit,
-        setError,
-        reset,
-        formState: { errors, isSubmitting },
-    } = useForm<CreateTeamInput>({
+    const form = useForm<CreateTeamInput>({
         resolver: zodResolver(teamSchema),
     });
     const onSubmit: SubmitHandler<CreateTeamInput> = async (data) => {
@@ -40,16 +43,16 @@ const CreateTeam: React.FC = () => {
             if (!response.success) {
                 throw new Error(response.message);
             }
-            reset();
+            form.reset();
             toast.success("Team has been created successfully.");
             router.push(`/teams/${response.data?.slug}`);
         } catch (e) {
             if (e instanceof Error) {
-                setError("root", { message: e.message });
+                form.setError("root", { message: e.message });
                 toast.error(e.message);
                 return;
             }
-            setError("root", {
+            form.setError("root", {
                 message:
                     "An error has occured while creating your team. Please try again later or contact system administrator.",
             });
@@ -58,57 +61,64 @@ const CreateTeam: React.FC = () => {
 
     return (
         <Dialog>
-            <form onSubmit={handleSubmit(onSubmit)} id="create-team">
-                <DialogTrigger asChild>
-                    <Button
-                        className="flex flex-row items-center"
-                        type="button"
-                    >
-                        <CirclePlus />
-                        Create Team
-                    </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>Create Team</DialogTitle>
-                        <DialogDescription>
-                            Set your team name and start collaborating with
-                            members.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4">
-                        <div className="grid gap-3">
-                            <Label htmlFor="name">Team Name</Label>
-                            <Input
-                                {...register("name")}
-                                placeholder="Web Development Team"
-                            />
-                            {errors.name && (
-                                <p className="text-sm text-red-500 mt-1">
-                                    {errors.name.message}
-                                </p>
+            <DialogTrigger asChild>
+                <Button className="flex flex-row items-center" type="button">
+                    <CirclePlus />
+                    Create Team
+                </Button>
+            </DialogTrigger>
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} id="create-team">
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Create Team</DialogTitle>
+                            <DialogDescription>
+                                Set your team name and start collaborating with
+                                members.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Team Name</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            {...field}
+                                            placeholder="Web Development Team"
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
                             )}
-                            {errors.root && (
-                                <p className="text-sm text-red-500 mt-1">
-                                    {errors.root.message}
-                                </p>
-                            )}
+                        />
+                        <div className="grid gap-4">
+                            <div className="grid gap-3">
+                                {form.formState.errors.root && (
+                                    <p className="text-sm text-red-500 mt-1">
+                                        {form.formState.errors.root.message}
+                                    </p>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                    <DialogFooter>
-                        <DialogClose asChild>
-                            <Button variant="outline">Cancel</Button>
-                        </DialogClose>
-                        <Button
-                            type="submit"
-                            disabled={isSubmitting}
-                            form="create-team"
-                        >
-                            {isSubmitting ? "Creating" : "Create"}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </form>
+                        <DialogFooter>
+                            <DialogClose asChild>
+                                <Button variant="outline">Cancel</Button>
+                            </DialogClose>
+                            <Button
+                                type="submit"
+                                disabled={form.formState.isSubmitting}
+                                form="create-team"
+                            >
+                                {form.formState.isSubmitting
+                                    ? "Creating"
+                                    : "Create"}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </form>
+            </Form>
         </Dialog>
     );
 };
