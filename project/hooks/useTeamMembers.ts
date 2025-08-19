@@ -26,7 +26,7 @@ export function useTeamMembers(
     return {
         members: res?.success ? res.data : null,
         isLoading,
-        isError,
+        isError: !res?.success ? true : isError,
         error: !res?.success ? res?.message : error,
     };
 }
