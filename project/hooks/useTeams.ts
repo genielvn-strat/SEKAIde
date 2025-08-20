@@ -76,6 +76,7 @@ export function useTeamActions() {
             data: UpdateTeamInput;
         }) => updateTeam(teamId, data),
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["teamDetails"] });
             queryClient.invalidateQueries({ queryKey: ["teams"] });
         },
     });
@@ -84,5 +85,6 @@ export function useTeamActions() {
         deleteTeam: del.mutateAsync,
         updateTeam: update.mutateAsync,
         isCreating: create.isPending,
+        isDeleting: del.isPending,
     };
 }

@@ -4,6 +4,7 @@ import {
     createMember,
     deleteMember,
     fetchTeamMembersBySlug,
+    leaveMember,
 } from "@/actions/teamMemberActions";
 import { CreateTeamMemberInput } from "@/lib/validations";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -32,7 +33,6 @@ export function useTeamMembers(
 }
 export function useTeamMemberActions() {
     const queryClient = useQueryClient();
-    // invite someone function
     const invite = useMutation({
         mutationFn: ({
             teamSlug,
@@ -57,8 +57,17 @@ export function useTeamMemberActions() {
             queryClient.invalidateQueries({ queryKey: [`teamMembers`] });
         },
     });
+    const leave = useMutation({
+        mutationFn: ({ teamSlug }: { teamSlug: string }) =>
+            leaveMember(teamSlug),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`teamMembers`] });
+        },
+    });
+
     return {
         invite: invite.mutateAsync,
         kick: kick.mutateAsync,
+        leave: leave.mutateAsync,
     };
 }

@@ -21,3 +21,7 @@ export const deleteMember = async (teamSlug: string, targerUserId: string) => {
     const userId = await getUserDbId();
     return await queries.teamMembers.kick(teamSlug, targerUserId, userId);
 };
+export const leaveMember = async (teamSlug: string) => {
+    const userId = await getUserDbId();
+    return await queries.teamMembers.leave(teamSlug, userId);
+};

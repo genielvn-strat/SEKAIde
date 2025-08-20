@@ -13,8 +13,6 @@ export type FetchJoinedTeams = {
     id: string;
     teamName: string;
     slug: string;
-    role: string;
-    inviteConfirmed: boolean;
     projectCount: number;
     memberCount: number;
     createdAt: string | null;

@@ -2,7 +2,11 @@ import { teams, teamMembers, projects, roles } from "@/migrations/schema";
 import { and, countDistinct, eq, or } from "drizzle-orm";
 import { CreateTeam, UpdateTeam } from "@/types/Team";
 import { failure, success } from "@/types/Response";
-import { FetchOwnedTeams, FetchTeamDetails } from "@/types/ServerResponses";
+import {
+    FetchJoinedTeams,
+    FetchOwnedTeams,
+    FetchTeamDetails,
+} from "@/types/ServerResponses";
 import { authorization } from "./authorizationQueries";
 import { db } from "../db";
 import { alias } from "drizzle-orm/pg-core";
@@ -12,7 +16,7 @@ export const teamQueries = {
         try {
             const memberSelf = alias(teamMembers, "memberSelf");
 
-            const result = await db
+            const result: FetchJoinedTeams[] = await db
                 .select({
                     id: teams.id,
                     teamName: teams.name,
@@ -123,21 +127,22 @@ export const teamQueries = {
                 if (!data.name || !data.ownerId) {
                     return failure(400, "Missing required fields.");
                 }
-    
+
                 const insertedTeam = await tx
                     .insert(teams)
                     .values(data)
                     .returning();
                 const team = insertedTeam[0];
-    
+
                 if (!team) throw new Error("Team creation failed");
-    
+
                 // create a team member for this user as well
                 const ownerRole = await tx
                     .select({ id: roles.id })
                     .from(roles)
-                    .where(eq(roles.nameId, "owner")).then(res => res[0] ?? null);
-    
+                    .where(eq(roles.nameId, "owner"))
+                    .then((res) => res[0] ?? null);
+
                 await tx.insert(teamMembers).values({
                     teamId: team.id,
                     userId: data.ownerId,
@@ -156,9 +161,21 @@ export const teamQueries = {
         if (!teamId || !userId) {
             return failure(400, "Missing required fields");
         }
-        const team = await authorization.checkIfTeamOwnedByUser(teamId, userId);
+        const member = await authorization.checkIfTeamMemberByTeamId(
+            teamId,
+            userId
+        );
 
-        if (!team) {
+        if (!member) {
+            return failure(403, "You are not authorized to update this team");
+        }
+
+        const permitted = await authorization.checkIfRoleHasPermission(
+            member.roleId,
+            "update_team"
+        );
+
+        if (!permitted) {
             return failure(403, "You are not authorized to update this team");
         }
 
@@ -166,7 +183,7 @@ export const teamQueries = {
             const result = await db
                 .update(teams)
                 .set({ ...data })
-                .where(eq(teams.id, team.id))
+                .where(eq(teams.id, member.teamId))
                 .returning();
             return success(200, "Team updated successfully", result[0]);
         } catch {

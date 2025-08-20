@@ -1,5 +1,5 @@
 import { roles, teamMembers, teams, users } from "@/migrations/schema";
-import { and, eq, ne, or } from "drizzle-orm";
+import { and, eq, ne, or, sql } from "drizzle-orm";
 import { db } from "../db";
 import { authorization } from "./authorizationQueries";
 import { failure, success } from "@/types/Response";
@@ -133,12 +133,12 @@ export const teamMemberQueries = {
                     and(
                         eq(teamMembers.userId, targetUserId),
                         eq(teamMembers.teamId, member.teamId),
-                        ne(roles.nameId, "admin") // is not an admin
+                        ne(roles.nameId, "owner") // is not an admin
                     )
                 )
                 .then((res) => res[0] ?? null);
 
-            if (!targetMember) return failure(400, "This member is an admin.");
+            if (!targetMember) return failure(400, "This member is an owner.");
 
             const result = await db
                 .delete(teamMembers)
@@ -150,5 +150,67 @@ export const teamMemberQueries = {
             return failure(500, "Failed to kick member");
         }
     },
-    update: "",
+    leave: async (teamSlug: string, userId: string) => {
+        const member = await authorization.checkIfTeamMemberByTeamSlug(
+            teamSlug,
+            userId
+        );
+
+        if (!member) {
+            return failure(400, "You're not even a member of this team.");
+        }
+
+        try {
+            // Get the role of this member
+            const targetMember = await db
+                .select({
+                    id: teamMembers.id,
+                    roleNameId: roles.nameId,
+                })
+                .from(teamMembers)
+                .innerJoin(roles, eq(roles.id, teamMembers.roleId))
+                .where(
+                    and(
+                        eq(teamMembers.userId, member.userId),
+                        eq(teamMembers.teamId, member.teamId)
+                    )
+                )
+                .then((res) => res[0] ?? null);
+
+            if (!targetMember) {
+                return failure(400, "Member role not found.");
+            }
+
+            // If owner, check if they are the last one
+            if (targetMember.roleNameId === "owner") {
+                const ownerCount = await db
+                    .select({ count: sql`count(*)` })
+                    .from(teamMembers)
+                    .innerJoin(roles, eq(roles.id, teamMembers.roleId))
+                    .where(
+                        and(
+                            eq(teamMembers.teamId, member.teamId),
+                            eq(roles.nameId, "owner")
+                        )
+                    )
+                    .then((res) => Number(res[0]?.count ?? 0));
+
+                if (ownerCount <= 1) {
+                    return failure(
+                        400,
+                        "You're the only owner of this team. Assign another owner before leaving."
+                    );
+                }
+            }
+
+            const result = await db
+                .delete(teamMembers)
+                .where(eq(teamMembers.id, targetMember.id))
+                .returning();
+
+            return success(200, "Team left successfully", result);
+        } catch (err) {
+            return failure(500, "Failed to leave team");
+        }
+    },
 };

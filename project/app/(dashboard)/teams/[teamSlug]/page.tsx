@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import TeamMembersTab from "@/components/TeamMembersTab";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import TeamProjectsTab from "@/components/TeamProjectsTab";
+import TeamSettingsTab from "@/components/TeamSettingsTab";
 
 interface ProjectProps {
     params: Promise<{
@@ -64,6 +65,11 @@ export default function TeamDetails({ params }: ProjectProps) {
                     <TabsContent value="projects">
                         <div className="flex flex-col gap-4">
                             <TeamProjectsTab teamDetails={teamDetails} />
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="settings">
+                        <div className="flex flex-col gap-4">
+                            <TeamSettingsTab teamDetails={teamDetails} />
                         </div>
                     </TabsContent>
                 </div>

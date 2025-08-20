@@ -20,6 +20,8 @@ export const authorization = {
         const result = await db
             .select({
                 id: teamMembers.id,
+                userId: teamMembers.userId,
+                teamId: teamMembers.teamId,
                 roleId: teamMembers.roleId,
                 inviteConfirmed: teamMembers.inviteConfirmed,
             })
@@ -27,7 +29,8 @@ export const authorization = {
             .where(
                 and(
                     eq(teamMembers.teamId, teamId),
-                    eq(teamMembers.userId, userId)
+                    eq(teamMembers.userId, userId),
+                    eq(teamMembers.inviteConfirmed, true)
                 )
             )
             .then((res) => res[0] || null);

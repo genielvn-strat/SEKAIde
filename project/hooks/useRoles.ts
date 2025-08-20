@@ -34,7 +34,7 @@ export function useAuthRoleByTeam(
         isError,
         error,
     } = useQuery({
-        queryKey: [`authRoleTeam`],
+        queryKey: [`authRoleTeam-${action}`],
         queryFn: () => authRoleByTeamSlug(teamSlug, action),
         enabled: !!teamSlug && options.enabled,
     });
