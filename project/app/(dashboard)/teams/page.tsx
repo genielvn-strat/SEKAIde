@@ -6,7 +6,7 @@ import { TypographyMuted } from "@/components/typography/TypographyMuted";
 import { Separator } from "@/components/ui/separator";
 import CreateTeam from "@/components/buttons/CreateTeam";
 import TeamCard from "@/components/TeamCard";
-import { useState, useMemo } from "react"; // 👈 Add useMemo here
+import { useState, useMemo } from "react"; 
 import { Input } from "@/components/ui/input";
 import {
     DropdownMenu,
@@ -21,7 +21,6 @@ import { Button } from "@/components/ui/button";
 import { ListFilter, MessageCircleQuestion } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
-import { notFound } from "next/navigation";
 
 export default function TeamPage() {
     const { teams, isLoading, isError } = useTeams();
@@ -30,7 +29,7 @@ export default function TeamPage() {
     const [sortCriteria, setSortCriteria] = useState("createdAt");
 
     const filteredAndSortedTeams = useMemo(() => {
-        if (!teams) return
+        if (!teams) return;
         return teams
             .filter((team) =>
                 team.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -61,7 +60,7 @@ export default function TeamPage() {
     }
 
     return (
-        <>
+        <div>
             <div className="doc-header flex flex-row justify-between items-center">
                 <div className="left">
                     <TypographyH1>Teams</TypographyH1>
@@ -126,6 +125,6 @@ export default function TeamPage() {
                     </Alert>
                 )}
             </div>
-        </>
+        </div>
     );
 }

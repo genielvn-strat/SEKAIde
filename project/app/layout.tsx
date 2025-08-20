@@ -1,9 +1,9 @@
 import type React from "react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+
 import "./globals.css";
-// TODO: Task 2.1 - Set up Clerk authentication service
-// import { ClerkProvider } from "@clerk/nextjs"
 import { ThemeProvider } from "@/components/theme-provider";
 import { ClerkProvider } from "@clerk/nextjs";
 import { TanstackProvider } from "@/lib/tanstack-provider";
@@ -26,12 +26,15 @@ export default function RootLayout({
         <ClerkProvider>
             <TanstackProvider>
                 <html lang="en" suppressHydrationWarning>
-                    <body className={inter.className}>
+                    <body>
                         <ThemeProvider>{children}</ThemeProvider>
-                        <Toaster richColors={true}/>
+                        <Toaster richColors={true} />
                     </body>
                 </html>
             </TanstackProvider>
         </ClerkProvider>
     );
 }
+
+// TODO: Task 2.1 - Set up Clerk authentication service
+// import { ClerkProvider } from "@clerk/nextjs"

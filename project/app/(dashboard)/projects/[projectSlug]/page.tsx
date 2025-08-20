@@ -22,7 +22,6 @@ export default function ProjectDetails({ params }: ProjectProps) {
     const { project, isLoading, isError, error } =
         useProjectDetails(projectSlug);
 
-
     if (isLoading) {
         return <LoadingSkeleton />;
     }
@@ -40,10 +39,8 @@ export default function ProjectDetails({ params }: ProjectProps) {
         );
     }
 
-    
-
     return (
-        <div className="flex flex-col">
+        <>
             <div className="doc-header flex flex-row justify-between items-center">
                 <div className="left">
                     <div className="flex flex-row items-center gap-4">
@@ -55,19 +52,19 @@ export default function ProjectDetails({ params }: ProjectProps) {
                 <div className="right"></div>
             </div>
             <Separator className="my-4" />
-            <Tabs defaultValue="board" className="h-full">
+            <Tabs defaultValue="board">
                 <TabsList>
                     <TabsTrigger value="board">Board</TabsTrigger>
                     <TabsTrigger value="tasks">Task List</TabsTrigger>
                     <TabsTrigger value="settings">Settings</TabsTrigger>
                 </TabsList>
-                <div className="my-4 min-h-full">
+                <div className="my-4">
                     <TabsContent value="board">
                         <KanbanBoardInterface project={project} />
                     </TabsContent>
                 </div>
             </Tabs>
-        </div>
+        </>
     );
 }
 // <div className="project mx-auto h-full">
