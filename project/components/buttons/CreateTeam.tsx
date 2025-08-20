@@ -91,15 +91,11 @@ const CreateTeam: React.FC = () => {
                                 </FormItem>
                             )}
                         />
-                        <div className="grid gap-4">
-                            <div className="grid gap-3">
-                                {form.formState.errors.root && (
-                                    <p className="text-sm text-red-500 mt-1">
-                                        {form.formState.errors.root.message}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
+                        {form.formState.errors.root && (
+                            <p className="text-sm text-red-500 mt-2">
+                                {form.formState.errors.root.message}
+                            </p>
+                        )}
                         <DialogFooter>
                             <DialogClose asChild>
                                 <Button variant="outline">Cancel</Button>

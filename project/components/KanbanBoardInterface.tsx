@@ -1,6 +1,6 @@
 "use client";
 
-import { FetchList, FetchTask } from "@/types/ServerResponses";
+import { FetchProject, FetchTask } from "@/types/ServerResponses";
 import {
     DndContext,
     DragOverlay,
@@ -13,26 +13,40 @@ import { arrayMove, SortableContext } from "@dnd-kit/sortable";
 import { useEffect, useState } from "react";
 import { KanbanColumn } from "./KanbanColumn";
 import { KanbanTask } from "./KanbanTask";
-import { useTaskActions } from "@/hooks/useTasks";
+import { useTaskActions, useTasks } from "@/hooks/useTasks";
+import { useLists } from "@/hooks/useLists";
+import LoadingSkeletonCards from "./LoadingSkeletonCards";
+import { Card, CardContent } from "@/components/ui/card";
+import { useAuthRoleByProject } from "@/hooks/useRoles";
+import { CirclePlus } from "lucide-react";
+import { TypographyMuted } from "./typography/TypographyMuted";
+import CreateColumn from "./buttons/CreateColumn";
 
 interface KanbanBoardProps {
-    projectSlug: string;
-    lists: FetchList[];
-    tasks: FetchTask[];
+    project: FetchProject;
 }
 
-export function KanbanBoardInterface({
-    projectSlug,
-    lists: lists,
-    tasks: initialTasks,
-}: KanbanBoardProps) {
-    const [tasks, setTasks] = useState(initialTasks);
-    const [activeTask, setActiveTask] = useState<FetchTask | null>(null);
+export function KanbanBoardInterface({ project }: KanbanBoardProps) {
+    const { lists, isLoading: listLoading } = useLists(project.slug, {
+        enabled: !!project,
+    });
+    const { tasks: initialTasks, isLoading: taskLoading } = useTasks(
+        project.slug,
+        {
+            enabled: !!project,
+        }
+    );
     const { updateTask } = useTaskActions();
+    const { permitted: permittedCreateList } = useAuthRoleByProject(
+        project.slug,
+        "create_list"
+    );
+    const [tasks, setTasks] = useState<FetchTask[]>([]);
+    const [activeTask, setActiveTask] = useState<FetchTask | null>(null);
 
     useEffect(() => {
-        setTasks(initialTasks)
-    }, [initialTasks])
+        if (initialTasks) setTasks(initialTasks);
+    }, [initialTasks]);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -41,6 +55,8 @@ export function KanbanBoardInterface({
             },
         })
     );
+    if (listLoading || taskLoading) return <LoadingSkeletonCards />;
+    if (!lists || !initialTasks || !tasks) return "An error has occured";
 
     function handleDragStart(event: any) {
         const { active } = event;
@@ -69,26 +85,55 @@ export function KanbanBoardInterface({
 
         // Find the list where the item was dropped
         const overListId =
-            lists.find((list) => list.id === overId)?.id ||
+            lists?.find((list) => list.id === overId)?.id ||
             tasks.find((task) => task.id === overId)?.listId;
 
+        if (!overListId) {
+            setActiveTask(null);
+            return;
+        }
+
         if (activeListId !== overListId) {
-            // Task moved to a different column
+            // Moving between columns
             setTasks((prevTasks) => {
-                const newTasks = prevTasks.map((t) =>
-                    t.id === activeTaskId ? { ...t, listId: overListId } : t
+                // Get tasks in target list
+                const targetTasks = prevTasks.filter(
+                    (t) => t.listId === overListId
                 );
-                return newTasks;
-            });
-            updateTask({
-                taskSlug: activeTask.slug,
-                data: {
-                    listId: overListId,
-                },
-                projectSlug: projectSlug,
+
+                // Figure out drop position
+                let newIndex = targetTasks.findIndex((t) => t.id === overId);
+                if (newIndex === -1) newIndex = targetTasks.length; // drop at end if not over a task
+
+                // Remove from old list
+                const remainingTasks = prevTasks.filter(
+                    (t) => t.id !== activeTaskId
+                );
+
+                // Insert into new list at correct position
+                const newTask = { ...activeTask, listId: overListId };
+                const newTargetTasks = [
+                    ...targetTasks.slice(0, newIndex),
+                    newTask,
+                    ...targetTasks.slice(newIndex),
+                ];
+
+                // Merge back
+                const otherTasks = remainingTasks.filter(
+                    (t) => t.listId !== overListId
+                );
+
+                updateTask({
+                    taskSlug: activeTask.slug,
+                    data: {
+                        listId: overListId,
+                    },
+                    projectSlug: project.slug,
+                });
+                return [...otherTasks, ...newTargetTasks];
             });
         } else {
-            // Task reordered within the same column
+            // Reordering within the same list
             const tasksInList = tasks.filter(
                 (task) => task.listId === activeListId
             );
@@ -116,35 +161,36 @@ export function KanbanBoardInterface({
     }
 
     return (
-        <div className="p-6 bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-gray-400">
+        <Card className="p-6 bg-background dark:bg-background min-h-full">
             <DndContext
                 sensors={sensors}
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
             >
-                <div className="flex pb-4 space-x-6 overflow-x-auto">
+                <CardContent className="flex p-2 space-x-6 overflow-x-auto min-h-full">
                     {lists.map((list) => {
                         const taskList = tasks.filter(
                             (task) => task.listId === list.id
                         );
                         return (
                             <SortableContext
-                                items={taskList.map((task) => task.id)}
                                 key={list.id}
+                                items={taskList.map((task) => task.id)}
                             >
                                 <KanbanColumn
                                     list={list}
                                     tasks={taskList}
-                                    projectSlug={projectSlug}
+                                    projectSlug={project.slug}
                                 />
                             </SortableContext>
                         );
                     })}
-                </div>
+                    {permittedCreateList && <CreateColumn project={project} />}
+                </CardContent>
                 <DragOverlay>
                     {activeTask ? <KanbanTask task={activeTask} /> : null}
                 </DragOverlay>
             </DndContext>
-        </div>
+        </Card>
     );
 }

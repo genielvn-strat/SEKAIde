@@ -1,13 +1,20 @@
+"use client";
 import { FetchList, FetchTask } from "@/types/ServerResponses";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
 import { KanbanTask } from "./KanbanTask";
 import { Button } from "./ui/button";
-import { useListActions } from "@/hooks/useLists";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { CreateTaskInput, taskSchema } from "@/lib/validations";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useTaskActions } from "@/hooks/useTasks";
+
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { CirclePlus } from "lucide-react";
+import CreateTask from "./buttons/CreateTask";
 
 export function KanbanColumn({
     list,
@@ -18,71 +25,49 @@ export function KanbanColumn({
     tasks: FetchTask[];
     projectSlug: string;
 }) {
-    const {
-        register,
-        handleSubmit,
-        setError,
-        reset,
-        formState: { errors, isSubmitting },
-    } = useForm<CreateTaskInput>({
-        resolver: zodResolver(taskSchema),
-    });
     const { setNodeRef } = useDroppable({
         id: list.id,
     });
-    const { createTask } = useTaskActions();
-    const { deleteList } = useListActions();
-
-    const onSubmit: SubmitHandler<CreateTaskInput> = async (data) => {
-        try {
-            await createTask({ projectSlug, listId: list.id, data });
-            reset();
-        } catch {
-            setError("root", { message: "Server error" });
-        }
-    };
 
     return (
-        <div
+        <Card
             ref={setNodeRef}
-            className="flex-shrink-0 w-80 p-4 rounded-lg border bg-gray-50 dark:bg-outer_space-400"
+            className="flex flex-col flex-shrink-0 w-80 min-h-full"
         >
-            {/* Column Header */}
-            <div className="flex items-center justify-between px-3 py-2 border-b border-gray-200 dark:border-gray-600">
-                <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-200">
-                    {list.name}
-                </h2>
-                <Button
-                    onClick={() => {
-                        deleteList({
-                            listId: list.id,
-                            projectSlug: projectSlug,
-                        });
-                    }}
-                >
-                    Remove List
-                </Button>
-            </div>
+            <CardHeader>
+                <CardTitle>{list.name}</CardTitle>
+                <CardDescription>{list.description}</CardDescription>
+            </CardHeader>
 
-            {/* Tasks */}
-            <div className="flex flex-col gap-3 p-3 overflow-y-auto max-h-[70vh]">
+            <CardContent className="flex flex-col gap-3 overflow-y-auto h-full max-h-[70vh]">
                 <SortableContext items={tasks.map((task) => task.id)}>
                     {tasks.map((task) => (
-                        <KanbanTask key={task.id} task={task} />
+                        <KanbanTask
+                            key={task.id}
+                            task={task}
+                            projectSlug={projectSlug}
+                        />
                     ))}
                 </SortableContext>
 
-                {/* Empty state */}
                 {tasks.length === 0 && (
                     <div className="text-center text-xs text-gray-500 dark:text-gray-400 py-6">
                         No tasks
                     </div>
                 )}
-                <form
+            </CardContent>
+            <CardFooter className="flex-col gap-2">
+                <CreateTask projectSlug={projectSlug} list={list} />
+            </CardFooter>
+        </Card>
+    );
+}
+
+/*
+<form
                     onSubmit={handleSubmit(onSubmit)}
                     className="space-y-4 p-4 border rounded-md shadow-sm"
                 >
-                    {/* Title */}
                     <div>
                         <label
                             htmlFor="title"
@@ -103,7 +88,6 @@ export function KanbanColumn({
                         )}
                     </div>
 
-                    {/* Description */}
                     <div>
                         <label
                             htmlFor="description"
@@ -123,7 +107,6 @@ export function KanbanColumn({
                         )}
                     </div>
 
-                    {/* Priority */}
                     <div>
                         <label
                             htmlFor="priority"
@@ -147,7 +130,6 @@ export function KanbanColumn({
                         )}
                     </div>
 
-                    {/* Due Date */}
                     <div>
                         <label
                             htmlFor="dueDate"
@@ -173,7 +155,6 @@ export function KanbanColumn({
                         )}
                     </div>
 
-                    {/* The `listId` and `position` can be hidden inputs as they're likely determined programmatically */}
                     <input type="hidden" {...register("listId")} />
                     <input
                         type="number"
@@ -198,7 +179,4 @@ export function KanbanColumn({
                         Create Task
                     </button>
                 </form>
-            </div>
-        </div>
-    );
-}
+                */

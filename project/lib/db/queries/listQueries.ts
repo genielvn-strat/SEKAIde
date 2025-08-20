@@ -1,5 +1,5 @@
 import { projects, lists } from "@/migrations/schema";
-import { asc, eq } from "drizzle-orm";
+import { asc, count, eq } from "drizzle-orm";
 import { CreateList, UpdateList } from "@/types/List";
 import { failure, success } from "@/types/Response";
 import { authorization } from "./authorizationQueries";
@@ -22,6 +22,7 @@ export const listQueries = {
                     id: lists.id,
                     name: lists.name,
                     description: lists.description,
+                    isFinal: lists.isFinal,
                     position: lists.position,
                 })
                 .from(lists)
@@ -50,25 +51,30 @@ export const listQueries = {
             projectSlug,
             userId
         );
-        
+
         if (!member) {
             return failure(400, "Not authorized to create a list");
         }
-        
+
         const permission = await authorization.checkIfRoleHasPermission(
             member.roleId,
             "create_list"
         );
-        console.log(permission)
+        console.log(permission);
 
         if (!permission) return failure(400, "Not authorized to create a list");
 
         try {
+            const [{ count: listCount }] = await db
+                .select({ count: count() })
+                .from(lists)
+                .where(eq(lists.projectId, project.id));
             const result = await db
                 .insert(lists)
                 .values({
                     ...data,
                     projectId: project.id,
+                    position: listCount,
                 })
                 .returning();
 

@@ -1,8 +1,24 @@
+"use client";
 import { FetchTask } from "@/types/ServerResponses";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-
-export function KanbanTask({ task }: { task: FetchTask }) {
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { TypographyMuted } from "./typography/TypographyMuted";
+import { Badge } from "./ui/badge";
+import Link from "next/link";
+export function KanbanTask({
+    projectSlug,
+    task,
+}: {
+    projectSlug: string;
+    task: FetchTask;
+}) {
     const { attributes, listeners, setNodeRef, transform, transition } =
         useSortable({ id: task.id });
 
@@ -12,46 +28,50 @@ export function KanbanTask({ task }: { task: FetchTask }) {
     };
 
     return (
-        <div
+        <Card
             ref={setNodeRef}
             style={style}
             {...attributes}
             {...listeners}
-            key={task.id}
-            className="bg-white dark:bg-outer_space-300 border border-gray-200 dark:border-gray-500 rounded-md p-3 shadow-sm hover:shadow-md transition-shadow"
+            className="p-0 shadow-sm hover:shadow-md transition-shadow"
         >
-            <div className="font-medium text-sm text-gray-800 dark:text-gray-100">
-                {task.title}
-            </div>
-            {task.description && (
-                <p className="mt-1 text-xs text-gray-600 dark:text-gray-300 line-clamp-2">
+            <CardHeader>
+                <Link href={`/projects/${projectSlug}/${task.slug}`} className="underline">
+                    <CardTitle>{task.title}</CardTitle>
+                </Link>
+                <CardDescription className="mt-1 text-xs text-gray-600 dark:text-gray-300 line-clamp-2">
                     {task.description}
-                </p>
-            )}
-            <div className="flex justify-between items-center mt-3 text-xs text-gray-500 dark:text-gray-400">
-                <span
-                    className={`px-2 py-0.5 rounded capitalize ${
-                        task.priority === "high"
-                            ? "bg-red-100 text-red-700"
-                            : task.priority === "medium"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-green-100 text-green-700"
-                    }`}
-                >
-                    {task.priority}
-                </span>
-                {task.dueDate && (
-                    <span>
-                        {new Date(task.dueDate).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                        })}
-                    </span>
-                )}
-            </div>
-            <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                {task.assigneeName} ({task.assigneeUsername})
-            </div>
-        </div>
+                    <div className="flex justify-between items-center mt-3 text-xs ">
+                        <Badge
+                            className={`capitalize ${
+                                task.priority === "high"
+                                    ? "bg-red-100 text-red-700"
+                                    : task.priority === "medium"
+                                    ? "bg-yellow-100 text-yellow-700"
+                                    : "bg-green-100 text-green-700"
+                            }`}
+                        >
+                            {task.priority}
+                        </Badge>
+                        {task.dueDate && (
+                            <span>
+                                {new Date(task.dueDate).toLocaleDateString(
+                                    "en-US",
+                                    {
+                                        month: "short",
+                                        day: "numeric",
+                                    }
+                                )}
+                            </span>
+                        )}
+                    </div>
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <TypographyMuted>
+                    Assigned to: {task.assigneeName} ({task.assigneeUsername})
+                </TypographyMuted>
+            </CardContent>
+        </Card>
     );
 }

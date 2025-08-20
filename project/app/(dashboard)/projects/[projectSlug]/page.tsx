@@ -1,14 +1,14 @@
 "use client";
 import { notFound } from "next/navigation";
 import { useProjectDetails } from "@/hooks/useProjects";
-import { useListActions, useLists } from "@/hooks/useLists";
-import { CreateListInput, listSchema } from "@/lib/validations";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import TaskList from "@/components/TaskList";
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { KanbanBoardInterface } from "@/components/KanbanBoardInterface";
-import { useTasks } from "@/hooks/useTasks";
 import { use } from "react";
+import { TypographyH1 } from "@/components/typography/TypographyH1";
+import { TypographyMuted } from "@/components/typography/TypographyMuted";
+import { Separator } from "@/components/ui/separator";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 
 interface ProjectProps {
     params: Promise<{
@@ -18,29 +18,17 @@ interface ProjectProps {
 
 export default function ProjectDetails({ params }: ProjectProps) {
     const { projectSlug } = use(params);
-    const {
-        register: listRegiter,
-        handleSubmit: listHandleSubmit,
-        setError: setListError,
-        reset: listReset,
-        formState: { errors: listErrors, isSubmitting: listSubmitting },
-    } = useForm<CreateListInput>({
-        resolver: zodResolver(listSchema),
-    });
 
     const { project, isLoading, isError, error } =
         useProjectDetails(projectSlug);
-    const { lists, isLoading: listLoading } = useLists(projectSlug, {
-        enabled: !!project,
-    });
-    const { tasks, isLoading: taskLoading } = useTasks(projectSlug, {
-        enabled: !!project,
-    });
 
-    const { createList, updateList, deleteList } = useListActions();
 
-    if (isLoading || listLoading || taskLoading) {
-        return <div className="loading">Loading project...</div>;
+    if (isLoading) {
+        return <LoadingSkeleton />;
+    }
+
+    if (!project) {
+        return notFound();
     }
 
     if (isError) {
@@ -52,99 +40,109 @@ export default function ProjectDetails({ params }: ProjectProps) {
         );
     }
 
-    if (!project || !lists || !tasks) {
-        return notFound();
-    }
-
-    const onListSubmit: SubmitHandler<CreateListInput> = async (data) => {
-        try {
-            await createList({ projectSlug: projectSlug, data });
-            listReset();
-        } catch {
-            setListError("root", { message: "Server error" });
-        }
-    };
+    
 
     return (
-        <div className="project mx-auto h-full">
-            <h1 className="text-xl font-semibold">{project.name}</h1>
-            <p className="text-sm text-muted-foreground">
-                {project.description}
-            </p>
-
-            <h2 className="text-lg font-semibold mt-6 mb-2">Create List</h2>
-            <form
-                onSubmit={listHandleSubmit(onListSubmit)}
-                className="space-y-2 mb-6"
-            >
-                <input
-                    type="text"
-                    placeholder="List name"
-                    className="w-full border px-3 py-2 rounded"
-                    {...listRegiter("name")}
-                />
-                {listErrors.name && (
-                    <p className="text-sm text-red-600">
-                        {listErrors.name.message}
-                    </p>
-                )}
-
-                <textarea
-                    placeholder="Description (optional)"
-                    className="w-full border px-3 py-2 rounded"
-                    {...listRegiter("description")}
-                />
-                {listErrors.description && (
-                    <p className="text-sm text-red-600">
-                        {listErrors.description.message}
-                    </p>
-                )}
-
-                <input
-                    type="number"
-                    placeholder="Position"
-                    className="border px-2 py-1 rounded"
-                    {...listRegiter("position", { valueAsNumber: true })}
-                />
-                {listErrors.position && (
-                    <p className="text-sm text-red-600">
-                        {listErrors.position.message}
-                    </p>
-                )}
-                <input
-                    type="checkbox"
-                    className="border px-2 py-1 rounded"
-                    {...listRegiter("isFinal")}
-                />
-                <label htmlFor="isFinal">isFinal</label>
-                {listErrors.isFinal && (
-                    <p className="text-sm text-red-600">
-                        {listErrors.isFinal.message}
-                    </p>
-                )}
-
-                {listErrors.root && (
-                    <p className="text-sm text-red-600">
-                        {listErrors.root.message}
-                    </p>
-                )}
-
-                <button
-                    type="submit"
-                    disabled={listSubmitting}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded disabled:opacity-50"
-                >
-                    {listSubmitting ? "Creating..." : "Add List"}
-                </button>
-            </form>
-            <KanbanBoardInterface
-                projectSlug={projectSlug}
-                lists={lists}
-                tasks={tasks}
-            />
+        <div className="flex flex-col">
+            <div className="doc-header flex flex-row justify-between items-center">
+                <div className="left">
+                    <div className="flex flex-row items-center gap-4">
+                        <TypographyH1>{project.name}</TypographyH1>
+                        <TypographyMuted>// {project.teamName}</TypographyMuted>
+                    </div>
+                    <TypographyMuted>{project.description}</TypographyMuted>
+                </div>
+                <div className="right"></div>
+            </div>
+            <Separator className="my-4" />
+            <Tabs defaultValue="board" className="h-full">
+                <TabsList>
+                    <TabsTrigger value="board">Board</TabsTrigger>
+                    <TabsTrigger value="tasks">Task List</TabsTrigger>
+                    <TabsTrigger value="settings">Settings</TabsTrigger>
+                </TabsList>
+                <div className="my-4 min-h-full">
+                    <TabsContent value="board">
+                        <KanbanBoardInterface project={project} />
+                    </TabsContent>
+                </div>
+            </Tabs>
         </div>
     );
 }
+// <div className="project mx-auto h-full">
+//     <h1 className="text-xl font-semibold">{project.name}</h1>
+//     <p className="text-sm text-muted-foreground">
+//         {project.description}
+//     </p>
+
+//     <h2 className="text-lg font-semibold mt-6 mb-2">Create List</h2>
+//     <form
+//         onSubmit={listHandleSubmit(onListSubmit)}
+//         className="space-y-2 mb-6"
+//     >
+//         <input
+//             type="text"
+//             placeholder="List name"
+//             className="w-full border px-3 py-2 rounded"
+//             {...listRegiter("name")}
+//         />
+//         {listErrors.name && (
+//             <p className="text-sm text-red-600">
+//                 {listErrors.name.message}
+//             </p>
+//         )}
+
+//         <textarea
+//             placeholder="Description (optional)"
+//             className="w-full border px-3 py-2 rounded"
+//             {...listRegiter("description")}
+//         />
+//         {listErrors.description && (
+//             <p className="text-sm text-red-600">
+//                 {listErrors.description.message}
+//             </p>
+//         )}
+
+//         <input
+//             type="number"
+//             placeholder="Position"
+//             className="border px-2 py-1 rounded"
+//             {...listRegiter("position", { valueAsNumber: true })}
+//         />
+//         {listErrors.position && (
+//             <p className="text-sm text-red-600">
+//                 {listErrors.position.message}
+//             </p>
+//         )}
+//         <input
+//             type="checkbox"
+//             className="border px-2 py-1 rounded"
+//             {...listRegiter("isFinal")}
+//         />
+//         <label htmlFor="isFinal">isFinal</label>
+//         {listErrors.isFinal && (
+//             <p className="text-sm text-red-600">
+//                 {listErrors.isFinal.message}
+//             </p>
+//         )}
+
+//         {listErrors.root && (
+//             <p className="text-sm text-red-600">
+//                 {listErrors.root.message}
+//             </p>
+//         )}
+
+//         <button
+//             type="submit"
+//             disabled={listSubmitting}
+//             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded disabled:opacity-50"
+//         >
+//             {listSubmitting ? "Creating..." : "Add List"}
+//         </button>
+//     </form>
+
+// </div>
 // <h2 className="text-lg font-semibold mb-2">Lists</h2>
 // <div className="space-y-4">
 //     {lists?.map((list) => (

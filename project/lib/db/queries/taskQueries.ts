@@ -48,6 +48,7 @@ export const taskQueries = {
                         eq(projects.slug, projectSlug)
                     )
                 )
+
                 .then((res) => res[0] || null);
 
             return success(200, "Task fetched successfully", result);
@@ -86,6 +87,7 @@ export const taskQueries = {
                 .innerJoin(projects, eq(tasks.projectId, projects.id))
                 .innerJoin(users, eq(tasks.assigneeId, users.id))
                 .innerJoin(lists, eq(tasks.listId, lists.id))
+                .orderBy(asc(tasks.position))
                 .where(eq(projects.slug, projectSlug));
 
             return success(200, "Project Tasks fetched successfully", result);

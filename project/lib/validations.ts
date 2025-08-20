@@ -46,7 +46,7 @@ export const taskSchema = z.object({
     title: z
         .string()
         .min(5, "Title is too short.")
-        .max(200, "Title is too long"),
+        .max(50, "Title is too long"),
     description: z.string().max(1000, "Description is too long").optional(),
     priority: z.enum(["low", "medium", "high"]),
     listId: z.string(),

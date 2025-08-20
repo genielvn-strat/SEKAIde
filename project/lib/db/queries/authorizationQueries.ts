@@ -266,4 +266,36 @@ export const authorization = {
 
         return result;
     },
+    checkIfRoleHasPermissionByProjectSlug: async (
+        userId: string,
+        projectSlug: string,
+        action: string
+    ) => {
+        const result = await db
+            .select({
+                teamId: teams.id,
+                roleId: roles.id,
+                roleName: roles.name,
+                permissionName: permissions.name,
+            })
+            .from(teamMembers)
+            .innerJoin(teams, eq(teamMembers.teamId, teams.id))
+            .innerJoin(projects, eq(projects.teamId, teams.id))
+            .innerJoin(roles, eq(teamMembers.roleId, roles.id))
+            .innerJoin(rolePermissions, eq(rolePermissions.roleId, roles.id))
+            .innerJoin(
+                permissions,
+                eq(rolePermissions.permissionId, permissions.id)
+            )
+            .where(
+                and(
+                    eq(teamMembers.userId, userId),
+                    eq(projects.slug, projectSlug),
+                    eq(permissions.name, action)
+                )
+            )
+            .then((res) => res[0] ?? null);
+
+        return result;
+    },
 };

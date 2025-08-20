@@ -74,6 +74,7 @@ export type FetchList = {
     name: string;
     description: string | null;
     position: number;
+    isFinal: boolean;
 };
 
 // Comment
