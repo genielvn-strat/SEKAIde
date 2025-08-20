@@ -5,6 +5,7 @@ import {
     createList,
     deleteList,
     updateList,
+    moveList,
 } from "@/actions/listActions";
 import { CreateListInput, UpdateListInput } from "@/lib/validations";
 import { FetchList } from "@/types/ServerResponses";
@@ -73,10 +74,27 @@ export function useListActions() {
             queryClient.invalidateQueries({ queryKey: ["lists"] });
         },
     });
+
+    const move = useMutation({
+        mutationFn: ({
+            listId,
+            projectSlug,
+            direction,
+        }: {
+            projectSlug: string;
+            listId: string;
+            direction: "left" | "right";
+        }) => moveList(listId, projectSlug, direction),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["lists"] });
+        },
+    });
+
     return {
         createList: create.mutateAsync,
         deleteList: del.mutateAsync,
         updateList: update.mutateAsync,
+        moveList: move.mutateAsync,
         isCreating: create.isPending,
     };
 }

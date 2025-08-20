@@ -166,4 +166,93 @@ export const listQueries = {
             return failure(500, "Failed to delete list.");
         }
     },
+    move: async (
+        listId: string,
+        projectSlug: string,
+        direction: "left" | "right",
+        userId: string
+    ) => {
+        // Validate list belongs to project
+        const list = await authorization.checkIfListBelongsToProjectBySlug(
+            projectSlug,
+            listId
+        );
+
+        if (!list || !list.teamId) {
+            return failure(404, "List not found in this project");
+        }
+
+        // Validate membership
+        const member = await authorization.checkIfTeamMemberByTeamId(
+            list.teamId,
+            userId
+        );
+
+        if (!member) return failure(400, "Not authorized to move this list");
+
+        const permission = await authorization.checkIfRoleHasPermission(
+            member.roleId,
+            "update_list"
+        );
+        if (!permission)
+            return failure(400, "Not authorized to move this list");
+
+        try {
+            // Get all lists ordered by position
+            const projectLists = await db
+                .select({
+                    id: lists.id,
+                    position: lists.position,
+                })
+                .from(lists)
+                .innerJoin(projects, eq(lists.projectId, projects.id))
+                .where(eq(projects.slug, projectSlug))
+                .orderBy(asc(lists.position));
+
+            const currentIndex = projectLists.findIndex(
+                (l) => l.id === list.id
+            );
+            if (currentIndex === -1)
+                return failure(404, "List not found in this project");
+
+            // Boundary checks
+            if (
+                (direction === "left" && currentIndex === 0) ||
+                (direction === "right" &&
+                    currentIndex === projectLists.length - 1)
+            ) {
+                return failure(
+                    400,
+                    "Cannot move list further in that direction"
+                );
+            }
+
+            const swapIndex =
+                direction === "left" ? currentIndex - 1 : currentIndex + 1;
+
+            const currentList = projectLists[currentIndex];
+            const swapList = projectLists[swapIndex];
+
+            // Swap positions
+            await db.transaction(async (tx) => {
+                await tx
+                    .update(lists)
+                    .set({ position: swapList.position })
+                    .where(eq(lists.id, currentList.id));
+
+                await tx
+                    .update(lists)
+                    .set({ position: currentList.position })
+                    .where(eq(lists.id, swapList.id));
+            });
+
+            return success(200, "List moved successfully", {
+                movedListId: currentList.id,
+                swappedWithId: swapList.id,
+            });
+        } catch (err) {
+            console.error("Move list error:", err);
+            return failure(500, "Failed to move list");
+        }
+    },
 };
