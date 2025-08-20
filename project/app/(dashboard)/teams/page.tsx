@@ -1,128 +1,129 @@
 "use client";
 
+import { useTeams } from "@/hooks/useTeams";
+import { TypographyH1 } from "@/components/typography/TypographyH1";
+import { TypographyMuted } from "@/components/typography/TypographyMuted";
+import { Separator } from "@/components/ui/separator";
+import CreateTeam from "@/components/buttons/CreateTeam";
+import TeamCard from "@/components/TeamCard";
+import { useState, useMemo } from "react"; // 👈 Add useMemo here
+import { Input } from "@/components/ui/input";
 import {
-    CreateTeamInput,
-    teamSchema,
-    UpdateTeamInput,
-} from "@/lib/validations";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useTeamActions, useTeams } from "@/hooks/useTeams";
-import Link from "next/link";
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
+    DropdownMenuSeparator,
+    DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { ListFilter, MessageCircleQuestion } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 
 export default function TeamPage() {
-    const {
-        register,
-        handleSubmit,
-        setError,
-        reset,
-        formState: { errors, isSubmitting },
-    } = useForm<CreateTeamInput>({
-        resolver: zodResolver(teamSchema),
-    });
+    const { joinedTeams, isLoading, isError } = useTeams();
 
-    const { joinedTeams, isLoading } = useTeams();
+    const [searchQuery, setSearchQuery] = useState("");
+    const [sortCriteria, setSortCriteria] = useState("createdAt");
 
-    const { createTeam, deleteTeam, updateTeam, isCreating } = useTeamActions();
+    const filteredAndSortedTeams = useMemo(() => {
+        return joinedTeams
+            .filter((team) =>
+                team.teamName.toLowerCase().includes(searchQuery.toLowerCase())
+            )
+            .sort((a, b) => {
+                if (sortCriteria === "teamName") {
+                    return a.teamName.localeCompare(b.teamName);
+                }
+                if (sortCriteria === "memberCount") {
+                    return b.memberCount - a.memberCount;
+                }
+                if (sortCriteria === "projectCount") {
+                    return b.projectCount - a.projectCount;
+                }
+                return (
+                    new Date(b.createdAt!).getTime() -
+                    new Date(a.createdAt!).getTime()
+                );
+            });
+    }, [joinedTeams, searchQuery, sortCriteria]);
 
-    const onSubmit: SubmitHandler<CreateTeamInput> = async (data) => {
-        try {
-            const response = await createTeam(data);
-            if (!response.success) {
-                throw new Error(response.message);
-            }
-            reset();
-        } catch (e) {
-            if (e instanceof Error) {
-                setError("root", { message: e.message });
-            }
-        }
-    };
+    if (isLoading) {
+        return <LoadingSkeleton />;
+    }
+
+    if (!joinedTeams || isError) {
+        return "Error loading teams";
+    }
 
     return (
-        <div className="space-y-6 max-w-2xl mx-auto py-8">
-            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-                <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">
-                    📋 Team Management Implementation Tasks
-                </h3>
-                <ul className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1 list-disc list-inside">
-                    <li>
-                        Task 6.1: Implement task assignment and collaboration
-                    </li>
-                    <li>
-                        Task 6.4: Implement project member management and
-                        permissions
-                    </li>
-                </ul>
-            </div>
-
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <div>
-                    <label className="block text-sm font-medium mb-1">
-                        Team Name
-                    </label>
-                    <input
-                        {...register("name")}
-                        type="text"
-                        className="w-full border rounded p-2"
-                        placeholder="Enter team name"
-                    />
-                    {errors.name && (
-                        <p className="text-sm text-red-500 mt-1">
-                            {errors.name.message}
-                        </p>
-                    )}
-                    {errors.root && (
-                        <p className="text-sm text-red-500 mt-1">
-                            {errors.root.message}
-                        </p>
-                    )}
+        <>
+            <div className="doc-header flex flex-row justify-between items-center">
+                <div className="left">
+                    <TypographyH1>Teams</TypographyH1>
+                    <TypographyMuted>
+                        Manage and view your teams
+                    </TypographyMuted>
                 </div>
-                <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-                    disabled={isCreating || isSubmitting}
-                >
-                    {isCreating || isSubmitting ? "Creating..." : "Create Team"}
-                </button>
-            </form>
-
-            <div>
-                <h2 className="text-lg font-semibold mt-6">🤝 Joined Teams</h2>
-                <div className="space-y-2 mt-2">
-                    {joinedTeams.map((team) => (
-                        <Link
-                            href={`/teams/${team.slug}`}
-                            key={team.id}
-                            className="bg-gray-100 p-2 rounded text-sm"
+                <div className="right">
+                    <CreateTeam />
+                </div>
+            </div>
+            <Separator className="my-4" />
+            <div className="flex flex-row gap-4 mb-4 items-center">
+                <Input
+                    placeholder="Search teams..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full"
+                />
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline">
+                            <ListFilter className="mr-2 h-4 w-4" /> Sort
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56">
+                        <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuRadioGroup
+                            value={sortCriteria}
+                            onValueChange={setSortCriteria}
                         >
-                            <pre>{JSON.stringify(team, null, 2)}</pre>
-                            <div className="mt-2 flex gap-2">
-                                <button
-                                    onClick={() => deleteTeam(team.id)}
-                                    className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                                >
-                                    Delete
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        const newName = prompt("New Name");
-                                        if (!newName) return;
-
-                                        updateTeam({
-                                            teamId: team.id,
-                                            data: { name: newName },
-                                        });
-                                    }}
-                                    className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-                                >
-                                    Edit
-                                </button>
-                            </div>
-                        </Link>
-                    ))}
-                </div>
+                            <DropdownMenuRadioItem value="createdAt">
+                                Creation date
+                            </DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="teamName">
+                                Name
+                            </DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="memberCount">
+                                Members
+                            </DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="projectCount">
+                                Projects
+                            </DropdownMenuRadioItem>
+                        </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
-        </div>
+            <div className="flex flex-wrap gap-4">
+                {filteredAndSortedTeams.length !== 0 ? (
+                    filteredAndSortedTeams.map((team) => (
+                        <TeamCard key={team.id} team={team} />
+                    ))
+                ) : (
+                    <Alert variant="default">
+                        <MessageCircleQuestion />
+                        <AlertTitle>No teams found</AlertTitle>
+                        <AlertDescription>
+                            Looks like you are not part of any teams yet. Create
+                            one or ask someone to invite you.
+                        </AlertDescription>
+                    </Alert>
+                )}
+            </div>
+        </>
     );
 }

@@ -184,6 +184,12 @@ export function KanbanColumn({
                             {errors.position.message}
                         </p>
                     )}
+                    <input type="checkbox" {...register("finished")} />
+                    {errors.finished && (
+                        <p className="mt-1 text-sm text-red-600">
+                            {errors.finished.message}
+                        </p>
+                    )}
 
                     <button
                         type="submit"

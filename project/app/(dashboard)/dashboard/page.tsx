@@ -1,8 +1,25 @@
+"use client";
+import { createPermissions, createRolePermissions } from "@/actions/createActions";
+import { Button } from "@/components/ui/button";
 import { TrendingUp, Users, CheckCircle, Clock, Plus } from "lucide-react";
 
 export default function DashboardPage() {
     return (
         <div className="space-y-6">
+            <Button
+                onClick={async () => {
+                    createPermissions();
+                }}
+            >
+                Create Permissions
+            </Button>
+            <Button
+                onClick={async () => {
+                    createRolePermissions();
+                }}
+            >
+                Create Role Permission
+            </Button>
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                 <div className="flex items-start">
                     <div className="flex-shrink-0">

@@ -24,8 +24,14 @@ export async function POST(req: NextRequest) {
         );
         console.log("Webhook payload:", evt.data);
         if (eventType === "user.created") {
-            const { id, email_addresses, username, first_name, last_name } =
-                evt.data;
+            const {
+                id,
+                email_addresses,
+                username,
+                first_name,
+                last_name,
+                image_url,
+            } = evt.data;
 
             try {
                 const data: CreateUser = {
@@ -33,6 +39,7 @@ export async function POST(req: NextRequest) {
                     username: String(username),
                     name: `${first_name} ${last_name}`,
                     email: email_addresses[0].email_address,
+                    displayPictureLink: image_url,
                 };
 
                 const user = await queries.users.create(data);

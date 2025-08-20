@@ -1,5 +1,5 @@
-import { teams, teamMembers } from "@/migrations/schema";
-import { and, eq, or } from "drizzle-orm";
+import { teams, teamMembers, projects, roles } from "@/migrations/schema";
+import { and, countDistinct, eq, or } from "drizzle-orm";
 import { CreateTeam, UpdateTeam } from "@/types/Team";
 import { failure, success } from "@/types/Response";
 import {
@@ -9,23 +9,43 @@ import {
 } from "@/types/ServerResponses";
 import { authorization } from "./authorizationQueries";
 import { db } from "../db";
+import { alias } from "drizzle-orm/pg-core";
 
 export const teamQueries = {
     getJoinedTeams: async (userId: string) => {
         try {
+            const memberSelf = alias(teamMembers, "memberSelf");
+
             const result: FetchJoinedTeams[] = await db
                 .select({
                     id: teams.id,
                     teamName: teams.name,
                     slug: teams.slug,
-                    role: teamMembers.role,
-                    inviteConfirmed: teamMembers.inviteConfirmed,
+                    memberCount: countDistinct(teamMembers.userId).as(
+                        "memberCount"
+                    ),
+                    projectCount: countDistinct(projects.id).as("projectCount"),
                     createdAt: teams.createdAt,
                     updatedAt: teams.updatedAt,
                 })
-                .from(teamMembers)
-                .innerJoin(teams, eq(teamMembers.teamId, teams.id))
-                .where(eq(teamMembers.userId, userId));
+                .from(teams)
+                .innerJoin(
+                    memberSelf,
+                    and(
+                        eq(memberSelf.teamId, teams.id),
+                        eq(memberSelf.userId, userId)
+                    )
+                )
+                .innerJoin(teamMembers, eq(teamMembers.teamId, teams.id))
+                .leftJoin(projects, eq(projects.teamId, teams.id))
+                .groupBy(
+                    teams.id,
+                    teams.name,
+                    teams.slug,
+                    teams.createdAt,
+                    teams.updatedAt
+                );
+
             return success(200, "Joined teams successfully fetched", result);
         } catch {
             return failure(500, "Failed to fetch joined teams");
@@ -38,11 +58,25 @@ export const teamQueries = {
                     id: teams.id,
                     teamName: teams.name,
                     slug: teams.slug,
+                    memberCount: countDistinct(teamMembers.userId).as(
+                        "memberCount"
+                    ),
+                    projectCount: countDistinct(projects.id).as("projectCount"),
                     createdAt: teams.createdAt,
                     updatedAt: teams.updatedAt,
                 })
                 .from(teams)
-                .where(eq(teams.ownerId, ownerId));
+                .innerJoin(teamMembers, eq(teams.id, teamMembers.teamId)) // join for counting
+                .leftJoin(projects, eq(projects.teamId, teams.id))
+                .where(eq(teams.ownerId, ownerId))
+                .groupBy(
+                    teams.id,
+                    teams.name,
+                    teams.slug,
+                    teams.createdAt,
+                    teams.updatedAt
+                );
+
             return success(200, "Owned teams successfully fetched", result);
         } catch {
             return failure(500, "Failed to fetch owned teams");
@@ -89,11 +123,11 @@ export const teamQueries = {
     },
     create: async (data: CreateTeam) => {
         const result = await db.transaction(async (tx) => {
-            if (!data.name || !data.ownerId) {
-                return failure(400, "Missing required fields.");
-            }
-
             try {
+                if (!data.name || !data.ownerId) {
+                    return failure(400, "Missing required fields.");
+                }
+
                 const insertedTeam = await tx
                     .insert(teams)
                     .values(data)
@@ -103,10 +137,16 @@ export const teamQueries = {
                 if (!team) throw new Error("Team creation failed");
 
                 // create a team member for this user as well
+                const ownerRole = await tx
+                    .select({ id: roles.id })
+                    .from(roles)
+                    .where(eq(roles.nameId, "owner"))
+                    .then((res) => res[0] ?? null);
+
                 await tx.insert(teamMembers).values({
                     teamId: team.id,
                     userId: data.ownerId,
-                    role: "admin",
+                    roleId: ownerRole.id,
                     inviteConfirmed: true,
                 });
                 return success(201, "Team created successfully", team);
@@ -121,9 +161,21 @@ export const teamQueries = {
         if (!teamId || !userId) {
             return failure(400, "Missing required fields");
         }
-        const team = await authorization.checkIfTeamOwnedByUser(teamId, userId);
+        const member = await authorization.checkIfTeamMemberByTeamId(
+            teamId,
+            userId
+        );
 
-        if (!team) {
+        if (!member) {
+            return failure(403, "You are not authorized to update this team");
+        }
+
+        const permitted = await authorization.checkIfRoleHasPermission(
+            member.roleId,
+            "update_team"
+        );
+
+        if (!permitted) {
             return failure(403, "You are not authorized to update this team");
         }
 
@@ -131,7 +183,7 @@ export const teamQueries = {
             const result = await db
                 .update(teams)
                 .set({ ...data })
-                .where(eq(teams.id, team.id))
+                .where(eq(teams.id, member.teamId))
                 .returning();
             return success(200, "Team updated successfully", result[0]);
         } catch {

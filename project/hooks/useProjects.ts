@@ -47,7 +47,7 @@ export function useTeamProjects(
     return {
         projects: res?.success ? res.data : null,
         isLoading,
-        isError,
+        isError: !res?.success ? true : isError,
         error: !res?.success ? res?.message : error,
     };
 }

@@ -12,9 +12,7 @@ export const userQueries = {
         return result[0] || null;
     },
     create: async (data: CreateUser) => {
-        if (!data.name || !data.clerkId || !data.username || !data.email) {
-            throw new Error("Missing required fields");
-        }
+        
         const result = await db.insert(users).values(data).returning();
         return result[0];
     },

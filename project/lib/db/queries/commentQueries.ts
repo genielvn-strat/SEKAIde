@@ -104,21 +104,22 @@ export const commentQueries = {
             userId
         );
 
+        if (!member) {
+            return failure(400, "Not authorized to update this comment.");
+        }
+
         const owned = await authorization.checkIfCommentOwnedByUser(
             commentId,
             userId
         );
 
-        if (
-            !member ||
-            !member.role ||
-            (!authorization.checkIfHasRole(member.role, [
-                "project_manager",
-                "admin",
-            ]) &&
-                !owned)
-        ) {
-            return failure(400, "Not authorized to delete this comment.");
+        const permission = await authorization.checkIfRoleHasPermission(
+            member.roleId,
+            "update_comment"
+        );
+
+        if (!owned && !permission) {
+            return failure(400, "Not authorized to update this comment.");
         }
 
         const task = await authorization.checkIfTaskBelongsToProjectBySlug(
@@ -154,21 +155,21 @@ export const commentQueries = {
             projectSlug,
             userId
         );
+        if (!member) {
+            return failure(400, "Not authorized to delete this comment.");
+        }
 
         const owned = await authorization.checkIfCommentOwnedByUser(
             commentId,
             userId
         );
 
-        if (
-            !member ||
-            !member.role ||
-            (!authorization.checkIfHasRole(member.role, [
-                "project_manager",
-                "admin",
-            ]) &&
-                !owned)
-        ) {
+        const permission = await authorization.checkIfRoleHasPermission(
+            member.roleId,
+            "delete_comment"
+        );
+
+        if (!owned && !permission) {
             return failure(400, "Not authorized to delete this comment.");
         }
 

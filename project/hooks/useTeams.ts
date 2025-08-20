@@ -15,6 +15,7 @@ export function useTeams() {
     const {
         data: res,
         isLoading,
+        isError,
         error,
     } = useQuery({
         queryKey: ["teams"],
@@ -24,6 +25,7 @@ export function useTeams() {
     return {
         ownedTeams: res?.success ? (res?.data as FetchTeams).owned : [],
         joinedTeams: res?.success ? (res?.data as FetchTeams).joined : [],
+        isError: !res?.success ? true : isError,
         isLoading,
         error: !res?.success ? res?.message : error,
     };
@@ -43,7 +45,7 @@ export function useTeamDetails(teamSlug: string) {
     return {
         teamDetails: res?.success ? res?.data : null,
         isLoading,
-        isError,
+        isError: !res?.success ? true : isError,
         error: !res?.success ? res?.message : error,
     };
 }
@@ -74,6 +76,7 @@ export function useTeamActions() {
             data: UpdateTeamInput;
         }) => updateTeam(teamId, data),
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["teamDetails"] });
             queryClient.invalidateQueries({ queryKey: ["teams"] });
         },
     });
@@ -82,5 +85,6 @@ export function useTeamActions() {
         deleteTeam: del.mutateAsync,
         updateTeam: update.mutateAsync,
         isCreating: create.isPending,
+        isDeleting: del.isPending,
     };
 }

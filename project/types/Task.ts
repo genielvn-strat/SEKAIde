@@ -6,6 +6,7 @@ export interface Task {
     listId: string;
     assigneeId?: string;
     slug: string;
+    finished: boolean;
     priority: "low" | "medium" | "high";
     dueDate?: Date;
     position: number;

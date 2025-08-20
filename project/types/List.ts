@@ -1,9 +1,10 @@
 export interface List {
     id: string;
     name: string;
-    description: string | undefined;
+    description?: string | undefined;
     projectId: string;
     position: number;
+    isFinal: boolean;
     createdAt: Date | string;
     updatedAt: Date | string;
 }

@@ -12,8 +12,8 @@ export type CreateUserInput = z.infer<typeof createUserSchema>;
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;
 
 export const projectSchema = z.object({
-    name: z.string().min(1, "Name is required").max(100, "Name is too long"),
-    description: z.string().max(500, "Description is too long").optional(),
+    name: z.string().min(1, "Name is required").max(50, "Name is too long"),
+    description: z.string().max(50, "Description is too long").optional(),
     teamId: z.string().min(1, "Please select a team."),
     dueDate: z.date().min(new Date(), "Due date must be in future").optional(),
 });
@@ -33,6 +33,15 @@ export const updateTeamSchema = teamSchema.partial();
 export type CreateTeamInput = z.infer<typeof createTeamSchema>;
 export type UpdateTeamInput = z.infer<typeof updateTeamSchema>;
 
+export const teamMemberSchema = z.object({
+    input: z.string().min(1, "Input an email or a username"),
+    roleId: z.string().min(1, "Role selection is required"),
+});
+export const createTeamMemberSchema = teamMemberSchema;
+export const updateTeamMemberSchema = teamMemberSchema.partial();
+export type CreateTeamMemberInput = z.infer<typeof createTeamMemberSchema>;
+export type UpdateTeamMemberInput = z.infer<typeof updateTeamMemberSchema>;
+
 export const taskSchema = z.object({
     title: z
         .string()
@@ -43,6 +52,7 @@ export const taskSchema = z.object({
     listId: z.string(),
     assigneeId: z.string().uuid().optional(),
     position: z.number().nonnegative("Position must be positive"),
+    finished: z.boolean(),
     dueDate: z.date().min(new Date(), "Due date must be in future").optional(),
 });
 export const createTaskSchema = taskSchema;
@@ -53,6 +63,7 @@ export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
 export const listSchema = z.object({
     name: z.string().min(5, "Name is too short.").max(100, "Name is too long"),
     description: z.string().max(200, "Description too long.").optional(),
+    isFinal: z.boolean(),
     position: z.number().nonnegative("Position must be positive"),
 });
 export const createListSchema = listSchema;

@@ -1,0 +1,1 @@
+ALTER TABLE "permissions" ADD CONSTRAINT "permissions_name_unique" UNIQUE("name");

@@ -50,17 +50,18 @@ export const listQueries = {
             projectSlug,
             userId
         );
-
-        if (
-            !member ||
-            !member.role ||
-            !authorization.checkIfHasRole(member.role, [
-                "project_manager",
-                "admin",
-            ])
-        ) {
-            return failure(400, "Not authorized to delete this list");
+        
+        if (!member) {
+            return failure(400, "Not authorized to create a list");
         }
+        
+        const permission = await authorization.checkIfRoleHasPermission(
+            member.roleId,
+            "create_list"
+        );
+        console.log(permission)
+
+        if (!permission) return failure(400, "Not authorized to create a list");
 
         try {
             const result = await db
@@ -100,12 +101,15 @@ export const listQueries = {
             userId
         );
 
-        if (
-            !member ||
-            (member?.role !== "project_manager" && member?.role !== "admin")
-        ) {
-            return failure(400, "Not authorized to delete this list");
+        if (!member) {
+            return failure(400, "Not authorized to update this list");
         }
+        const permission = await authorization.checkIfRoleHasPermission(
+            member.roleId,
+            "update_list"
+        );
+        if (!permission)
+            return failure(400, "Not authorized to update this list");
 
         try {
             const result = await db
@@ -136,16 +140,15 @@ export const listQueries = {
             userId
         );
 
-        if (
-            !member ||
-            !member.role ||
-            !authorization.checkIfHasRole(member.role, [
-                "project_manager",
-                "admin",
-            ])
-        ) {
+        if (!member) {
             return failure(400, "Not authorized to delete this list");
         }
+        const permission = await authorization.checkIfRoleHasPermission(
+            member.roleId,
+            "delete_list"
+        );
+        if (!permission)
+            return failure(400, "Not authorized to delete this list");
 
         try {
             const result = await db

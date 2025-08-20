@@ -1,1 +1,0 @@
-ALTER TABLE "tasks" ADD COLUMN "slug" text NOT NULL;

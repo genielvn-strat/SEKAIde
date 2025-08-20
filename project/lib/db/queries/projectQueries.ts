@@ -1,5 +1,11 @@
-import { projects, teams, teamMembers, lists } from "@/migrations/schema";
-import { and, eq, or } from "drizzle-orm";
+import {
+    projects,
+    teams,
+    teamMembers,
+    lists,
+    tasks,
+} from "@/migrations/schema";
+import { and, count, eq, or, sql } from "drizzle-orm";
 import { CreateProject, UpdateProject } from "@/types/Project";
 import { failure, success } from "@/types/Response";
 import { FetchProject } from "@/types/ServerResponses";
@@ -65,7 +71,7 @@ export const projectQueries = {
         }
 
         try {
-            const result = await db
+            const result: FetchProject[] = await db
                 .select({
                     id: projects.id,
                     name: projects.name,
@@ -75,10 +81,14 @@ export const projectQueries = {
                     createdAt: projects.createdAt,
                     updatedAt: projects.updatedAt,
                     dueDate: projects.dueDate,
+                    totalTaskCount: count(tasks.id).mapWith(Number),
+                    finishedTaskCount: sql<number>`sum(case when ${tasks.finished} = true then 1 else 0 end)`,
                 })
                 .from(projects)
                 .innerJoin(teams, eq(teams.id, projects.teamId))
-                .where(eq(teams.slug, teamSlug));
+                .leftJoin(tasks, eq(tasks.projectId, projects.id)) // include tasks
+                .where(eq(teams.slug, teamSlug))
+                .groupBy(projects.id); // aggregate per project
             return success(200, "Team projects fetched successfully", result);
         } catch {
             return failure(500, "Failed to fetch team projects");
@@ -98,11 +108,15 @@ export const projectQueries = {
                     createdAt: projects.createdAt,
                     updatedAt: projects.updatedAt,
                     dueDate: projects.dueDate,
+                    totalTaskCount: count(tasks.id).mapWith(Number),
+                    activeTaskCount: sql<number>`sum(case when ${tasks.finished} = true then 1 else 0 end)`,
                 })
                 .from(teamMembers)
                 .innerJoin(projects, eq(teamMembers.teamId, projects.teamId))
                 .innerJoin(teams, eq(teamMembers.teamId, teams.id))
-                .where(eq(teamMembers.userId, userId));
+                .leftJoin(tasks, eq(tasks.projectId, projects.id)) // join tasks to projects
+                .where(eq(teamMembers.userId, userId))
+                .groupBy(projects.id, teams.name); // group to aggregate per project
             return success(200, "Projects successfully fetched", result);
         } catch {
             return failure(500, "Failed to fetch projects");
@@ -150,7 +164,7 @@ export const projectQueries = {
 
                 await tx.insert(lists).values(defaultLists);
 
-                return success(200, "Project successfully created", inserted);
+                return success(200, "Project successfully created", project);
             });
 
             return result;
@@ -163,12 +177,23 @@ export const projectQueries = {
         data: UpdateProject,
         userId: string
     ) => {
-        const project = await authorization.checkIfProjectOwnedByUserBySlug(
+        const member = await authorization.checkIfTeamMemberByProjectSlug(
             projectSlug,
             userId
         );
+        if (!member) {
+            return failure(
+                400,
+                "You are not authorized to update this project"
+            );
+        }
 
-        if (!project) {
+        const permission = await authorization.checkIfRoleHasPermission(
+            member.roleId,
+            "update_project"
+        );
+
+        if (!permission) {
             return failure(
                 400,
                 "You are not authorized to update this project"
@@ -181,7 +206,7 @@ export const projectQueries = {
                 .set({
                     ...data,
                 })
-                .where(eq(projects.id, project.id))
+                .where(eq(projects.id, member.projectId))
                 .returning();
             return success(200, "Project successfully updated", result);
         } catch {
@@ -192,12 +217,23 @@ export const projectQueries = {
         if (!projectSlug || !userId) {
             return failure(500, "Missing required fields");
         }
-        const project = await authorization.checkIfProjectOwnedByUserBySlug(
+        const member = await authorization.checkIfTeamMemberByProjectSlug(
             projectSlug,
             userId
         );
+        if (!member) {
+            return failure(
+                400,
+                "You are not authorized to delete this project"
+            );
+        }
 
-        if (!project) {
+        const permission = await authorization.checkIfRoleHasPermission(
+            member.roleId,
+            "delete_project"
+        );
+
+        if (!permission) {
             return failure(
                 400,
                 "You are not authorized to delete this project"
@@ -207,7 +243,7 @@ export const projectQueries = {
         try {
             const result = await db
                 .delete(projects)
-                .where(eq(projects.id, project.id))
+                .where(eq(projects.id, member.projectId))
                 .returning();
             return success(200, "Project successfully deleted", result);
         } catch {

@@ -3,6 +3,8 @@ export type FetchOwnedTeams = {
     id: string;
     teamName: string;
     slug: string;
+    projectCount: number;
+    memberCount: number;
     createdAt: string | null;
     updatedAt: string | null;
 };
@@ -11,8 +13,8 @@ export type FetchJoinedTeams = {
     id: string;
     teamName: string;
     slug: string;
-    role: string;
-    inviteConfirmed: boolean;
+    projectCount: number;
+    memberCount: number;
     createdAt: string | null;
     updatedAt: string | null;
 };
@@ -38,8 +40,10 @@ export type FetchProject = {
     description: string | null;
     slug: string;
     ownerId: string;
-    teamId: string;
-    teamName: string;
+    teamId?: string;
+    teamName?: string;
+    finishedTaskCount?: number;
+    totalTaskCount?: number;
     createdAt: string | null;
     updatedAt: string | null;
     dueDate: string | null;
@@ -51,7 +55,10 @@ export type FetchTeamMember = {
     userId: string;
     name: string;
     username: string;
-    role: "admin" | "project_manager" | "member";
+    email: string;
+    displayPictureLink: string;
+    roleName: string;
+    roleColor: string;
     inviteConfirmed: boolean;
 };
 
