@@ -6,9 +6,9 @@ import {
     deleteTeam,
     updateTeam,
     fetchTeamBySlug,
+    fetchTeamWithCreateProject,
 } from "@/actions/teamActions";
 import { UpdateTeamInput } from "@/lib/validations";
-import { FetchTeams } from "@/types/ServerResponses";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function useTeams() {
@@ -23,8 +23,7 @@ export function useTeams() {
     });
 
     return {
-        ownedTeams: res?.success ? (res?.data as FetchTeams).owned : [],
-        joinedTeams: res?.success ? (res?.data as FetchTeams).joined : [],
+        teams: res?.success ? res.data : null,
         isError: !res?.success ? true : isError,
         isLoading,
         error: !res?.success ? res?.message : error,
@@ -40,6 +39,26 @@ export function useTeamDetails(teamSlug: string) {
         queryKey: ["teamDetails", teamSlug],
         queryFn: () => fetchTeamBySlug(teamSlug),
         enabled: !!teamSlug,
+    });
+
+    return {
+        teamDetails: res?.success ? res?.data : null,
+        isLoading,
+        isError: !res?.success ? true : isError,
+        error: !res?.success ? res?.message : error,
+    };
+}
+
+export function useTeamWithCreateProject() {
+    const {
+        data: res,
+        isLoading,
+        isError,
+        error,
+    } = useQuery({
+        queryKey: ["teamProjectCreate"],
+        queryFn: fetchTeamWithCreateProject,
+        enabled: true,
     });
 
     return {

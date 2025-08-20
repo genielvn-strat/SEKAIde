@@ -1,33 +1,21 @@
 // Teams
-export type FetchOwnedTeams = {
-    id: string;
-    teamName: string;
-    slug: string;
-    projectCount: number;
-    memberCount: number;
-    createdAt: string | null;
-    updatedAt: string | null;
-};
 
-export type FetchJoinedTeams = {
+export type FetchTeams = {
     id: string;
-    teamName: string;
+    name: string;
     slug: string;
     projectCount: number;
     memberCount: number;
     createdAt: string | null;
     updatedAt: string | null;
-};
-export type FetchTeams = {
-    owned: FetchOwnedTeams[];
-    joined: FetchJoinedTeams[];
 };
 
 export type FetchTeamDetails = {
     id: string;
     name: string;
     slug: string;
-    ownerId: string;
+    projectCount?: number;
+    memberCount?: number;
     createdAt: string | null;
     updatedAt: string | null;
 };

@@ -3,10 +3,10 @@ import { TypographyP } from "@/components/typography/TypographyP";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FolderOpen, Users } from "lucide-react";
 import Link from "next/link";
-import { FetchJoinedTeams } from "@/types/ServerResponses";
+import { FetchTeams } from "@/types/ServerResponses";
 
 interface TeamCardProps {
-    team: FetchJoinedTeams;
+    team: FetchTeams;
 }
 
 const TeamCard: React.FC<TeamCardProps> = ({ team }) => {
@@ -14,7 +14,7 @@ const TeamCard: React.FC<TeamCardProps> = ({ team }) => {
         <Card className="w-full max-w-sm" key={team.id}>
             <CardHeader>
                 <Link href={`/teams/${team.slug}`}>
-                    <CardTitle className="text-2xl">{team.teamName}</CardTitle>
+                    <CardTitle className="text-2xl">{team.name}</CardTitle>
                 </Link>
             </CardHeader>
             <CardContent>

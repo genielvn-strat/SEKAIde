@@ -9,7 +9,6 @@ import {
     boolean,
     pgEnum,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 
 export const taskPriority = pgEnum("task_priority", ["low", "medium", "high"]);
 

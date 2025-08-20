@@ -13,27 +13,22 @@ import slugify from "slugify";
 import { nanoid } from "nanoid";
 import { ZodError } from "zod";
 import { failure, success } from "@/types/Response";
-import { FetchTeams } from "@/types/ServerResponses";
 
 export const fetchTeams = async () => {
     const userId = await getUserDbId();
-    const [ownedRes, joinedRes] = await Promise.all([
-        queries.teams.getByOwner(userId),
-        queries.teams.getJoinedTeams(userId),
-    ]);
+    const result = await queries.teams.getJoinedTeams(userId);
 
-    if (!ownedRes.success) return ownedRes;
-    if (!joinedRes.success) return joinedRes;
-
-    return success<FetchTeams>(200, "Team fetched successfully", {
-        owned: ownedRes.data ?? [],
-        joined: joinedRes.data ?? [],
-    });
+    return result
 };
 
 export const fetchTeamBySlug = async (slug: string) => {
     const userId = await getUserDbId();
     return await queries.teams.getBySlug(slug, userId);
+};
+
+export const fetchTeamWithCreateProject = async () => {
+    const userId = await getUserDbId();
+    return await queries.teams.getTeamsWithCreateProject(userId);
 };
 
 export const createTeam = async (data: CreateTeamInput) => {
