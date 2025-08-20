@@ -18,6 +18,9 @@ import { TypographyMuted } from "@/components/typography/TypographyMuted";
 import { useTeamActions } from "@/hooks/useTeams";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { FolderOpen, LayoutList, TriangleAlert, Users } from "lucide-react";
+import { TypographyP } from "../typography/TypographyP";
 
 interface DeleteTeamProps {
     teamDetails: FetchTeamDetails;
@@ -57,7 +60,39 @@ const DeleteTeam: React.FC<DeleteTeamProps> = ({ teamDetails }) => {
                         <br />
                     </AlertDialogDescription>
                 </AlertDialogHeader>
-                <div className="py-2">
+                <Alert variant="destructive">
+                    <AlertTitle className="flex flex-row items-center gap-2">
+                        You're also going to do the following:
+                    </AlertTitle>
+                    <AlertDescription>
+                        {teamDetails.memberCount != 0 && (
+                            <TypographyP>
+                                <Users /> {teamDetails.memberCount}{" "}
+                                {teamDetails.memberCount == 1
+                                    ? "member"
+                                    : "members"}{" "}
+                                will be removed from the team.
+                            </TypographyP>
+                        )}
+                        {teamDetails.projectCount != 0 && (
+                            <TypographyP>
+                                <FolderOpen /> {teamDetails.projectCount}{" "}
+                                {teamDetails.projectCount == 1
+                                    ? "project"
+                                    : "projects"}{" "}
+                                will be deleted.
+                            </TypographyP>
+                        )}
+                        {teamDetails.taskCount != 0 && (
+                            <TypographyP>
+                                <LayoutList /> {teamDetails.taskCount}{" "}
+                                {teamDetails.taskCount == 1 ? "task" : "tasks"}{" "}
+                                will be deleted.
+                            </TypographyP>
+                        )}
+                    </AlertDescription>
+                </Alert>
+                <div className="py-2 flex flex-col gap-2">
                     <Input
                         placeholder="Type confirmation text..."
                         value={confirmationText}
@@ -75,7 +110,8 @@ const DeleteTeam: React.FC<DeleteTeamProps> = ({ teamDetails }) => {
                         variant="destructive"
                         onClick={handleDelete}
                         disabled={
-                            confirmationText !== "I am sure to delete this team" || isDeleting
+                            confirmationText !==
+                                "I am sure to delete this team" || isDeleting
                         }
                     >
                         Delete

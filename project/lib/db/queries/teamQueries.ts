@@ -5,14 +5,12 @@ import {
     roles,
     rolePermissions,
     permissions,
+    tasks,
 } from "@/migrations/schema";
 import { and, countDistinct, eq, or } from "drizzle-orm";
 import { CreateTeam, UpdateTeam } from "@/types/Team";
 import { failure, success } from "@/types/Response";
-import {
-    FetchTeams,
-    FetchTeamDetails,
-} from "@/types/ServerResponses";
+import { FetchTeams, FetchTeamDetails } from "@/types/ServerResponses";
 import { authorization } from "./authorizationQueries";
 import { db } from "../db";
 import { alias } from "drizzle-orm/pg-core";
@@ -104,12 +102,18 @@ export const teamQueries = {
                     id: teams.id,
                     name: teams.name,
                     slug: teams.slug,
+                    memberCount: countDistinct(teamMembers.userId).as(
+                        "memberCount"
+                    ),
+                    projectCount: countDistinct(projects.id).as("projectCount"),
+                    taskCount: countDistinct(tasks.id).as("taskCount"), // <-- new
                     createdAt: teams.createdAt,
                     updatedAt: teams.updatedAt,
                 })
-
                 .from(teams)
                 .innerJoin(teamMembers, eq(teams.id, teamMembers.teamId))
+                .leftJoin(projects, eq(projects.teamId, teams.id))
+                .leftJoin(tasks, eq(tasks.projectId, projects.id)) // <-- join tasks
                 .where(
                     and(
                         eq(teams.slug, slug),
@@ -119,10 +123,17 @@ export const teamQueries = {
                         )
                     )
                 )
+                .groupBy(
+                    teams.id,
+                    teams.name,
+                    teams.slug,
+                    teams.createdAt,
+                    teams.updatedAt
+                )
                 .then((res) => res[0] || null);
 
             return success(200, "Team details successfully fetched.", result);
-        } catch {
+        } catch (err) {
             return failure(500, "Failed to fetch team details");
         }
     },
