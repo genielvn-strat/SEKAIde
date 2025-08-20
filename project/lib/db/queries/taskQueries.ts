@@ -215,11 +215,15 @@ export const taskQueries = {
         if (!member) {
             return failure(400, "Not authorized to update this task");
         }
+        const assigned = await db
+            .select()
+            .from(tasks)
+            .where(and(eq(tasks.slug, taskSlug), eq(tasks.assigneeId, userId)));
         const permission = await authorization.checkIfRoleHasPermission(
             member.roleId,
             "update_task"
         );
-        if (!permission)
+        if (!permission && !assigned)
             return failure(400, "Not authorized to update this task");
         try {
             const result = await db

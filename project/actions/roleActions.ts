@@ -33,3 +33,19 @@ export const authRoleByProjectSlug = async (
     console.log(userId, projectSlug, action, !!result);
     return !!result;
 };
+
+export const authRoleByTaskId = async (
+    taskId: string,
+    projectSlug: string,
+    action: string
+) => {
+    const userId = await getUserDbId();
+    const result = await authorization.checkIfRoleHasPermissionByTaskId(
+        userId,
+        projectSlug,
+        taskId,
+        action
+    );
+    console.log(userId, taskId, action, !!result);
+    return !!result;
+};

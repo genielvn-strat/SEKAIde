@@ -12,6 +12,7 @@ import {
 import { TypographyMuted } from "./typography/TypographyMuted";
 import { Badge } from "./ui/badge";
 import Link from "next/link";
+import { useAuthRoleByTask } from "@/hooks/useRoles";
 export function KanbanTask({
     projectSlug,
     task,
@@ -19,6 +20,12 @@ export function KanbanTask({
     projectSlug: string;
     task: FetchTask;
 }) {
+    const { permitted: permittedUpdate } = useAuthRoleByTask(
+        task.id,
+        projectSlug,
+        "update_task"
+    );
+
     const { attributes, listeners, setNodeRef, transform, transition } =
         useSortable({ id: task.id });
 
@@ -30,13 +37,15 @@ export function KanbanTask({
     return (
         <Card
             ref={setNodeRef}
-            style={style}
-            {...attributes}
-            {...listeners}
+            style={{ ...style, opacity: permittedUpdate ? 1 : 0.5 }}
+            {...(permittedUpdate ? { ...attributes, ...listeners } : {})}
             className="p-0 shadow-sm hover:shadow-md transition-shadow"
         >
             <CardHeader>
-                <Link href={`/projects/${projectSlug}/${task.slug}`} className="underline">
+                <Link
+                    href={`/projects/${projectSlug}/${task.slug}`}
+                    className="underline"
+                >
                     <CardTitle>{task.title}</CardTitle>
                 </Link>
                 <CardDescription className="mt-1 text-xs text-gray-600 dark:text-gray-300 line-clamp-2">

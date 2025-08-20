@@ -298,4 +298,50 @@ export const authorization = {
 
         return result;
     },
+    checkIfRoleHasPermissionByTaskId: async (
+        userId: string,
+        projectSlug: string,
+        taskId: string,
+        action: string
+    ) => {
+        // Check if assigned to the person
+        const task = await db
+            .select({ taskId: tasks.id })
+            .from(tasks)
+            .where(and(eq(tasks.assigneeId, userId), eq(tasks.id, taskId)))
+            .then((res) => res[0] ?? null);
+
+        if (task) {
+            // Assignee automatically has permission
+            return task;
+        }
+
+        // 2. Otherwise, check role-based permission
+        const result = await db
+            .select({
+                teamId: teams.id,
+                roleId: roles.id,
+                roleName: roles.name,
+                permissionName: permissions.name,
+            })
+            .from(teamMembers)
+            .innerJoin(teams, eq(teamMembers.teamId, teams.id))
+            .innerJoin(projects, eq(projects.teamId, teams.id))
+            .innerJoin(roles, eq(teamMembers.roleId, roles.id))
+            .innerJoin(rolePermissions, eq(rolePermissions.roleId, roles.id))
+            .innerJoin(
+                permissions,
+                eq(rolePermissions.permissionId, permissions.id)
+            )
+            .where(
+                and(
+                    eq(teamMembers.userId, userId),
+                    eq(permissions.name, action),
+                    eq(projects.slug, projectSlug)
+                )
+            )
+            .then((res) => res[0] ?? null);
+
+        return result;
+    },
 };
