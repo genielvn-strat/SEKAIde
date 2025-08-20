@@ -60,7 +60,6 @@ export const listQueries = {
             member.roleId,
             "create_list"
         );
-        console.log(permission);
 
         if (!permission) return failure(400, "Not authorized to create a list");
 

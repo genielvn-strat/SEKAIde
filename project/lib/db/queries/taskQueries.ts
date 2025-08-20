@@ -37,6 +37,7 @@ export const taskQueries = {
                     projectSlug: projects.slug,
                     listId: lists.id,
                     listName: lists.name,
+                    finished: tasks.finished,
                 })
                 .from(tasks)
                 .innerJoin(projects, eq(tasks.projectId, projects.id))
@@ -82,6 +83,7 @@ export const taskQueries = {
                     projectSlug: projects.slug,
                     listId: lists.id,
                     listName: lists.name,
+                    finished: tasks.finished,
                 })
                 .from(tasks)
                 .innerJoin(projects, eq(tasks.projectId, projects.id))
@@ -125,6 +127,7 @@ export const taskQueries = {
                     projectSlug: projects.slug,
                     listId: lists.id,
                     listName: lists.name,
+                    finished: tasks.finished,
                 })
                 .from(tasks)
                 .innerJoin(users, eq(tasks.assigneeId, users.id))
@@ -226,6 +229,14 @@ export const taskQueries = {
         if (!permission && !assigned)
             return failure(400, "Not authorized to update this task");
         try {
+            let list;
+            if (data.listId) {
+                list = await db
+                    .select({ isFinal: lists.isFinal, name: lists.name })
+                    .from(lists)
+                    .where(eq(lists.id, data.listId))
+                    .then((res) => res[0] ?? null);
+            }
             const result = await db
                 .update(tasks)
                 .set({
@@ -234,6 +245,7 @@ export const taskQueries = {
                         ? data.dueDate.toISOString()
                         : undefined,
                     updatedAt: new Date().toISOString(),
+                    ...(list !== undefined ? { finished: list.isFinal } : {}),
                 })
                 .where(eq(tasks.id, task.id))
                 .returning();
