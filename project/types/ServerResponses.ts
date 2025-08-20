@@ -14,8 +14,6 @@ export type FetchTeamDetails = {
     id: string;
     name: string;
     slug: string;
-    projectCount?: number;
-    memberCount?: number;
     createdAt: string | null;
     updatedAt: string | null;
 };

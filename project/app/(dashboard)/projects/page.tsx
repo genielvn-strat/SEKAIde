@@ -1,161 +1,135 @@
 "use client";
-
-import { useProjectActions, useProjects } from "@/hooks/useProjects";
-import { useTeams } from "@/hooks/useTeams";
-import { CreateProjectInput, projectSchema } from "@/lib/validations";
-import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
-import React, { useState } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
+import { useProjects } from "@/hooks/useProjects";
+import { TypographyH1 } from "@/components/typography/TypographyH1";
+import { TypographyMuted } from "@/components/typography/TypographyMuted";
+import { Separator } from "@/components/ui/separator";
+import CreateProject from "@/components/buttons/CreateProject";
+import ProjectCard from "@/components/ProjectCard";
+import { useState, useMemo } from "react";
+import { Input } from "@/components/ui/input";
+import {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
+    DropdownMenuSeparator,
+    DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { ListFilter, MessageCircleQuestion } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function ProjectsPage() {
-    const {
-        register,
-        handleSubmit,
-        setError,
-        reset,
-        formState: { errors, isSubmitting },
-    } = useForm<CreateProjectInput>({
-        resolver: zodResolver(projectSchema),
-    });
-    const { ownedTeams } = useTeams();
-    const { projects } = useProjects();
+    const { projects, isLoading, isError } = useProjects();
 
-    const { createProject, deleteProject, updateProject, isCreating } =
-        useProjectActions();
+    const [searchQuery, setSearchQuery] = useState("");
+    const [sortCriteria, setSortCriteria] = useState("createdAt");
 
-    const onSubmit: SubmitHandler<CreateProjectInput> = async (data) => {
-        try {
-            const response = await createProject(data);
-            if (!response.success) throw new Error(response.message);
-            reset();
-        } catch (e) {
-            if (e instanceof Error) {
-                setError("root", { message: e.message });
-            }
-        }
-    };
+    const filteredAndSortedProjects = useMemo(() => {
+        return projects
+            ?.map((project) => {
+                const completionRate =
+                    project.totalTaskCount && project.totalTaskCount > 0
+                        ? (project.finishedTaskCount ?? 0) /
+                          project.totalTaskCount
+                        : 0;
+                return { ...project, completionRate };
+            })
+            .filter((project) =>
+                project.name.toLowerCase().includes(searchQuery.toLowerCase())
+            )
+            .sort((a, b) => {
+                if (sortCriteria === "name") {
+                    return a.name.localeCompare(b.name);
+                }
+                if (sortCriteria === "completionRate") {
+                    return b.completionRate - a.completionRate;
+                }
+                return (
+                    new Date(b.createdAt!).getTime() -
+                    new Date(a.createdAt!).getTime()
+                );
+            });
+    }, [projects, searchQuery, sortCriteria]);
+
+    if (isLoading) {
+        return <LoadingSkeleton />;
+    }
+
+    if (!projects || isError) {
+        return "Error loading projects";
+    }
 
     return (
-        <div className="space-y-6 max-w-2xl mx-auto p-4">
-            <div>
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <label
-                        htmlFor="team-select"
-                        className="block font-medium mb-2"
-                    >
-                        Select a Team
-                    </label>
-                    <label className="block text-sm font-medium mb-1">
-                        Project Name
-                    </label>
-                    <input
-                        {...register("name")}
-                        type="text"
-                        className="w-full border rounded p-2"
-                        placeholder="Enter Project name"
-                    />
-                    {errors.name && (
-                        <p className="text-sm text-red-500 mt-1">
-                            {errors.name.message}
-                        </p>
-                    )}
-                    <label className="block text-sm font-medium mb-1">
-                        Project Description
-                    </label>
-                    <textarea
-                        {...register("description")}
-                        className="w-full border rounded p-2"
-                        placeholder="Enter Project Description"
-                    />
-                    {errors.description && (
-                        <p className="text-sm text-red-500 mt-1">
-                            {errors.description.message}
-                        </p>
-                    )}
-                    <select
-                        {...register("teamId")}
-                        id="team-select"
-                        className="w-full border p-2 rounded"
-                    >
-                        <option value="" disabled>
-                            -- Select Team --
-                        </option>
-                        {ownedTeams?.length ? (
-                            ownedTeams.map((team) => (
-                                <option key={team.id} value={team.id}>
-                                    {team.teamName}
-                                </option>
-                            ))
-                        ) : (
-                            <option disabled>No owned teams found</option>
-                        )}
-                    </select>
-                    {errors.teamId && (
-                        <p className="text-sm text-red-500 mt-1">
-                            {errors.teamId.message}
-                        </p>
-                    )}
-                    {errors.root && (
-                        <p className="text-sm text-red-500 mt-1">
-                            {errors.root.message}
-                        </p>
-                    )}
-                    <button
-                        type="submit"
-                        disabled={isCreating}
-                        className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
-                    >
-                        Create Test Project
-                    </button>
-                </form>
+        <>
+            <div className="doc-header flex flex-row justify-between items-center">
+                <div className="left">
+                    <TypographyH1>Projects</TypographyH1>
+                    <TypographyMuted>
+                        See projects across your joined teams
+                    </TypographyMuted>
+                </div>
+                <div className="right">
+                    <CreateProject />
+                </div>
+            </div>
+            <Separator className="my-4" />
+
+            {/* Search + Sort Controls */}
+            <div className="flex flex-row gap-4 mb-4 items-center">
+                <Input
+                    placeholder="Search projects..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full"
+                />
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline">
+                            <ListFilter className="mr-2 h-4 w-4" /> Sort
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56">
+                        <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuRadioGroup
+                            value={sortCriteria}
+                            onValueChange={setSortCriteria}
+                        >
+                            <DropdownMenuRadioItem value="createdAt">
+                                Creation date
+                            </DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="name">
+                                Name
+                            </DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="completionRate">
+                                Completion Rate
+                            </DropdownMenuRadioItem>
+                        </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
 
-            <div>
-                <h2 className="font-bold text-lg mb-2">Projects</h2>
-                {projects?.length ? (
-                    <ul className="space-y-2">
-                        {projects.map((project) => (
-                            <Link href={`/projects/${project.slug}`}>
-                                <li
-                                    key={project.id}
-                                    className="bg-gray-100 p-2 rounded text-sm"
-                                >
-                                    <pre>
-                                        {JSON.stringify(project, null, 2)}
-                                    </pre>
-                                    <button
-                                        onClick={() => {
-                                            deleteProject({
-                                                slug: project.slug,
-                                            });
-                                        }}
-                                        className="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                                    >
-                                        Delete
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            const newName = prompt("New Name");
-                                            if (!newName) return;
-
-                                            updateProject({
-                                                projectSlug: project.slug,
-                                                data: { name: newName },
-                                            });
-                                        }}
-                                        className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-                                    >
-                                        Edit
-                                    </button>
-                                </li>
-                            </Link>
-                        ))}
-                    </ul>
+            {/* Projects List */}
+            <div className="flex flex-wrap gap-4">
+                {filteredAndSortedProjects?.length !== 0 ? (
+                    filteredAndSortedProjects?.map((project) => (
+                        <ProjectCard key={project.id} project={project} />
+                    ))
                 ) : (
-                    <p className="text-gray-500">No projects found.</p>
+                    <Alert variant="default">
+                        <MessageCircleQuestion />
+                        <AlertTitle>No projects found</AlertTitle>
+                        <AlertDescription>
+                            There are no projects available right now. Please
+                            wait for one to be assigned, or create a new project
+                            if you're a Project Manager.
+                        </AlertDescription>
+                    </Alert>
                 )}
             </div>
-        </div>
+        </>
     );
 }

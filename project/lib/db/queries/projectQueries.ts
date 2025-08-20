@@ -109,7 +109,7 @@ export const projectQueries = {
                     updatedAt: projects.updatedAt,
                     dueDate: projects.dueDate,
                     totalTaskCount: count(tasks.id).mapWith(Number),
-                    activeTaskCount: sql<number>`sum(case when ${tasks.finished} = true then 1 else 0 end)`,
+                    finishedTaskCount: sql<number>`sum(case when ${tasks.finished} = true then 1 else 0 end)`,
                 })
                 .from(teamMembers)
                 .innerJoin(projects, eq(teamMembers.teamId, projects.teamId))

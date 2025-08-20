@@ -26,12 +26,18 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
                         {project.name}
                     </CardTitle>
                     <CardDescription className="truncate">
-                        {project.description}
+                        {project.description ?? "No description"}
                     </CardDescription>
                 </Link>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
                 <div>
+                    {project.teamName && (
+                        <div className="flex flex-row items-center gap-4">
+                            <Users />
+                            <TypographyP>{project.teamName}</TypographyP>
+                        </div>
+                    )}
                     <div className="flex flex-row items-center gap-4">
                         <FolderClock />
                         <TypographyP>

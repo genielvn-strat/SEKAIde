@@ -62,7 +62,7 @@ export function useTeamWithCreateProject() {
     });
 
     return {
-        teamDetails: res?.success ? res?.data : null,
+        teams: res?.success ? res?.data : null,
         isLoading,
         isError: !res?.success ? true : isError,
         error: !res?.success ? res?.message : error,
