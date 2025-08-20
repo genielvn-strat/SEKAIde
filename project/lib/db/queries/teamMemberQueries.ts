@@ -40,6 +40,39 @@ export const teamMemberQueries = {
             return failure(500, "Failed to fetch team members");
         }
     },
+    getByProjectSlug: async (projectSlug: string, userId: string) => {
+        const member = await authorization.checkIfTeamMemberByProjectSlug(
+            projectSlug,
+            userId
+        );
+
+        if (!member)
+            return failure(
+                400,
+                "You are not authorized to view this team members"
+            );
+
+        try {
+            const result: FetchTeamMember[] = await db
+                .select({
+                    userId: users.id,
+                    name: users.name,
+                    username: users.username,
+                    email: users.email,
+                    displayPictureLink: users.displayPictureLink,
+                    roleName: roles.name,
+                    roleColor: roles.color,
+                    inviteConfirmed: teamMembers.inviteConfirmed,
+                })
+                .from(teamMembers)
+                .innerJoin(users, eq(users.id, teamMembers.userId))
+                .innerJoin(roles, eq(roles.id, teamMembers.roleId))
+                .where(eq(teamMembers.teamId, member.teamId));
+            return success(200, "Team members fetched successfully", result);
+        } catch {
+            return failure(500, "Failed to fetch team members");
+        }
+    },
     accept: "", // Set invite to true
     reject: "", // Delete the row
     invite: async (

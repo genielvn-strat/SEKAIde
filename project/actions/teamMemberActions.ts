@@ -3,11 +3,14 @@
 import { queries } from "@/lib/db";
 import { getUserDbId } from "./sessionActions";
 import { CreateTeamMemberInput } from "@/lib/validations";
-import { CreateTeamMember } from "@/types/TeamMember";
 
-export const fetchTeamMembersBySlug = async (teamSlug: string) => {
+export const fetchTeamMembersByTeamSlug = async (teamSlug: string) => {
     const userId = await getUserDbId();
     return await queries.teamMembers.getByTeamSlug(teamSlug, userId);
+};
+export const fetchTeamMembersByProjectSlug = async (projectSlug: string) => {
+    const userId = await getUserDbId();
+    return await queries.teamMembers.getByProjectSlug(projectSlug, userId);
 };
 export const createMember = async (
     teamSlug: string,

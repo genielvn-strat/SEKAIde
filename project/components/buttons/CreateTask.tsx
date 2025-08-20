@@ -44,6 +44,10 @@ import { CalendarIcon, CirclePlus } from "lucide-react";
 import { Calendar } from "../ui/calendar";
 import { FetchList } from "@/types/ServerResponses";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useAuthRoleByProject } from "@/hooks/useRoles";
+import { useTeamMembersByProject } from "@/hooks/useTeamMembers";
+import { TypographyMuted } from "../typography/TypographyMuted";
+import { TypographyP } from "../typography/TypographyP";
 
 interface CreateTaskProps {
     projectSlug: string;
@@ -52,6 +56,14 @@ interface CreateTaskProps {
 
 const CreateTask: React.FC<CreateTaskProps> = ({ projectSlug, list }) => {
     const { createTask } = useTaskActions();
+    const { permitted: permittedAssign } = useAuthRoleByProject(
+        projectSlug,
+        "assign_others"
+    );
+
+    const { members } = useTeamMembersByProject(projectSlug, {
+        enabled: !!permittedAssign,
+    });
 
     const form = useForm<CreateTaskInput>({
         resolver: zodResolver(taskSchema),
@@ -62,6 +74,7 @@ const CreateTask: React.FC<CreateTaskProps> = ({ projectSlug, list }) => {
             listId: list.id,
             finished: list.isFinal,
             position: 0,
+            assigneeId: undefined,
         },
     });
 
@@ -177,6 +190,7 @@ const CreateTask: React.FC<CreateTaskProps> = ({ projectSlug, list }) => {
                                 </FormItem>
                             )}
                         />
+
                         <FormField
                             control={form.control}
                             name="dueDate"
@@ -227,6 +241,50 @@ const CreateTask: React.FC<CreateTaskProps> = ({ projectSlug, list }) => {
                                 </FormItem>
                             )}
                         />
+
+                        {permittedAssign ? (
+                            <FormField
+                                control={form.control}
+                                name="assigneeId"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Assignee</FormLabel>
+                                        <FormControl>
+                                            <Select
+                                                defaultValue={field.value}
+                                                onValueChange={field.onChange}
+                                            >
+                                                <SelectTrigger
+                                                    disabled={!permittedAssign}
+                                                >
+                                                    <SelectValue placeholder="Select assignee" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {members?.map((member) => (
+                                                        <SelectItem
+                                                            key={member.userId}
+                                                            value={
+                                                                member.userId
+                                                            }
+                                                            className="flex flex-row items-center gap-4"
+                                                        >
+                                                            <TypographyP>
+                                                                {member.name}
+                                                            </TypographyP>
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        ) : (
+                            <TypographyMuted>
+                                You can only assign this task to yourself.
+                            </TypographyMuted>
+                        )}
 
                         <FormField
                             control={form.control}

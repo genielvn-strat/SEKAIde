@@ -18,8 +18,6 @@ import { useLists } from "@/hooks/useLists";
 import LoadingSkeletonCards from "./LoadingSkeletonCards";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuthRoleByProject } from "@/hooks/useRoles";
-import { CirclePlus } from "lucide-react";
-import { TypographyMuted } from "./typography/TypographyMuted";
 import CreateColumn from "./buttons/CreateColumn";
 
 interface KanbanBoardProps {
@@ -188,7 +186,12 @@ export function KanbanBoardInterface({ project }: KanbanBoardProps) {
                     {permittedCreateList && <CreateColumn project={project} />}
                 </CardContent>
                 <DragOverlay>
-                    {activeTask ? <KanbanTask task={activeTask} /> : null}
+                    {activeTask ? (
+                        <KanbanTask
+                            projectSlug={project.slug}
+                            task={activeTask}
+                        />
+                    ) : null}
                 </DragOverlay>
             </DndContext>
         </Card>

@@ -3,7 +3,8 @@
 import {
     createMember,
     deleteMember,
-    fetchTeamMembersBySlug,
+    fetchTeamMembersByProjectSlug,
+    fetchTeamMembersByTeamSlug,
     leaveMember,
 } from "@/actions/teamMemberActions";
 import { CreateTeamMemberInput } from "@/lib/validations";
@@ -20,7 +21,29 @@ export function useTeamMembers(
         error,
     } = useQuery({
         queryKey: ["teamMembers", slug],
-        queryFn: () => fetchTeamMembersBySlug(slug),
+        queryFn: () => fetchTeamMembersByTeamSlug(slug),
+        enabled: !!slug && options.enabled,
+    });
+
+    return {
+        members: res?.success ? res.data : null,
+        isLoading,
+        isError: !res?.success ? true : isError,
+        error: !res?.success ? res?.message : error,
+    };
+}
+export function useTeamMembersByProject(
+    slug: string,
+    options: { enabled?: boolean } = { enabled: true }
+) {
+    const {
+        data: res,
+        isLoading,
+        isError,
+        error,
+    } = useQuery({
+        queryKey: ["teamMembers", slug],
+        queryFn: () => fetchTeamMembersByProjectSlug(slug),
         enabled: !!slug && options.enabled,
     });
 

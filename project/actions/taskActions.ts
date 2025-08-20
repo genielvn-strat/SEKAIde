@@ -52,7 +52,7 @@ export const createTask = async (
             lower: true,
             strict: true,
         })}-${nanoid(6)}`,
-        assigneeId: userId, // TODO: Use assignee from what the user selects in the UI. For now, you are the assignee.
+        assigneeId: data.assigneeId ?? userId, // TODO: Use assignee from what the user selects in the UI. For now, you are the assignee.
         listId,
     };
     return await queries.tasks.create(projectSlug, taskData, userId);
