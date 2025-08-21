@@ -1,13 +1,8 @@
 "use client";
 
 import React, { Suspense } from "react";
-import {
-    SidebarProvider,
-    SidebarTrigger,
-    useSidebar,
-} from "@/components/ui/sidebar";
+import { useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
-import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 
 export default function DashboardLayout({
@@ -23,15 +18,9 @@ export default function DashboardLayout({
             <div className="flex flex-col w-full min-h-screen overflow-x-auto">
                 {/* Header */}
                 <header className="sticky top-0 z-10 flex items-center justify-between py-2 px-4 sm:px-4 lg:px-4 bg-background border-b">
-                    
-                        <Menu onClick={toggleSidebar}scale={48} />
+                    <Menu onClick={toggleSidebar} scale={48} />
                     {/* Example right-side actions */}
-                    <div className="flex items-center gap-3">
-                        {/* You can add buttons, avatar, or search here */}
-                        <button className="rounded-lg px-3 py-1 bg-primary text-primary-foreground text-sm">
-                            Action
-                        </button>
-                    </div>
+                    <div className="flex items-center gap-3"></div>
                 </header>
 
                 {/* Main content */}

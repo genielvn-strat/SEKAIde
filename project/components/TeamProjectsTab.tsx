@@ -67,7 +67,7 @@ const TeamProjectsTab: React.FC<TeamProjectsTabProps> = ({
     if (!projects || isError) return "An error has occurred";
 
     return (
-        <>
+        <div className="flex flex-col gap-4">
             <div className="flex flex-row justify-between items-center">
                 {permittedCreate && (
                     <CreateTeamProject teamDetails={teamDetails} />
@@ -125,7 +125,7 @@ const TeamProjectsTab: React.FC<TeamProjectsTabProps> = ({
                     ))
                 )}
             </div>
-        </>
+        </div>
     );
 };
 

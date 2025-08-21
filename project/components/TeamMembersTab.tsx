@@ -22,7 +22,7 @@ const TeamMembersTab: React.FC<TeamMembersTabProps> = ({ teamSlug }) => {
     if (!members || isError)
         return "An error has occurred while loading members";
     return (
-        <>
+        <div className="flex flex-col gap-4">
             {permittedInvite && (
                 <div className="flex flex-row justify-between items-center">
                     <InviteMember teamSlug={teamSlug} />
@@ -30,7 +30,7 @@ const TeamMembersTab: React.FC<TeamMembersTabProps> = ({ teamSlug }) => {
             )}
 
             <DataTable columns={TeamMemberColumns(teamSlug)} data={members} />
-        </>
+        </div>
     );
 };
 

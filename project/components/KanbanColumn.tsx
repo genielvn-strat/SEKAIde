@@ -32,7 +32,7 @@ export function KanbanColumn({
     return (
         <Card
             ref={setNodeRef}
-            className="flex flex-col flex-shrink-0 w-80 min-h-full"
+            className="flex flex-col flex-shrink-0 w-80"
         >
             <CardHeader className="flex flex-row items-center justify-between">
                 <div className="left">
@@ -46,7 +46,7 @@ export function KanbanColumn({
                 </div>
             </CardHeader>
 
-            <CardContent className="flex flex-col gap-3 overflow-y-auto h-full min-h-[45vh] max-h-[45vh]">
+            <CardContent className="flex flex-col flex-1 gap-3 overflow-y-auto min-h-0 max-h-full">
                 <SortableContext items={tasks.map((task) => task.id)}>
                     {tasks.map((task) => (
                         <KanbanTask

@@ -22,18 +22,14 @@ import CreateList from "./buttons/CreateList";
 
 interface KanbanBoardProps {
     project: FetchProject;
+    tasks: FetchTask[]
 }
 
-export function KanbanBoardInterface({ project }: KanbanBoardProps) {
+export function KanbanBoardInterface({ project, tasks: initialTasks }: KanbanBoardProps) {
     const { lists, isLoading: listLoading } = useLists(project.slug, {
         enabled: !!project,
     });
-    const { tasks: initialTasks, isLoading: taskLoading } = useTasks(
-        project.slug,
-        {
-            enabled: !!project,
-        }
-    );
+    
     const { updateTask } = useTaskActions();
     const { permitted: permittedCreateList } = useAuthRoleByProject(
         project.slug,
@@ -53,7 +49,7 @@ export function KanbanBoardInterface({ project }: KanbanBoardProps) {
             },
         })
     );
-    if (listLoading || taskLoading) return <LoadingSkeletonCards />;
+    if (listLoading) return <LoadingSkeletonCards />;
     if (!lists || !initialTasks || !tasks) return "An error has occured";
 
     function handleDragStart(event: any) {
@@ -159,13 +155,13 @@ export function KanbanBoardInterface({ project }: KanbanBoardProps) {
     }
 
     return (
-        <Card className="p-3 bg-background dark:bg-background min-h-full">
+        <Card className="p-3 bg-background dark:bg-background h-[60vh] md:h-[70vh]">
             <DndContext
                 sensors={sensors}
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
             >
-                <CardContent className="flex p-2 space-x-6 overflow-x-auto min-h-full">
+                <CardContent className="flex p-2 space-x-6 overflow-x-auto h-full">
                     {lists.map((list) => {
                         const taskList = tasks.filter(
                             (task) => task.listId === list.id
