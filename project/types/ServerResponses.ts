@@ -75,6 +75,7 @@ export type FetchList = {
     name: string;
     description: string | null;
     position: number;
+    color?: "red" | "orange" | "yellow" | "green" | "blue" | "violet" | "mono" | null;
     isFinal: boolean;
 };
 

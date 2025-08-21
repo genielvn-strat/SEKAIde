@@ -36,7 +36,9 @@ export function KanbanColumn({
         >
             <CardHeader className="flex flex-row items-center justify-between">
                 <div className="left">
-                    <CardTitle>{list.name}</CardTitle>
+                    <CardTitle className={`text-rainbow-${list.color}`}>
+                        {list.name}
+                    </CardTitle>
                     <CardDescription>{list.description}</CardDescription>
                 </div>
                 <div className="right">
@@ -44,7 +46,7 @@ export function KanbanColumn({
                 </div>
             </CardHeader>
 
-            <CardContent className="flex flex-col gap-3 overflow-y-auto h-full max-h-[70vh]">
+            <CardContent className="flex flex-col gap-3 overflow-y-auto h-full min-h-[45vh] max-h-[45vh]">
                 <SortableContext items={tasks.map((task) => task.id)}>
                     {tasks.map((task) => (
                         <KanbanTask

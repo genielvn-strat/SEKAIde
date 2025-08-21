@@ -23,6 +23,7 @@ export const listQueries = {
                     name: lists.name,
                     description: lists.description,
                     isFinal: lists.isFinal,
+                    color: lists.color,
                     position: lists.position,
                 })
                 .from(lists)
@@ -171,7 +172,6 @@ export const listQueries = {
         direction: "left" | "right",
         userId: string
     ) => {
-        // Validate list belongs to project
         const list = await authorization.checkIfListBelongsToProjectBySlug(
             projectSlug,
             listId
@@ -181,7 +181,6 @@ export const listQueries = {
             return failure(404, "List not found in this project");
         }
 
-        // Validate membership
         const member = await authorization.checkIfTeamMemberByTeamId(
             list.teamId,
             userId
@@ -197,7 +196,6 @@ export const listQueries = {
             return failure(400, "Not authorized to move this list");
 
         try {
-            // Get all lists ordered by position
             const projectLists = await db
                 .select({
                     id: lists.id,

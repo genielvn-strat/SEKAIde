@@ -11,6 +11,7 @@ import { failure, success } from "@/types/Response";
 import { FetchProject } from "@/types/ServerResponses";
 import { authorization } from "./authorizationQueries";
 import { db } from "../db";
+import { CreateList } from "@/types/List";
 
 export const projectQueries = {
     getBySlug: async (projectSlug: string, userId: string) => {
@@ -139,27 +140,35 @@ export const projectQueries = {
                 const project = inserted[0];
                 if (!project) return failure(500, "Failed to create project");
 
-                const defaultLists = [
+                const defaultLists: CreateList[] = [
                     {
                         name: "To Do",
                         description: "Tasks to be done",
                         projectId: project.id,
+                        color: "red" as const,
+                        isFinal: false,
                     },
                     {
                         name: "In Progress",
                         description: "Tasks currently being worked on",
                         projectId: project.id,
+                        color: "blue" as const,
+                        isFinal: false,
                     },
                     {
                         name: "Done",
                         description: "Completed tasks",
                         projectId: project.id,
+                        color: "green" as const,
+                        isFinal: true,
                     },
                 ].map((lists, idx) => ({
                     name: lists.name,
                     description: lists.description,
                     position: idx,
                     projectId: project.id,
+                    color: lists.color,
+                    isFinal: lists.isFinal,
                 }));
 
                 await tx.insert(lists).values(defaultLists);

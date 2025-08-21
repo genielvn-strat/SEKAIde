@@ -20,7 +20,7 @@ interface ListActionsProps {
 }
 
 const ListActions: React.FC<ListActionsProps> = ({ list, projectSlug }) => {
-    const { moveList } = useListActions();
+    const { moveList } = useListActions(projectSlug);
     const [editDialog, showEditDialog] = useState(false);
     const [deleteDialog, showDeleteDialog] = useState(false);
 

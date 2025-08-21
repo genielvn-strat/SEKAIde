@@ -26,7 +26,7 @@ const DeleteList: React.FC<KickMemberProps> = ({
     projectSlug,
     setOpen,
 }) => {
-    const { deleteList } = useListActions();
+    const { deleteList } = useListActions(projectSlug);
 
     const handleDelete = async () => {
         try {

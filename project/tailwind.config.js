@@ -124,7 +124,17 @@ module.exports = {
   				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
-  			}
+  			},
+			rainbow: {
+				foreground: 'hsl(var(--rainbow-foreground))',
+				red: "hsl(var(--rainbow-red))",
+				orange: "hsl(var(--rainbow-orange))",
+				yellow: "hsl(var(--rainbow-yellow))",
+				green: "hsl(var(--rainbow-green))",
+				blue: "hsl(var(--rainbow-blue))",
+				violet: "hsl(var(--rainbow-violet))",
+				mono: "hsl(var(--rainbow-mono))",
+			}
   		},
   		fontFamily: {
   			sans: [

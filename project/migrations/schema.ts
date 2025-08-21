@@ -11,6 +11,14 @@ import {
 } from "drizzle-orm/pg-core";
 
 export const taskPriority = pgEnum("task_priority", ["low", "medium", "high"]);
+export const color = pgEnum("color", [
+    "red",
+    "orange",
+    "yellow",
+    "green",
+    "blue",
+    "violet",
+]);
 
 export const projects = pgTable(
     "projects",
@@ -100,6 +108,7 @@ export const lists = pgTable(
         projectId: uuid("project_id"),
         position: integer().notNull(),
         isFinal: boolean().notNull().default(false),
+        color: color(),
         createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
         updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow(),
     },
@@ -121,7 +130,7 @@ export const tasks = pgTable(
         projectId: uuid("project_id").notNull(),
         listId: uuid("list_id"),
         assigneeId: uuid("assignee_id"),
-        priority: taskPriority().default("low").notNull(),
+        priority: taskPriority().default("medium").notNull(),
         position: integer().notNull(),
         slug: text().notNull(),
         finished: boolean().notNull().default(false),
@@ -192,7 +201,7 @@ export const roles = pgTable(
         id: uuid().defaultRandom().primaryKey().notNull(),
         name: text().notNull(),
         nameId: text().notNull(),
-        color: text().default("#0a0a0a").notNull(),
+        color: color(),
     },
     (table) => [unique("roles_nameId_unique").on(table.nameId)]
 );

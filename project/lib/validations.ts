@@ -65,6 +65,9 @@ export const listSchema = z.object({
     description: z.string().max(200, "Description too long.").optional(),
     isFinal: z.boolean(),
     position: z.number().nonnegative("Position must be positive"),
+    color: z
+        .enum(["red", "orange", "yellow", "green", "blue", "violet"])
+        .optional(),
 });
 export const createListSchema = listSchema;
 export const updateListSchema = listSchema.partial();

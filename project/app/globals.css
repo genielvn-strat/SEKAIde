@@ -60,6 +60,14 @@
     --shadow-2xl: 0px 4px 10px 0px hsl(240 30% 25% / 0.3);
     --tracking-normal: 0em;
     --spacing: 0.25rem;
+    --rainbow-foreground: 0 85.7% 97.3%;
+    --rainbow-red: 0 72.2% 50.6%;
+    --rainbow-orange: 24.6 95% 53.1%;
+    --rainbow-yellow: 47.9 95.8% 53.1%;
+    --rainbow-green: 142.1 76.2% 36.3%;
+    --rainbow-blue: 221.2 83.2% 53.3%;
+    --rainbow-violet: 262.1 83.3% 57.8%;
+    --rainbow-mono: 0 0% 9%;
 }
 
 .dark {

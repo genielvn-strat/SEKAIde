@@ -39,7 +39,7 @@ const EditList: React.FC<UpdateListProps> = ({
     projectSlug,
     setOpen,
 }) => {
-    const { updateList } = useListActions();
+    const { updateList } = useListActions(projectSlug);
     const form = useForm<CreateListInput>({
         resolver: zodResolver(listSchema),
         defaultValues: {
