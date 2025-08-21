@@ -37,6 +37,7 @@ export const taskQueries = {
                     projectSlug: projects.slug,
                     listId: lists.id,
                     listName: lists.name,
+                    listColor: lists.color,
                     finished: tasks.finished,
                 })
                 .from(tasks)
@@ -83,6 +84,7 @@ export const taskQueries = {
                     projectSlug: projects.slug,
                     listId: lists.id,
                     listName: lists.name,
+                    listColor: lists.color,
                     finished: tasks.finished,
                 })
                 .from(tasks)
@@ -127,6 +129,7 @@ export const taskQueries = {
                     projectSlug: projects.slug,
                     listId: lists.id,
                     listName: lists.name,
+                    listColor: lists.color,
                     finished: tasks.finished,
                 })
                 .from(tasks)

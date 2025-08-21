@@ -66,6 +66,15 @@ export type FetchTask = {
     projectSlug: string;
     listId?: string;
     listName?: string;
+    listColor?:
+        | "red"
+        | "orange"
+        | "yellow"
+        | "green"
+        | "blue"
+        | "violet"
+        | "mono"
+        | null;
     finished: boolean;
 };
 
@@ -75,7 +84,15 @@ export type FetchList = {
     name: string;
     description: string | null;
     position: number;
-    color?: "red" | "orange" | "yellow" | "green" | "blue" | "violet" | "mono" | null;
+    color?:
+        | "red"
+        | "orange"
+        | "yellow"
+        | "green"
+        | "blue"
+        | "violet"
+        | "mono"
+        | null;
     isFinal: boolean;
 };
 
