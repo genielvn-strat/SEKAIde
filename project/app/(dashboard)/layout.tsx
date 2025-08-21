@@ -1,24 +1,48 @@
 "use client";
 
 import React, { Suspense } from "react";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import {
+    SidebarProvider,
+    SidebarTrigger,
+    useSidebar,
+} from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
 
 export default function DashboardLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const { toggleSidebar } = useSidebar();
 
     return (
-        <SidebarProvider>
+        <>
             <AppSidebar />
-            <main className="py-8 px-4 sm:px-6 lg:px-8 w-full overflow-x-auto ">
-                <Suspense>{children}</Suspense>
-            </main>
-        </SidebarProvider>
+            <div className="flex flex-col w-full min-h-screen overflow-x-auto">
+                {/* Header */}
+                <header className="sticky top-0 z-10 flex items-center justify-between py-2 px-4 sm:px-4 lg:px-4 bg-background border-b">
+                    
+                        <Menu onClick={toggleSidebar}scale={48} />
+                    {/* Example right-side actions */}
+                    <div className="flex items-center gap-3">
+                        {/* You can add buttons, avatar, or search here */}
+                        <button className="rounded-lg px-3 py-1 bg-primary text-primary-foreground text-sm">
+                            Action
+                        </button>
+                    </div>
+                </header>
+
+                {/* Main content */}
+                <main className="flex-1 py-8 px-4 sm:px-6 lg:px-8 overflow-x-auto">
+                    <Suspense>{children}</Suspense>
+                </main>
+            </div>
+        </>
     );
 }
+
 // <div className="min-h-screen ">
 //       {/* Mobile sidebar overlay */}
 //       {sidebarOpen && (

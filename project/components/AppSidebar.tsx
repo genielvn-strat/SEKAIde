@@ -56,7 +56,7 @@ export function AppSidebar() {
     return (
         <Sidebar>
             {/* Header */}
-            <SidebarHeader className="px-4 py-3 border-b">
+            <SidebarHeader className="px-4 py-3">
                 <Link
                     href="/"
                     className="text-2xl font-bold hover:opacity-80 transition"

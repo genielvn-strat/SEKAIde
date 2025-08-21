@@ -23,16 +23,18 @@ export default function RootLayout({
 }) {
     return (
         // TODO: Task 2.1 - Wrap with ClerkProvider once Clerk is set up
-        <ClerkProvider>
-            <TanstackProvider>
-                <html lang="en" suppressHydrationWarning>
-                    <body>
-                        <ThemeProvider>{children}</ThemeProvider>
-                        <Toaster richColors={true} />
-                    </body>
-                </html>
-            </TanstackProvider>
-        </ClerkProvider>
+        <SidebarProvider>
+            <ClerkProvider>
+                <TanstackProvider>
+                    <html lang="en" suppressHydrationWarning>
+                        <body>
+                            <ThemeProvider>{children}</ThemeProvider>
+                            <Toaster richColors={true} />
+                        </body>
+                    </html>
+                </TanstackProvider>
+            </ClerkProvider>
+        </SidebarProvider>
     );
 }
 

@@ -159,7 +159,7 @@ export function KanbanBoardInterface({ project }: KanbanBoardProps) {
     }
 
     return (
-        <Card className="p-6 bg-background dark:bg-background min-h-full">
+        <Card className="p-3 bg-background dark:bg-background min-h-full">
             <DndContext
                 sensors={sensors}
                 onDragStart={handleDragStart}

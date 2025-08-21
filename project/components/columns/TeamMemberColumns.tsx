@@ -42,7 +42,10 @@ export const TeamMemberColumns: (
     },
     {
         accessorKey: "email",
-        header: "Email",
+        header: () => <span className="hidden md:table-cell">Email</span>,
+        cell: ({ row }) => (
+            <span className="hidden md:table-cell">{row.original.email}</span>
+        ),
     },
     {
         accessorKey: "role",
