@@ -13,7 +13,16 @@ import { DataTable } from "@/components/DataTable";
 import { ProjectTasksColumn } from "@/components/columns/ProjectTasksColumns";
 import { useTasks } from "@/hooks/useTasks";
 import CreateTask from "@/components/buttons/CreateTask";
-
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { TypographyH2 } from "@/components/typography/TypographyH2";
+import ProjectSettingsTab from "@/components/ProjectSettingsTab";
 interface ProjectProps {
     params: Promise<{
         projectSlug: string;
@@ -80,6 +89,9 @@ export default function ProjectDetails({ params }: ProjectProps) {
                             data={tasks}
                         />
                     </div>
+                </TabsContent>
+                <TabsContent value="settings">
+                    <ProjectSettingsTab project={project} />
                 </TabsContent>
             </Tabs>
         </>

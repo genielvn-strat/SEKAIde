@@ -46,7 +46,6 @@ const UpdateTeam: React.FC<UpdateTeamProps> = ({ teamDetails }) => {
             if (!response.success) {
                 throw new Error(response.message);
             }
-            form.reset();
             toast.success("Team has been created successfully.");
         } catch (e) {
             if (e instanceof Error) {

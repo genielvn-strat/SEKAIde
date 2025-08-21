@@ -298,7 +298,6 @@ const EditTask: React.FC<EditTaskProps> = ({ task, projectSlug, setOpen }) => {
                                             onValueChange={field.onChange}
                                         >
                                             <SelectTrigger
-                                                disabled={!permittedAssign}
                                             >
                                                 <SelectValue placeholder="Select list" />
                                             </SelectTrigger>
