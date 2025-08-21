@@ -18,7 +18,7 @@ import { useLists } from "@/hooks/useLists";
 import LoadingSkeletonCards from "./LoadingSkeletonCards";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuthRoleByProject } from "@/hooks/useRoles";
-import CreateColumn from "./buttons/CreateColumn";
+import CreateList from "./buttons/CreateList";
 
 interface KanbanBoardProps {
     project: FetchProject;
@@ -183,7 +183,7 @@ export function KanbanBoardInterface({ project }: KanbanBoardProps) {
                             </SortableContext>
                         );
                     })}
-                    {permittedCreateList && <CreateColumn project={project} />}
+                    {permittedCreateList && <CreateList project={project} />}
                 </CardContent>
                 <DragOverlay>
                     {activeTask ? (

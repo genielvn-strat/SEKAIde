@@ -1,0 +1,72 @@
+import React, { Dispatch, SetStateAction } from "react";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
+import { Button } from "../ui/button";
+import { useListActions } from "@/hooks/useLists";
+import { FetchList } from "@/types/ServerResponses";
+
+interface KickMemberProps {
+    list: FetchList;
+    projectSlug: string;
+    setOpen: Dispatch<SetStateAction<boolean>>;
+}
+
+const DeleteList: React.FC<KickMemberProps> = ({
+    list,
+    projectSlug,
+    setOpen,
+}) => {
+    const { deleteList } = useListActions();
+
+    const handleDelete = async () => {
+        try {
+            const result = await deleteList({
+                listId: list.id,
+                projectSlug,
+            });
+            if (!result.success) {
+                throw new Error(result.message);
+            }
+            toast.success(`${list.name} has been deleted.`);
+        } catch (e) {
+            if (e instanceof Error) {
+                toast.error(e.message);
+                return;
+            }
+        } finally {
+            setOpen(false);
+        }
+    };
+
+    return (
+        <AlertDialog open onOpenChange={setOpen}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Delete {list.name}?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Are you sure you want to remove {list.name} from this
+                        project? All tasks on this list will be unlisted.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <Button variant="destructive" onClick={handleDelete}>
+                        Delete
+                    </Button>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    );
+};
+
+export default DeleteList;

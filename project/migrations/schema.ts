@@ -108,7 +108,7 @@ export const lists = pgTable(
             columns: [table.projectId],
             foreignColumns: [projects.id],
             name: "lists_project_id_projects_id_fk",
-        }).onDelete("cascade"),
+        }).onDelete("set null"),
     ]
 );
 
@@ -119,7 +119,7 @@ export const tasks = pgTable(
         title: text().notNull(),
         description: text(),
         projectId: uuid("project_id").notNull(),
-        listId: uuid("list_id").notNull(),
+        listId: uuid("list_id"),
         assigneeId: uuid("assignee_id"),
         priority: taskPriority().default("low").notNull(),
         position: integer().notNull(),
@@ -139,12 +139,12 @@ export const tasks = pgTable(
             columns: [table.listId],
             foreignColumns: [lists.id],
             name: "tasks_list_id_lists_id_fk",
-        }).onDelete("cascade"),
+        }).onDelete("set null"),
         foreignKey({
             columns: [table.assigneeId],
             foreignColumns: [users.id],
             name: "tasks_assignee_id_users_id_fk",
-        }).onDelete("cascade"),
+        }).onDelete("set null"),
     ]
 );
 

@@ -3,7 +3,6 @@ import { FetchList, FetchTask } from "@/types/ServerResponses";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
 import { KanbanTask } from "./KanbanTask";
-import { Button } from "./ui/button";
 
 import {
     Card,
@@ -13,16 +12,9 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { CirclePlus, EllipsisVertical } from "lucide-react";
+
 import CreateTask from "./buttons/CreateTask";
-import { useListActions } from "@/hooks/useLists";
-import { toast } from "sonner";
+import ListActions from "./buttons/ListActions";
 
 export function KanbanColumn({
     list,
@@ -37,27 +29,6 @@ export function KanbanColumn({
         id: list.id,
     });
 
-    const { moveList } = useListActions();
-
-    const onMoveList = async (direction: "left" | "right") => {
-        try {
-            const response = await moveList({
-                listId: list.id,
-                projectSlug,
-                direction,
-            });
-            if (!response.success) {
-                throw new Error(response.message);
-            }
-            toast.success(`List moved to the ${direction}.`);
-        } catch (e) {
-            if (e instanceof Error) {
-                toast.error(e.message);
-                return;
-            }
-        }
-    };
-
     return (
         <Card
             ref={setNodeRef}
@@ -69,33 +40,7 @@ export function KanbanColumn({
                     <CardDescription>{list.description}</CardDescription>
                 </div>
                 <div className="right">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost">
-                                <EllipsisVertical />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                                onClick={() => {
-                                    onMoveList("left");
-                                }}
-                            >
-                                Move Left
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={() => {
-                                    onMoveList("right");
-                                }}
-                            >
-                                Move Right
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">
-                                Delete
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <ListActions list={list} projectSlug={projectSlug} />
                 </div>
             </CardHeader>
 

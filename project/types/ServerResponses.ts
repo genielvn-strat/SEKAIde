@@ -65,7 +65,7 @@ export type FetchTask = {
     projectName: string;
     projectSlug: string;
     listId?: string;
-    listName: string;
+    listName?: string;
     finished: boolean;
 };
 

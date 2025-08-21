@@ -34,7 +34,7 @@ interface CreateColumnProps {
     project: FetchProject;
 }
 
-const CreateColumn: React.FC<CreateColumnProps> = ({ project }) => {
+const CreateList: React.FC<CreateColumnProps> = ({ project }) => {
     const { createList } = useListActions();
     const form = useForm<CreateListInput>({
         resolver: zodResolver(listSchema),
@@ -76,7 +76,7 @@ const CreateColumn: React.FC<CreateColumnProps> = ({ project }) => {
                 <Card className="flex-shrink-0 w-80 border-dashed bg-transparent cursor-pointer hover:bg-accent/30">
                     <CardContent className="flex flex-col justify-center items-center h-full gap-4">
                         <CirclePlus />
-                        <TypographyMuted>Add Column</TypographyMuted>
+                        <TypographyMuted>Add List</TypographyMuted>
                     </CardContent>
                 </Card>
             </DialogTrigger>
@@ -85,7 +85,7 @@ const CreateColumn: React.FC<CreateColumnProps> = ({ project }) => {
                 <form onSubmit={form.handleSubmit(onSubmit)} id="create-list">
                     <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
-                            <DialogTitle>Create Column</DialogTitle>
+                            <DialogTitle>Create List</DialogTitle>
                             <DialogDescription>
                                 Define your list name and details.
                             </DialogDescription>
@@ -172,4 +172,4 @@ const CreateColumn: React.FC<CreateColumnProps> = ({ project }) => {
     );
 };
 
-export default CreateColumn;
+export default CreateList;
