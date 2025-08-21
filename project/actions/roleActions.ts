@@ -16,7 +16,6 @@ export const authRoleByTeamSlug = async (teamSlug: string, action: string) => {
         teamSlug,
         action
     );
-    console.log(userId, teamSlug, action, !!result);
     return !!result;
 };
 
@@ -30,7 +29,6 @@ export const authRoleByProjectSlug = async (
         projectSlug,
         action
     );
-    console.log(userId, projectSlug, action, !!result);
     return !!result;
 };
 
@@ -46,6 +44,5 @@ export const authRoleByTaskId = async (
         taskId,
         action
     );
-    console.log(userId, taskId, action, !!result);
     return !!result;
 };

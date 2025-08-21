@@ -119,7 +119,6 @@ export const teamMemberQueries = {
                     )
                 )
                 .then((res) => res[0] ?? null);
-            console.log(existing, user.id, member.teamId);
             if (existing) return failure(409, "User is already a member");
 
             const newMember = await db

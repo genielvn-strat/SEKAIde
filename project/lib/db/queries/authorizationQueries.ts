@@ -125,7 +125,6 @@ export const authorization = {
                 )
             )
             .then((res) => res[0] || null);
-        console.log(result);
         return result;
     },
     checkIfProjectOwnedByUserBySlug: async (

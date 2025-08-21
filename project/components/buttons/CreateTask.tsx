@@ -80,7 +80,6 @@ const CreateTask: React.FC<CreateTaskProps> = ({ projectSlug, list }) => {
 
     const onSubmit: SubmitHandler<CreateTaskInput> = async (data) => {
         try {
-            console.log(data);
             const response = await createTask({
                 projectSlug,
                 listId: list.id,
