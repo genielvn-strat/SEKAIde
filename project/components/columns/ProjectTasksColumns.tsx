@@ -15,10 +15,12 @@ import {
 import { Button } from "@/components/ui/button";
 import KickMember from "@/components/dialog/KickMember";
 import { useState } from "react";
-import { useAuthRoleByProject } from "@/hooks/useRoles";
+import { useAuthRoleByProject, useAuthRoleByTask } from "@/hooks/useRoles";
 import Link from "next/link";
 import { ro } from "date-fns/locale";
 import { Checkbox } from "../ui/checkbox";
+import DeleteTaskFromList from "../dialog/DeleteTaskFromList";
+import EditTask from "../dialog/EditTask";
 
 export const ProjectTasksColumn: (
     projectSlug: string
@@ -109,18 +111,22 @@ export const ProjectTasksColumn: (
     {
         id: "actions",
         cell: ({ row }) => {
-            const [kickDialog, showKickDialog] = useState(false);
-            const { permitted: permittedUpdate } = useAuthRoleByProject(
+            const task = row.original;
+            const [editDialog, showEditDialog] = useState(false);
+            const [deleteDialog, showDeleteDialog] = useState(false);
+            const { permitted: permittedUpdate } = useAuthRoleByTask(
+                task.id,
                 projectSlug,
                 "update_task"
             );
-            const { permitted: permittedDelete } = useAuthRoleByProject(
+            const { permitted: permittedDelete } = useAuthRoleByTask(
+                task.id,
                 projectSlug,
                 "delete_task"
             );
 
             return (
-                permittedUpdate && (
+                (permittedUpdate || permittedDelete) && (
                     <>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -129,7 +135,24 @@ export const ProjectTasksColumn: (
                                     <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                             </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem
+                                    onClick={() => showEditDialog(true)}
+                                >
+                                    Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className="text-destructive"
+                                    onClick={() => showDeleteDialog(true)}
+                                >
+                                    Delete
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
                         </DropdownMenu>
+                        {
+                            deleteDialog && <DeleteTaskFromList task={task} projectSlug={projectSlug} setOpen={showDeleteDialog}/>
+                        }
+                        {editDialog && <EditTask task={task} projectSlug={projectSlug} setOpen={showEditDialog}/>}
                     </>
                 )
             );

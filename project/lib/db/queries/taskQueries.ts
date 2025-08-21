@@ -31,6 +31,7 @@ export const taskQueries = {
                     dueDate: tasks.dueDate,
                     position: tasks.position,
                     slug: tasks.slug,
+                    assigneeId: users.id,
                     assigneeName: users.name,
                     assigneeUsername: users.username,
                     projectName: projects.name,
@@ -78,6 +79,7 @@ export const taskQueries = {
                     dueDate: tasks.dueDate,
                     position: tasks.position,
                     slug: tasks.slug,
+                    assigneeId: users.id,
                     assigneeName: users.name,
                     assigneeUsername: users.username,
                     projectName: projects.name,
@@ -90,7 +92,7 @@ export const taskQueries = {
                 .from(tasks)
                 .innerJoin(projects, eq(tasks.projectId, projects.id))
                 .innerJoin(users, eq(tasks.assigneeId, users.id))
-                .innerJoin(lists, eq(tasks.listId, lists.id))
+                .leftJoin(lists, eq(tasks.listId, lists.id))
                 .orderBy(asc(tasks.position))
                 .where(eq(projects.slug, projectSlug));
 
@@ -123,6 +125,7 @@ export const taskQueries = {
                     dueDate: tasks.dueDate,
                     position: tasks.position,
                     slug: tasks.slug,
+                    assigneeId: users.id,
                     assigneeName: users.name,
                     assigneeUsername: users.username,
                     projectName: projects.name,
@@ -275,12 +278,15 @@ export const taskQueries = {
         if (!member) {
             return failure(400, "Not authorized to delete this task");
         }
-
+        const assigned = await db
+            .select()
+            .from(tasks)
+            .where(and(eq(tasks.slug, taskSlug), eq(tasks.assigneeId, userId)));
         const permission = await authorization.checkIfRoleHasPermission(
             member.roleId,
             "delete_task"
         );
-        if (!permission)
+        if (!permission && !assigned)
             return failure(400, "Not authorized to delete this task");
 
         try {

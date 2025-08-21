@@ -13,7 +13,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 
-import CreateTask from "./buttons/CreateTask";
+import CreateTaskToList from "./buttons/CreateTaskToList";
 import ListActions from "./buttons/ListActions";
 
 export function KanbanColumn({
@@ -30,10 +30,7 @@ export function KanbanColumn({
     });
 
     return (
-        <Card
-            ref={setNodeRef}
-            className="flex flex-col flex-shrink-0 w-80"
-        >
+        <Card ref={setNodeRef} className="flex flex-col flex-shrink-0 w-80">
             <CardHeader className="flex flex-row items-center justify-between">
                 <div className="left">
                     <CardTitle className={`text-rainbow-${list.color}`}>
@@ -64,7 +61,7 @@ export function KanbanColumn({
                 )}
             </CardContent>
             <CardFooter className="flex-col gap-2">
-                <CreateTask projectSlug={projectSlug} list={list} />
+                <CreateTaskToList projectSlug={projectSlug} list={list} />
             </CardFooter>
         </Card>
     );

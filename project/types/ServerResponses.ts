@@ -60,12 +60,13 @@ export type FetchTask = {
     dueDate: string | null;
     position: number;
     slug: string;
+    assigneeId: string;
     assigneeName: string;
     assigneeUsername: string;
     projectName: string;
     projectSlug: string;
-    listId?: string;
-    listName?: string;
+    listId?: string | null;
+    listName?: string | null;
     listColor?:
         | "red"
         | "orange"

@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { CreateTaskInput, taskSchema } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -42,7 +42,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { CalendarIcon, CirclePlus } from "lucide-react";
 import { Calendar } from "../ui/calendar";
-import { FetchList } from "@/types/ServerResponses";
+import { FetchList, FetchTask } from "@/types/ServerResponses";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuthRoleByProject } from "@/hooks/useRoles";
 import { useTeamMembersByProject } from "@/hooks/useTeamMembers";
@@ -50,12 +50,14 @@ import { TypographyMuted } from "../typography/TypographyMuted";
 import { TypographyP } from "../typography/TypographyP";
 import { useLists } from "@/hooks/useLists";
 
-interface CreateTaskProps {
+interface EditTaskProps {
+    task: FetchTask;
     projectSlug: string;
+    setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-const CreateTask: React.FC<CreateTaskProps> = ({ projectSlug }) => {
-    const { createTask } = useTaskActions();
+const EditTask: React.FC<EditTaskProps> = ({ task, projectSlug, setOpen }) => {
+    const { updateTask } = useTaskActions();
     const { permitted: permittedAssign } = useAuthRoleByProject(
         projectSlug,
         "assign_others"
@@ -69,26 +71,27 @@ const CreateTask: React.FC<CreateTaskProps> = ({ projectSlug }) => {
     const form = useForm<CreateTaskInput>({
         resolver: zodResolver(taskSchema),
         defaultValues: {
-            title: "",
-            description: "",
-            priority: "medium",
-            listId: undefined,
-            finished: false,
-            position: 0,
-            assigneeId: undefined,
+            title: task.title,
+            description: task.description ?? undefined,
+            assigneeId: task.assigneeId,
+            priority: task.priority,
+            listId: task.listId ?? undefined,
+            finished: task.finished,
+            position: task.position,
         },
     });
 
     const onSubmit: SubmitHandler<CreateTaskInput> = async (data) => {
         try {
-            const response = await createTask({
+            const response = await updateTask({
+                taskSlug: task.slug,
                 projectSlug,
                 data,
             });
             if (!response.success) {
                 throw new Error(response.message);
             }
-            toast.success("Task has been created successfully.");
+            toast.success("Task has been updated successfully.");
             form.reset();
         } catch (e) {
             if (e instanceof Error) {
@@ -98,26 +101,28 @@ const CreateTask: React.FC<CreateTaskProps> = ({ projectSlug }) => {
             }
             form.setError("root", {
                 message:
-                    "An error has occurred while creating your task. Please try again later or contact the system administrator.",
+                    "An error has occurred while editing your task. Please try again later or contact the system administrator.",
             });
         }
     };
 
     return (
-        <Dialog>
-            <DialogTrigger asChild>
-                <Button variant="default" type="button">
-                    <CirclePlus />
-                    Add Task
-                </Button>
-            </DialogTrigger>
+        <Dialog
+            open
+            onOpenChange={() => {
+                setOpen(false);
+            }}
+        >
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} id={`create-task`}>
+                <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    id={`edit-task-${task.id}`}
+                >
                     <DialogContent className="sm:max-w-[500px]">
                         <DialogHeader>
-                            <DialogTitle>Create Task</DialogTitle>
+                            <DialogTitle>Edit Task</DialogTitle>
                             <DialogDescription>
-                                Add a task to this project.
+                                Change information for {task.title}
                             </DialogDescription>
                         </DialogHeader>
 
@@ -281,7 +286,6 @@ const CreateTask: React.FC<CreateTaskProps> = ({ projectSlug }) => {
                                 You can only assign this task to yourself.
                             </TypographyMuted>
                         )}
-
                         <FormField
                             control={form.control}
                             name="listId"
@@ -352,11 +356,11 @@ const CreateTask: React.FC<CreateTaskProps> = ({ projectSlug }) => {
                             <Button
                                 type="submit"
                                 disabled={form.formState.isSubmitting}
-                                form={`create-task`}
+                                form={`edit-task-${task.id}`}
                             >
                                 {form.formState.isSubmitting
-                                    ? "Creating..."
-                                    : "Create Task"}
+                                    ? "Editing..."
+                                    : "Edit Task"}
                             </Button>
                         </DialogFooter>
                     </DialogContent>
@@ -366,4 +370,4 @@ const CreateTask: React.FC<CreateTaskProps> = ({ projectSlug }) => {
     );
 };
 
-export default CreateTask;
+export default EditTask;

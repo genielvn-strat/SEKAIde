@@ -48,19 +48,18 @@ import { useAuthRoleByProject } from "@/hooks/useRoles";
 import { useTeamMembersByProject } from "@/hooks/useTeamMembers";
 import { TypographyMuted } from "../typography/TypographyMuted";
 import { TypographyP } from "../typography/TypographyP";
-import { useLists } from "@/hooks/useLists";
 
 interface CreateTaskProps {
     projectSlug: string;
+    list: FetchList;
 }
 
-const CreateTask: React.FC<CreateTaskProps> = ({ projectSlug }) => {
+const CreateTaskToList: React.FC<CreateTaskProps> = ({ projectSlug, list }) => {
     const { createTask } = useTaskActions();
     const { permitted: permittedAssign } = useAuthRoleByProject(
         projectSlug,
         "assign_others"
     );
-    const { lists } = useLists(projectSlug);
 
     const { members } = useTeamMembersByProject(projectSlug, {
         enabled: !!permittedAssign,
@@ -72,8 +71,8 @@ const CreateTask: React.FC<CreateTaskProps> = ({ projectSlug }) => {
             title: "",
             description: "",
             priority: "medium",
-            listId: undefined,
-            finished: false,
+            listId: list.id,
+            finished: list.isFinal,
             position: 0,
             assigneeId: undefined,
         },
@@ -112,12 +111,15 @@ const CreateTask: React.FC<CreateTaskProps> = ({ projectSlug }) => {
                 </Button>
             </DialogTrigger>
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} id={`create-task`}>
+                <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    id={`create-task-${list.id}`}
+                >
                     <DialogContent className="sm:max-w-[500px]">
                         <DialogHeader>
                             <DialogTitle>Create Task</DialogTitle>
                             <DialogDescription>
-                                Add a task to this project.
+                                Add a task to {list.name} list.
                             </DialogDescription>
                         </DialogHeader>
 
@@ -284,40 +286,6 @@ const CreateTask: React.FC<CreateTaskProps> = ({ projectSlug }) => {
 
                         <FormField
                             control={form.control}
-                            name="listId"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>List</FormLabel>
-                                    <FormControl>
-                                        <Select
-                                            defaultValue={field.value}
-                                            onValueChange={field.onChange}
-                                        >
-                                            <SelectTrigger
-                                                disabled={!permittedAssign}
-                                            >
-                                                <SelectValue placeholder="Select list" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {lists?.map((list) => (
-                                                    <SelectItem
-                                                        key={list.id}
-                                                        value={list.id}
-                                                        className={`flex flex-row items-center gap-4 text-rainbow-${list.color}`}
-                                                    >
-                                                        {list.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
                             name="finished"
                             render={({ field }) => (
                                 <FormItem className="flex flex-col">
@@ -352,7 +320,7 @@ const CreateTask: React.FC<CreateTaskProps> = ({ projectSlug }) => {
                             <Button
                                 type="submit"
                                 disabled={form.formState.isSubmitting}
-                                form={`create-task`}
+                                form={`create-task-${list.id}`}
                             >
                                 {form.formState.isSubmitting
                                     ? "Creating..."
@@ -366,4 +334,4 @@ const CreateTask: React.FC<CreateTaskProps> = ({ projectSlug }) => {
     );
 };
 
-export default CreateTask;
+export default CreateTaskToList;

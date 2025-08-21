@@ -12,6 +12,7 @@ import LoadingSkeleton from "@/components/LoadingSkeleton";
 import { DataTable } from "@/components/DataTable";
 import { ProjectTasksColumn } from "@/components/columns/ProjectTasksColumns";
 import { useTasks } from "@/hooks/useTasks";
+import CreateTask from "@/components/buttons/CreateTask";
 
 interface ProjectProps {
     params: Promise<{
@@ -66,11 +67,14 @@ export default function ProjectDetails({ params }: ProjectProps) {
                     <TabsTrigger value="settings">Settings</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="board" className="py-4">
+                <TabsContent value="board">
                     <KanbanBoardInterface project={project} tasks={tasks} />
                 </TabsContent>
-                <TabsContent value="tasks" className="py-4">
+                <TabsContent value="tasks">
                     <div className="flex flex-col gap-4">
+                        <div className="flex flex-row justify-between items-center">
+                            <CreateTask projectSlug={projectSlug} />
+                        </div>
                         <DataTable
                             columns={ProjectTasksColumn(projectSlug)}
                             data={tasks}
