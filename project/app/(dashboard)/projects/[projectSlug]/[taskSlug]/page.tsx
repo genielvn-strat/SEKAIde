@@ -23,6 +23,7 @@ import { TypographyH2 } from "@/components/typography/TypographyH2";
 import CreateComment from "@/components/CreateComment";
 import CommentCard from "@/components/CommentCard";
 import { Button } from "@/components/ui/button";
+import TaskDropDown from "@/components/dropdown/TaskDropDown";
 interface TaskProps {
     params: Promise<{
         projectSlug: string;
@@ -62,12 +63,15 @@ export default function TaskDetails({ params }: TaskProps) {
         <>
             <div className="doc-header flex flex-col justify-between gap-4">
                 <div className="flex flex-col gap-2">
-                    <div className="flex flex-row items-center gap-4">
-                        <TypographyH1>{task.title}</TypographyH1>
-                        <TypographyMuted>
-                            {" "}
-                            // {task.projectName}
-                        </TypographyMuted>
+                    <div className="flex flex-row justify-between">
+                        <div className="flex flex-row items-center gap-4">
+                            <TypographyH1>{task.title}</TypographyH1>
+                            <TypographyMuted>
+                                {" "}
+                                // {task.projectName}
+                            </TypographyMuted>
+                        </div>
+                        {task.allowUpdate && <TaskDropDown task={task} />}
                     </div>
                     <div className="flex justify-between items-center">
                         <div className="flex flex-row gap-2">

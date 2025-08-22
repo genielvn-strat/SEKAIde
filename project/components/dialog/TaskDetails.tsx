@@ -17,6 +17,7 @@ import { Separator } from "../ui/separator";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { CheckCircle2, Circle } from "lucide-react";
+import TaskDropDown from "../dropdown/TaskDropDown";
 
 interface TaskDetailsProps {
     task: FetchTask;
@@ -35,7 +36,10 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, children }) => {
                 <div className="mx-auto w-full max-w-3xl">
                     <DrawerHeader className="text-left">
                         <DrawerTitle className="flex flex-col gap-2">
-                            <TypographyH1>{task.title}</TypographyH1>
+                            <div className="flex flex-row justify-between">
+                                <TypographyH1>{task.title}</TypographyH1>
+                                {task.allowUpdate && <TaskDropDown task={task}/>}
+                            </div>
                             <div className="flex justify-between items-center">
                                 <div className="flex flex-row gap-2">
                                     {task.listName && (

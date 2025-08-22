@@ -15,18 +15,20 @@ import { Button } from "../ui/button";
 import { useListActions } from "@/hooks/useLists";
 import { FetchList, FetchTask } from "@/types/ServerResponses";
 import { useTaskActions } from "@/hooks/useTasks";
+import { useRouter } from "next/navigation";
 
-interface DeleteTaskFromListProps {
+interface DeleteTaskProps {
     task: FetchTask;
     projectSlug: string;
     setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-const DeleteTaskFromList: React.FC<DeleteTaskFromListProps> = ({
+const DeleteTask: React.FC<DeleteTaskProps> = ({
     task,
     projectSlug,
     setOpen,
 }) => {
+    const router = useRouter();
     const { deleteTask, isDeleting } = useTaskActions();
 
     const handleDelete = async () => {
@@ -39,6 +41,7 @@ const DeleteTaskFromList: React.FC<DeleteTaskFromListProps> = ({
                 throw new Error(result.message);
             }
             toast.success(`${task.title} has been deleted.`);
+            router.push(`/projects/${task.projectSlug}`);
         } catch (e) {
             if (e instanceof Error) {
                 toast.error(e.message);
@@ -61,7 +64,11 @@ const DeleteTaskFromList: React.FC<DeleteTaskFromListProps> = ({
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+                    <Button
+                        variant="destructive"
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                    >
                         Delete
                     </Button>
                 </AlertDialogFooter>
@@ -70,4 +77,4 @@ const DeleteTaskFromList: React.FC<DeleteTaskFromListProps> = ({
     );
 };
 
-export default DeleteTaskFromList;
+export default DeleteTask;

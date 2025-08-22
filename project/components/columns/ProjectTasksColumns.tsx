@@ -19,10 +19,11 @@ import { useAuthRoleByProject, useAuthRoleByTask } from "@/hooks/useRoles";
 import Link from "next/link";
 import { ro } from "date-fns/locale";
 import { Checkbox } from "../ui/checkbox";
-import DeleteTaskFromList from "../dialog/DeleteTaskFromList";
+import DeleteTask from "../dialog/DeleteTask";
 import EditTask from "../dialog/EditTask";
 import TaskDetails from "../dialog/TaskDetails";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import TaskDropDown from "../dropdown/TaskDropDown";
 
 export const ProjectTasksColumn: (
     projectSlug: string
@@ -135,47 +136,7 @@ export const ProjectTasksColumn: (
             const [editDialog, showEditDialog] = useState(false);
             const [deleteDialog, showDeleteDialog] = useState(false);
 
-            return (
-                task.allowUpdate && (
-                    <>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                    <span className="sr-only">Open menu</span>
-                                    <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                    onClick={() => showEditDialog(true)}
-                                >
-                                    Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                    className="text-destructive"
-                                    onClick={() => showDeleteDialog(true)}
-                                >
-                                    Delete
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                        {deleteDialog && (
-                            <DeleteTaskFromList
-                                task={task}
-                                projectSlug={projectSlug}
-                                setOpen={showDeleteDialog}
-                            />
-                        )}
-                        {editDialog && (
-                            <EditTask
-                                task={task}
-                                projectSlug={projectSlug}
-                                setOpen={showEditDialog}
-                            />
-                        )}
-                    </>
-                )
-            );
+            return task.allowUpdate && <TaskDropDown task={task} />;
         },
     },
 ];
