@@ -25,6 +25,13 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "../ui/checkbox";
 import { toast } from "sonner";
@@ -47,6 +54,7 @@ const EditList: React.FC<UpdateListProps> = ({
             description: list.description ?? undefined,
             isFinal: list.isFinal,
             position: list.position,
+            color: list.color ?? undefined,
         },
     });
 
@@ -112,6 +120,69 @@ const EditList: React.FC<UpdateListProps> = ({
                                             placeholder="Tasks to be done"
                                         />
                                     </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="color"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                    <FormLabel>Color</FormLabel>
+                                    <Select
+                                        onValueChange={(val) =>
+                                            field.onChange(
+                                                val === "none" ? undefined : val
+                                            )
+                                        }
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a color" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="none">
+                                                None
+                                            </SelectItem>
+                                            <SelectItem
+                                                value="red"
+                                                className="text-rainbow-red"
+                                            >
+                                                Red
+                                            </SelectItem>
+                                            <SelectItem
+                                                value="orange"
+                                                className="text-rainbow-orange"
+                                            >
+                                                Orange
+                                            </SelectItem>
+                                            <SelectItem
+                                                value="yellow"
+                                                className="text-rainbow-yellow"
+                                            >
+                                                Yellow
+                                            </SelectItem>
+                                            <SelectItem
+                                                value="green"
+                                                className="text-rainbow-green"
+                                            >
+                                                Green
+                                            </SelectItem>
+                                            <SelectItem
+                                                value="blue"
+                                                className="text-rainbow-blue"
+                                            >
+                                                Blue
+                                            </SelectItem>
+                                            <SelectItem
+                                                value="violet"
+                                                className="text-rainbow-violet"
+                                            >
+                                                Violet
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                     <FormMessage />
                                 </FormItem>
                             )}
