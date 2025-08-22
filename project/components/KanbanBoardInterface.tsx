@@ -22,14 +22,17 @@ import CreateList from "./buttons/CreateList";
 
 interface KanbanBoardProps {
     project: FetchProject;
-    tasks: FetchTask[]
+    tasks: FetchTask[];
 }
 
-export function KanbanBoardInterface({ project, tasks: initialTasks }: KanbanBoardProps) {
+export function KanbanBoardInterface({
+    project,
+    tasks: initialTasks,
+}: KanbanBoardProps) {
     const { lists, isLoading: listLoading } = useLists(project.slug, {
         enabled: !!project,
     });
-    
+
     const { updateTask } = useTaskActions();
     const { permitted: permittedCreateList } = useAuthRoleByProject(
         project.slug,
@@ -37,6 +40,7 @@ export function KanbanBoardInterface({ project, tasks: initialTasks }: KanbanBoa
     );
     const [tasks, setTasks] = useState<FetchTask[]>([]);
     const [activeTask, setActiveTask] = useState<FetchTask | null>(null);
+    const [overId, setOverId] = useState<string | null>(null);
 
     useEffect(() => {
         if (initialTasks) setTasks(initialTasks);
@@ -56,6 +60,11 @@ export function KanbanBoardInterface({ project, tasks: initialTasks }: KanbanBoa
         const { active } = event;
         const task = tasks.find((t) => t.id === active.id);
         setActiveTask(task || null);
+    }
+
+    function handleDragOver(event: any) {
+        const { over } = event;
+        setOverId(over?.id || null);
     }
 
     function handleDragEnd(event: DragEndEvent) {
@@ -152,6 +161,7 @@ export function KanbanBoardInterface({ project, tasks: initialTasks }: KanbanBoa
         }
 
         setActiveTask(null);
+        setOverId(null);
     }
 
     return (
@@ -159,6 +169,7 @@ export function KanbanBoardInterface({ project, tasks: initialTasks }: KanbanBoa
             <DndContext
                 sensors={sensors}
                 onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
                 onDragEnd={handleDragEnd}
             >
                 <CardContent className="flex p-2 space-x-6 overflow-x-auto h-full">
@@ -174,6 +185,8 @@ export function KanbanBoardInterface({ project, tasks: initialTasks }: KanbanBoa
                                 <KanbanColumn
                                     list={list}
                                     tasks={taskList}
+                                    activeId={activeTask?.id ?? null}
+                                    overId={overId}
                                     projectSlug={project.slug}
                                 />
                             </SortableContext>
@@ -184,8 +197,8 @@ export function KanbanBoardInterface({ project, tasks: initialTasks }: KanbanBoa
                 <DragOverlay>
                     {activeTask ? (
                         <KanbanTask
-                            projectSlug={project.slug}
                             task={activeTask}
+                            activeId={null}
                         />
                     ) : null}
                 </DragOverlay>

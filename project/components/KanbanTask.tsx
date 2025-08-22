@@ -4,53 +4,51 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
     Card,
-    CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { TypographyMuted } from "./typography/TypographyMuted";
 import { Badge } from "./ui/badge";
-import Link from "next/link";
-import { useAuthRoleByTask } from "@/hooks/useRoles";
 import TaskDetails from "./dialog/TaskDetails";
 import { Grip } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function KanbanTask({
-    projectSlug,
     task,
+    activeId,
 }: {
-    projectSlug: string;
     task: FetchTask;
+    activeId: string | null;
 }) {
-    
-
-    const { attributes, listeners, setNodeRef, transform, transition } =
-        useSortable({ id: task.id });
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: task.id });
 
     const style = {
-        transform: CSS.Transform.toString(transform),
         transition,
     };
+    console.log(activeId, task.id)
 
     return (
         <Card
             ref={setNodeRef}
-            style={{ ...style, opacity: task.allowUpdate ? 1 : 0.5 }}
+            style={{ ...style, opacity: !task.allowUpdate ? 0.5 : activeId === task.id ? 0 : 1 }}
+            className={`${activeId === task.id ? "opacity-0" : "opacity-100"}`}
+            {...(task.allowUpdate ? { ...attributes, ...listeners } : {})}
         >
             <CardHeader>
                 <div className="flex justify-between">
                     <TaskDetails task={task}>
                         <CardTitle>{task.title}</CardTitle>
                     </TaskDetails>
-                    <div
-                        {...(task.allowUpdate
-                            ? { ...attributes, ...listeners }
-                            : {})}
-                        className="p-0"
-                    >
-                        {task.allowUpdate && <Grip size={16} className="ml-2" />}
+                    <div className="p-0">
+                        {task.allowUpdate && (
+                            <Grip size={16} className="ml-2" />
+                        )}
                     </div>
                 </div>
                 <CardDescription className="mt-1 text-xs text-gray-600 dark:text-gray-300 line-clamp-2">
@@ -80,8 +78,6 @@ export function KanbanTask({
                         </span>
                     )}
                 </div>
-
-                
             </CardHeader>
         </Card>
     );
