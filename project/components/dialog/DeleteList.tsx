@@ -15,13 +15,13 @@ import { Button } from "../ui/button";
 import { useListActions } from "@/hooks/useLists";
 import { FetchList } from "@/types/ServerResponses";
 
-interface KickMemberProps {
+interface DeleteListProps {
     list: FetchList;
     projectSlug: string;
     setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-const DeleteList: React.FC<KickMemberProps> = ({
+const DeleteList: React.FC<DeleteListProps> = ({
     list,
     projectSlug,
     setOpen,
