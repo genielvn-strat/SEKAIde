@@ -1,5 +1,5 @@
 import { users, comments } from "@/migrations/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { failure, success } from "@/types/Response";
 import { authorization } from "./authorizationQueries";
 import { db } from "../db";
@@ -20,6 +20,15 @@ export const commentQueries = {
         if (!isAuthorized) {
             return failure(400, "Not authorized to view this task.");
         }
+
+        const canUpdate =
+            (await authorization
+                .checkIfRoleHasPermissionByProjectSlug(
+                    userId,
+                    projectSlug,
+                    "update_comment"
+                )
+                .then((res) => (res ? true : false))) ?? false;
 
         const task = await authorization.checkIfTaskBelongsToProjectBySlug(
             projectSlug,
@@ -42,6 +51,13 @@ export const commentQueries = {
                     authorName: users.name,
                     authorUsername: users.username,
                     authorDisplayPicture: users.displayPictureLink,
+                    allowUpdate: sql<boolean>`
+                        CASE 
+                            WHEN ${comments.authorId} = ${userId} THEN TRUE
+                            WHEN ${canUpdate} = TRUE THEN TRUE
+                            ELSE FALSE
+                        END
+                    `,
                 })
                 .from(comments)
                 .innerJoin(users, eq(comments.authorId, users.id))

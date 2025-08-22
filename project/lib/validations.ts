@@ -81,7 +81,7 @@ export const commentSchema = z.object({
         .max(1000, "Content is too long."),
 });
 export const createCommentSchema = commentSchema;
-export const updateCommentSchema = commentSchema.partial();
+export const updateCommentSchema = commentSchema;
 export type CreateCommentInput = z.infer<typeof createCommentSchema>;
 export type UpdateCommentInput = z.infer<typeof updateCommentSchema>;
 

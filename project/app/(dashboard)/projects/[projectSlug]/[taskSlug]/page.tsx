@@ -42,32 +42,6 @@ export default function TaskDetails({ params }: TaskProps) {
         enabled: !!task,
     });
 
-    const {
-        register,
-        handleSubmit,
-        setError,
-        reset,
-        formState: { errors, isSubmitting },
-    } = useForm<CreateCommentInput>({
-        resolver: zodResolver(commentSchema),
-    });
-
-    const { createComment, deleteComment, updateComment } =
-        useCommentActions(taskSlug);
-
-    const onSubmit: SubmitHandler<CreateCommentInput> = async (data) => {
-        try {
-            await createComment({
-                taskSlug: taskSlug,
-                projectSlug: projectSlug,
-                data,
-            });
-            reset();
-        } catch {
-            setError("root", { message: "Server error" });
-        }
-    };
-
     if (isLoading) {
         return <LoadingSkeleton />;
     }
@@ -189,7 +163,14 @@ export default function TaskDetails({ params }: TaskProps) {
             </div>
             <div className="space-y-4 my-2">
                 {comments && comments.length > 0 ? (
-                    comments.map((comment) => <CommentCard comment={comment} />)
+                    comments.map((comment) => (
+                        <CommentCard
+                            comment={comment}
+                            taskSlug={taskSlug}
+                            projectSlug={projectSlug}
+                            key={comment.id}
+                        />
+                    ))
                 ) : (
                     <p className="text-sm text-gray-500">No comments yet.</p>
                 )}

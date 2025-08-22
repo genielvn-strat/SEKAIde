@@ -100,4 +100,5 @@ export type FetchComment = {
     authorDisplayPicture: string;
     createdAt: string | null;
     updatedAt: string | null;
+    allowUpdate: boolean;
 };
