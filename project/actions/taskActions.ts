@@ -35,7 +35,6 @@ export const fetchTaskBySlug = async (
 
 export const createTask = async (
     projectSlug: string,
-    listId: string,
     data: CreateTaskInput
 ) => {
     const userId = await getUserDbId();
@@ -52,8 +51,7 @@ export const createTask = async (
             lower: true,
             strict: true,
         })}-${nanoid(6)}`,
-        assigneeId: userId, // TODO: Use assignee from what the user selects in the UI. For now, you are the assignee.
-        listId: listId,
+        assigneeId: data.assigneeId ?? userId, 
     };
     return await queries.tasks.create(projectSlug, taskData, userId);
 };

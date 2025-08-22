@@ -16,6 +16,33 @@ export const authRoleByTeamSlug = async (teamSlug: string, action: string) => {
         teamSlug,
         action
     );
-    console.log(userId, teamSlug, action, !!result);
+    return !!result;
+};
+
+export const authRoleByProjectSlug = async (
+    projectSlug: string,
+    action: string
+) => {
+    const userId = await getUserDbId();
+    const result = await authorization.checkIfRoleHasPermissionByProjectSlug(
+        userId,
+        projectSlug,
+        action
+    );
+    return !!result;
+};
+
+export const authRoleByTaskId = async (
+    taskId: string,
+    projectSlug: string,
+    action: string
+) => {
+    const userId = await getUserDbId();
+    const result = await authorization.checkIfRoleHasPermissionByTaskId(
+        userId,
+        projectSlug,
+        taskId,
+        action
+    );
     return !!result;
 };

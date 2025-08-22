@@ -17,13 +17,11 @@ export function useTaskActions() {
     const create = useMutation({
         mutationFn: ({
             projectSlug,
-            listId,
             data,
         }: {
             projectSlug: string;
-            listId: string;
             data: CreateTaskInput;
-        }) => createTask(projectSlug, listId, data),
+        }) => createTask(projectSlug, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`tasks`] });
         },
@@ -62,6 +60,7 @@ export function useTaskActions() {
         deleteTask: del.mutateAsync,
         updateTask: update.mutateAsync,
         isCreating: create.isPending,
+        isDeleting: del.isPending,
     };
 }
 export function useTasks(

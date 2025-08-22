@@ -56,9 +56,14 @@ export const createProject = async (data: CreateProjectInput) => {
     return await queries.projects.create(project);
 };
 
-export const deleteProject = async (slug: string) => {
+export const deleteProject = async (id: string) => {
     const userId = await getUserDbId();
-    return await queries.projects.delete(slug, userId);
+    return await queries.projects.delete(id, userId);
+};
+
+export const resetProject = async (id: string) => {
+    const userId = await getUserDbId();
+    return await queries.projects.reset(id, userId);
 };
 
 export const updateProject = async (

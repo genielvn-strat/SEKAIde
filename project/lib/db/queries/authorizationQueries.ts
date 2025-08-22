@@ -88,6 +88,35 @@ export const authorization = {
             .then((res) => res[0] ?? null);
         return result;
     },
+    checkIfTeamMemberByProjectId: async (
+        projectId: string,
+        userId: string
+    ) => {
+        if (!projectId || !userId) {
+            throw new Error("Missing required fields");
+        }
+        const result = await db
+            .select({
+                id: teamMembers.id,
+                userId: teamMembers.userId,
+                teamId: teams.id,
+                roleId: teamMembers.roleId,
+                projectId: projects.id,
+                inviteConfirmed: teamMembers.inviteConfirmed,
+            })
+            .from(teamMembers)
+            .innerJoin(teams, eq(teamMembers.teamId, teams.id))
+            .innerJoin(projects, eq(teams.id, projects.teamId))
+            .where(
+                and(
+                    eq(projects.id, projectId),
+                    eq(teamMembers.userId, userId),
+                    eq(teamMembers.inviteConfirmed, true)
+                )
+            )
+            .then((res) => res[0] ?? null);
+        return result;
+    },
     checkIfTeamOwnedByUser: async (teamId: string, userId: string) => {
         if (!teamId || !userId) {
             throw new Error("Missing required fields");
@@ -125,7 +154,6 @@ export const authorization = {
                 )
             )
             .then((res) => res[0] || null);
-        console.log(result);
         return result;
     },
     checkIfProjectOwnedByUserBySlug: async (
@@ -260,6 +288,84 @@ export const authorization = {
                     eq(teamMembers.userId, userId),
                     eq(teams.slug, teamSlug),
                     eq(permissions.name, action)
+                )
+            )
+            .then((res) => res[0] ?? null);
+
+        return result;
+    },
+    checkIfRoleHasPermissionByProjectSlug: async (
+        userId: string,
+        projectSlug: string,
+        action: string
+    ) => {
+        const result = await db
+            .select({
+                teamId: teams.id,
+                roleId: roles.id,
+                roleName: roles.name,
+                permissionName: permissions.name,
+            })
+            .from(teamMembers)
+            .innerJoin(teams, eq(teamMembers.teamId, teams.id))
+            .innerJoin(projects, eq(projects.teamId, teams.id))
+            .innerJoin(roles, eq(teamMembers.roleId, roles.id))
+            .innerJoin(rolePermissions, eq(rolePermissions.roleId, roles.id))
+            .innerJoin(
+                permissions,
+                eq(rolePermissions.permissionId, permissions.id)
+            )
+            .where(
+                and(
+                    eq(teamMembers.userId, userId),
+                    eq(projects.slug, projectSlug),
+                    eq(permissions.name, action)
+                )
+            )
+            .then((res) => res[0] ?? null);
+
+        return result;
+    },
+    checkIfRoleHasPermissionByTaskId: async (
+        userId: string,
+        projectSlug: string,
+        taskId: string,
+        action: string
+    ) => {
+        // Check if assigned to the person
+        const task = await db
+            .select({ taskId: tasks.id })
+            .from(tasks)
+            .where(and(eq(tasks.assigneeId, userId), eq(tasks.id, taskId)))
+            .then((res) => res[0] ?? null);
+
+        if (task) {
+            // Assignee automatically has permission
+            return task;
+        }
+
+        // 2. Otherwise, check role-based permission
+        const result = await db
+            .select({
+                teamId: teams.id,
+                roleId: roles.id,
+                roleName: roles.name,
+                permissionName: permissions.name,
+            })
+            .from(teamMembers)
+            .innerJoin(teams, eq(teamMembers.teamId, teams.id))
+            .innerJoin(projects, eq(projects.teamId, teams.id))
+            .innerJoin(roles, eq(teamMembers.roleId, roles.id))
+            .innerJoin(rolePermissions, eq(rolePermissions.roleId, roles.id))
+            .innerJoin(
+                permissions,
+                eq(rolePermissions.permissionId, permissions.id)
+            )
+            .where(
+                and(
+                    eq(teamMembers.userId, userId),
+                    eq(permissions.name, action),
+                    eq(projects.slug, projectSlug)
                 )
             )
             .then((res) => res[0] ?? null);

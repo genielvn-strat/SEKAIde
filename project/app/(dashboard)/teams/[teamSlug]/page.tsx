@@ -56,23 +56,15 @@ export default function TeamDetails({ params }: ProjectProps) {
                     <TabsTrigger value="projects">Projects</TabsTrigger>
                     <TabsTrigger value="settings">Settings</TabsTrigger>
                 </TabsList>
-                <div className="my-4">
-                    <TabsContent value="members">
-                        <div className="flex flex-col gap-4">
-                            <TeamMembersTab teamSlug={teamSlug} />
-                        </div>
-                    </TabsContent>
-                    <TabsContent value="projects">
-                        <div className="flex flex-col gap-4">
-                            <TeamProjectsTab teamDetails={teamDetails} />
-                        </div>
-                    </TabsContent>
-                    <TabsContent value="settings">
-                        <div className="flex flex-col gap-4">
-                            <TeamSettingsTab teamDetails={teamDetails} />
-                        </div>
-                    </TabsContent>
-                </div>
+                <TabsContent value="members">
+                    <TeamMembersTab teamSlug={teamSlug} />
+                </TabsContent>
+                <TabsContent value="projects">
+                    <TeamProjectsTab teamDetails={teamDetails} />
+                </TabsContent>
+                <TabsContent value="settings">
+                    <TeamSettingsTab teamDetails={teamDetails} />
+                </TabsContent>
             </Tabs>
         </>
     );

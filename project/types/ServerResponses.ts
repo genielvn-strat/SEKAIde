@@ -1,33 +1,22 @@
 // Teams
-export type FetchOwnedTeams = {
-    id: string;
-    teamName: string;
-    slug: string;
-    projectCount: number;
-    memberCount: number;
-    createdAt: string | null;
-    updatedAt: string | null;
-};
 
-export type FetchJoinedTeams = {
+export type FetchTeams = {
     id: string;
-    teamName: string;
+    name: string;
     slug: string;
     projectCount: number;
     memberCount: number;
     createdAt: string | null;
     updatedAt: string | null;
-};
-export type FetchTeams = {
-    owned: FetchOwnedTeams[];
-    joined: FetchJoinedTeams[];
 };
 
 export type FetchTeamDetails = {
     id: string;
     name: string;
     slug: string;
-    ownerId: string;
+    projectCount: number;
+    memberCount: number;
+    taskCount: number;
     createdAt: string | null;
     updatedAt: string | null;
 };
@@ -71,12 +60,22 @@ export type FetchTask = {
     dueDate: string | null;
     position: number;
     slug: string;
+    assigneeId: string;
     assigneeName: string;
     assigneeUsername: string;
     projectName: string;
     projectSlug: string;
-    listId?: string;
-    listName: string;
+    listId?: string | null;
+    listName?: string | null;
+    listColor?:
+        | "red"
+        | "orange"
+        | "yellow"
+        | "green"
+        | "blue"
+        | "violet"
+        | null;
+    finished: boolean;
 };
 
 // Lists
@@ -85,6 +84,8 @@ export type FetchList = {
     name: string;
     description: string | null;
     position: number;
+    color?: "red" | "orange" | "yellow" | "green" | "blue" | "violet" | null;
+    isFinal: boolean;
 };
 
 // Comment

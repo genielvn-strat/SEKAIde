@@ -5,6 +5,7 @@ import {
     createList,
     deleteList,
     updateList,
+    moveList,
 } from "@/actions/listActions";
 import { CreateListInput, UpdateListInput } from "@/lib/validations";
 import { FetchList } from "@/types/ServerResponses";
@@ -19,7 +20,7 @@ export function useLists(
         isLoading,
         error,
     } = useQuery({
-        queryKey: ["lists"],
+        queryKey: [`lists-${projectSlug}`],
         queryFn: () => fetchProjectLists(projectSlug),
         enabled: !!projectSlug && options.enabled,
     });
@@ -31,7 +32,7 @@ export function useLists(
     };
 }
 
-export function useListActions() {
+export function useListActions(projectSlug: string) {
     const queryClient = useQueryClient();
     const create = useMutation({
         mutationFn: ({
@@ -42,7 +43,9 @@ export function useListActions() {
             data: CreateListInput;
         }) => createList(projectSlug, data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["lists"] });
+            queryClient.invalidateQueries({
+                queryKey: [`lists-${projectSlug}`],
+            });
         },
     });
 
@@ -55,7 +58,9 @@ export function useListActions() {
             projectSlug: string;
         }) => deleteList(listId, projectSlug),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["lists"] });
+            queryClient.invalidateQueries({
+                queryKey: [`lists-${projectSlug}`],
+            });
         },
     });
 
@@ -70,13 +75,34 @@ export function useListActions() {
             data: UpdateListInput;
         }) => updateList(projectSlug, listId, data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["lists"] });
+            queryClient.invalidateQueries({
+                queryKey: [`lists-${projectSlug}`],
+            });
         },
     });
+
+    const move = useMutation({
+        mutationFn: ({
+            listId,
+            projectSlug,
+            direction,
+        }: {
+            projectSlug: string;
+            listId: string;
+            direction: "left" | "right";
+        }) => moveList(listId, projectSlug, direction),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: [`lists-${projectSlug}`],
+            });
+        },
+    });
+
     return {
         createList: create.mutateAsync,
         deleteList: del.mutateAsync,
         updateList: update.mutateAsync,
+        moveList: move.mutateAsync,
         isCreating: create.isPending,
     };
 }

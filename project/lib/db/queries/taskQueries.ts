@@ -31,12 +31,15 @@ export const taskQueries = {
                     dueDate: tasks.dueDate,
                     position: tasks.position,
                     slug: tasks.slug,
+                    assigneeId: users.id,
                     assigneeName: users.name,
                     assigneeUsername: users.username,
                     projectName: projects.name,
                     projectSlug: projects.slug,
                     listId: lists.id,
                     listName: lists.name,
+                    listColor: lists.color,
+                    finished: tasks.finished,
                 })
                 .from(tasks)
                 .innerJoin(projects, eq(tasks.projectId, projects.id))
@@ -48,6 +51,7 @@ export const taskQueries = {
                         eq(projects.slug, projectSlug)
                     )
                 )
+
                 .then((res) => res[0] || null);
 
             return success(200, "Task fetched successfully", result);
@@ -75,17 +79,21 @@ export const taskQueries = {
                     dueDate: tasks.dueDate,
                     position: tasks.position,
                     slug: tasks.slug,
+                    assigneeId: users.id,
                     assigneeName: users.name,
                     assigneeUsername: users.username,
                     projectName: projects.name,
                     projectSlug: projects.slug,
                     listId: lists.id,
                     listName: lists.name,
+                    listColor: lists.color,
+                    finished: tasks.finished,
                 })
                 .from(tasks)
                 .innerJoin(projects, eq(tasks.projectId, projects.id))
                 .innerJoin(users, eq(tasks.assigneeId, users.id))
-                .innerJoin(lists, eq(tasks.listId, lists.id))
+                .leftJoin(lists, eq(tasks.listId, lists.id))
+                .orderBy(asc(tasks.position))
                 .where(eq(projects.slug, projectSlug));
 
             return success(200, "Project Tasks fetched successfully", result);
@@ -117,12 +125,15 @@ export const taskQueries = {
                     dueDate: tasks.dueDate,
                     position: tasks.position,
                     slug: tasks.slug,
+                    assigneeId: users.id,
                     assigneeName: users.name,
                     assigneeUsername: users.username,
                     projectName: projects.name,
                     projectSlug: projects.slug,
                     listId: lists.id,
                     listName: lists.name,
+                    listColor: lists.color,
+                    finished: tasks.finished,
                 })
                 .from(tasks)
                 .innerJoin(users, eq(tasks.assigneeId, users.id))
@@ -213,13 +224,25 @@ export const taskQueries = {
         if (!member) {
             return failure(400, "Not authorized to update this task");
         }
+        const assigned = await db
+            .select()
+            .from(tasks)
+            .where(and(eq(tasks.slug, taskSlug), eq(tasks.assigneeId, userId)));
         const permission = await authorization.checkIfRoleHasPermission(
             member.roleId,
             "update_task"
         );
-        if (!permission)
+        if (!permission && !assigned)
             return failure(400, "Not authorized to update this task");
         try {
+            let list;
+            if (data.listId) {
+                list = await db
+                    .select({ isFinal: lists.isFinal, name: lists.name })
+                    .from(lists)
+                    .where(eq(lists.id, data.listId))
+                    .then((res) => res[0] ?? null);
+            }
             const result = await db
                 .update(tasks)
                 .set({
@@ -228,6 +251,7 @@ export const taskQueries = {
                         ? data.dueDate.toISOString()
                         : undefined,
                     updatedAt: new Date().toISOString(),
+                    ...(list !== undefined ? { finished: list.isFinal } : {}),
                 })
                 .where(eq(tasks.id, task.id))
                 .returning();
@@ -254,12 +278,15 @@ export const taskQueries = {
         if (!member) {
             return failure(400, "Not authorized to delete this task");
         }
-
+        const assigned = await db
+            .select()
+            .from(tasks)
+            .where(and(eq(tasks.slug, taskSlug), eq(tasks.assigneeId, userId)));
         const permission = await authorization.checkIfRoleHasPermission(
             member.roleId,
             "delete_task"
         );
-        if (!permission)
+        if (!permission && !assigned)
             return failure(400, "Not authorized to delete this task");
 
         try {

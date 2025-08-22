@@ -27,7 +27,7 @@ const TaskList: React.FC<TaskListProps> = ({ projectSlug, listId }) => {
 
     const onSubmit: SubmitHandler<CreateTaskInput> = async (data) => {
         try {
-            await createTask({ projectSlug, listId, data });
+            await createTask({ projectSlug, data });
             reset();
         } catch (err) {
             setError("root", { message: "Failed to create task" });

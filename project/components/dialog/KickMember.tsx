@@ -12,7 +12,7 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 
 interface KickMemberProps {
     teamSlug: string;
@@ -33,7 +33,7 @@ const KickMember: React.FC<KickMemberProps> = ({
         try {
             const result = await kick({ teamSlug, targetUserId: memberUserId });
             if (!result.success) {
-                throw new Error(result.message)
+                throw new Error(result.message);
             }
             toast.success(`${memberName} has been kicked from the team.`);
         } catch (e) {

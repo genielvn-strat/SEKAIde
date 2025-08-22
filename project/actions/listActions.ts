@@ -59,3 +59,12 @@ export const deleteList = async (listId: string, projectSlug: string) => {
     const userId = await getUserDbId();
     return await queries.lists.delete(listId, projectSlug, userId);
 };
+
+export const moveList = async (
+    listId: string,
+    projectId: string,
+    direction: "left" | "right"
+) => {
+    const userId = await getUserDbId();
+    return await queries.lists.move(listId, projectId, direction, userId);
+};

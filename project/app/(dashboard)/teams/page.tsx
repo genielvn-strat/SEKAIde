@@ -6,7 +6,7 @@ import { TypographyMuted } from "@/components/typography/TypographyMuted";
 import { Separator } from "@/components/ui/separator";
 import CreateTeam from "@/components/buttons/CreateTeam";
 import TeamCard from "@/components/TeamCard";
-import { useState, useMemo } from "react"; // 👈 Add useMemo here
+import { useState, useMemo } from "react"; 
 import { Input } from "@/components/ui/input";
 import {
     DropdownMenu,
@@ -23,19 +23,20 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 
 export default function TeamPage() {
-    const { joinedTeams, isLoading, isError } = useTeams();
+    const { teams, isLoading, isError } = useTeams();
 
     const [searchQuery, setSearchQuery] = useState("");
     const [sortCriteria, setSortCriteria] = useState("createdAt");
 
     const filteredAndSortedTeams = useMemo(() => {
-        return joinedTeams
+        if (!teams) return;
+        return teams
             .filter((team) =>
-                team.teamName.toLowerCase().includes(searchQuery.toLowerCase())
+                team.name.toLowerCase().includes(searchQuery.toLowerCase())
             )
             .sort((a, b) => {
                 if (sortCriteria === "teamName") {
-                    return a.teamName.localeCompare(b.teamName);
+                    return a.name.localeCompare(b.name);
                 }
                 if (sortCriteria === "memberCount") {
                     return b.memberCount - a.memberCount;
@@ -48,18 +49,18 @@ export default function TeamPage() {
                     new Date(a.createdAt!).getTime()
                 );
             });
-    }, [joinedTeams, searchQuery, sortCriteria]);
+    }, [teams, searchQuery, sortCriteria]);
 
     if (isLoading) {
         return <LoadingSkeleton />;
     }
 
-    if (!joinedTeams || isError) {
+    if (!teams || isError) {
         return "Error loading teams";
     }
 
     return (
-        <>
+        <div>
             <div className="doc-header flex flex-row justify-between items-center">
                 <div className="left">
                     <TypographyH1>Teams</TypographyH1>
@@ -109,8 +110,8 @@ export default function TeamPage() {
                 </DropdownMenu>
             </div>
             <div className="flex flex-wrap gap-4">
-                {filteredAndSortedTeams.length !== 0 ? (
-                    filteredAndSortedTeams.map((team) => (
+                {filteredAndSortedTeams?.length !== 0 ? (
+                    filteredAndSortedTeams?.map((team) => (
                         <TeamCard key={team.id} team={team} />
                     ))
                 ) : (
@@ -124,6 +125,6 @@ export default function TeamPage() {
                     </Alert>
                 )}
             </div>
-        </>
+        </div>
     );
 }

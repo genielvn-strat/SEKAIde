@@ -9,9 +9,16 @@ import {
     boolean,
     pgEnum,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 
 export const taskPriority = pgEnum("task_priority", ["low", "medium", "high"]);
+export const color = pgEnum("color", [
+    "red",
+    "orange",
+    "yellow",
+    "green",
+    "blue",
+    "violet",
+]);
 
 export const projects = pgTable(
     "projects",
@@ -101,6 +108,7 @@ export const lists = pgTable(
         projectId: uuid("project_id"),
         position: integer().notNull(),
         isFinal: boolean().notNull().default(false),
+        color: color(),
         createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
         updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow(),
     },
@@ -109,7 +117,7 @@ export const lists = pgTable(
             columns: [table.projectId],
             foreignColumns: [projects.id],
             name: "lists_project_id_projects_id_fk",
-        }).onDelete("cascade"),
+        }).onDelete("set null"),
     ]
 );
 
@@ -120,9 +128,9 @@ export const tasks = pgTable(
         title: text().notNull(),
         description: text(),
         projectId: uuid("project_id").notNull(),
-        listId: uuid("list_id").notNull(),
+        listId: uuid("list_id"),
         assigneeId: uuid("assignee_id"),
-        priority: taskPriority().default("low").notNull(),
+        priority: taskPriority().default("medium").notNull(),
         position: integer().notNull(),
         slug: text().notNull(),
         finished: boolean().notNull().default(false),
@@ -140,12 +148,12 @@ export const tasks = pgTable(
             columns: [table.listId],
             foreignColumns: [lists.id],
             name: "tasks_list_id_lists_id_fk",
-        }).onDelete("cascade"),
+        }).onDelete("set null"),
         foreignKey({
             columns: [table.assigneeId],
             foreignColumns: [users.id],
             name: "tasks_assignee_id_users_id_fk",
-        }).onDelete("cascade"),
+        }).onDelete("set null"),
     ]
 );
 
@@ -193,7 +201,7 @@ export const roles = pgTable(
         id: uuid().defaultRandom().primaryKey().notNull(),
         name: text().notNull(),
         nameId: text().notNull(),
-        color: text().default("#0a0a0a").notNull(),
+        color: color(),
     },
     (table) => [unique("roles_nameId_unique").on(table.nameId)]
 );

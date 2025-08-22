@@ -1,5 +1,5 @@
 import { projects, lists } from "@/migrations/schema";
-import { asc, eq } from "drizzle-orm";
+import { asc, count, eq } from "drizzle-orm";
 import { CreateList, UpdateList } from "@/types/List";
 import { failure, success } from "@/types/Response";
 import { authorization } from "./authorizationQueries";
@@ -22,6 +22,8 @@ export const listQueries = {
                     id: lists.id,
                     name: lists.name,
                     description: lists.description,
+                    isFinal: lists.isFinal,
+                    color: lists.color,
                     position: lists.position,
                 })
                 .from(lists)
@@ -50,25 +52,29 @@ export const listQueries = {
             projectSlug,
             userId
         );
-        
+
         if (!member) {
             return failure(400, "Not authorized to create a list");
         }
-        
+
         const permission = await authorization.checkIfRoleHasPermission(
             member.roleId,
             "create_list"
         );
-        console.log(permission)
 
         if (!permission) return failure(400, "Not authorized to create a list");
 
         try {
+            const [{ count: listCount }] = await db
+                .select({ count: count() })
+                .from(lists)
+                .where(eq(lists.projectId, project.id));
             const result = await db
                 .insert(lists)
                 .values({
                     ...data,
                     projectId: project.id,
+                    position: listCount,
                 })
                 .returning();
 
@@ -158,6 +164,92 @@ export const listQueries = {
             return success(200, "List deleted successfully", result);
         } catch {
             return failure(500, "Failed to delete list.");
+        }
+    },
+    move: async (
+        listId: string,
+        projectSlug: string,
+        direction: "left" | "right",
+        userId: string
+    ) => {
+        const list = await authorization.checkIfListBelongsToProjectBySlug(
+            projectSlug,
+            listId
+        );
+
+        if (!list || !list.teamId) {
+            return failure(404, "List not found in this project");
+        }
+
+        const member = await authorization.checkIfTeamMemberByTeamId(
+            list.teamId,
+            userId
+        );
+
+        if (!member) return failure(400, "Not authorized to move this list");
+
+        const permission = await authorization.checkIfRoleHasPermission(
+            member.roleId,
+            "update_list"
+        );
+        if (!permission)
+            return failure(400, "Not authorized to move this list");
+
+        try {
+            const projectLists = await db
+                .select({
+                    id: lists.id,
+                    position: lists.position,
+                })
+                .from(lists)
+                .innerJoin(projects, eq(lists.projectId, projects.id))
+                .where(eq(projects.slug, projectSlug))
+                .orderBy(asc(lists.position));
+
+            const currentIndex = projectLists.findIndex(
+                (l) => l.id === list.id
+            );
+            if (currentIndex === -1)
+                return failure(404, "List not found in this project");
+
+            // Boundary checks
+            if (
+                (direction === "left" && currentIndex === 0) ||
+                (direction === "right" &&
+                    currentIndex === projectLists.length - 1)
+            ) {
+                return failure(
+                    400,
+                    "Cannot move list further in that direction"
+                );
+            }
+
+            const swapIndex =
+                direction === "left" ? currentIndex - 1 : currentIndex + 1;
+
+            const currentList = projectLists[currentIndex];
+            const swapList = projectLists[swapIndex];
+
+            // Swap positions
+            await db.transaction(async (tx) => {
+                await tx
+                    .update(lists)
+                    .set({ position: swapList.position })
+                    .where(eq(lists.id, currentList.id));
+
+                await tx
+                    .update(lists)
+                    .set({ position: currentList.position })
+                    .where(eq(lists.id, swapList.id));
+            });
+
+            return success(200, "List moved successfully", {
+                movedListId: currentList.id,
+                swappedWithId: swapList.id,
+            });
+        } catch (err) {
+            console.error("Move list error:", err);
+            return failure(500, "Failed to move list");
         }
     },
 };

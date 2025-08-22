@@ -13,7 +13,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import KickMember from "@/components/KickMember";
+import KickMember from "@/components/dialog/KickMember";
 import { useState } from "react";
 import { useAuthRoleByTeam } from "@/hooks/useRoles";
 
@@ -42,7 +42,10 @@ export const TeamMemberColumns: (
     },
     {
         accessorKey: "email",
-        header: "Email",
+        header: () => <span className="hidden md:table-cell">Email</span>,
+        cell: ({ row }) => (
+            <span className="hidden md:table-cell">{row.original.email}</span>
+        ),
     },
     {
         accessorKey: "role",

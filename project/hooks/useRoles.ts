@@ -1,6 +1,6 @@
 "use client";
 
-import { authRoleByTeamSlug, fetchRoles } from "@/actions/roleActions";
+import { authRoleByProjectSlug, authRoleByTaskId, authRoleByTeamSlug, fetchRoles } from "@/actions/roleActions";
 import { teams } from "@/migrations/schema";
 import { useQuery } from "@tanstack/react-query";
 
@@ -37,6 +37,55 @@ export function useAuthRoleByTeam(
         queryKey: [`authRoleTeam-${action}`],
         queryFn: () => authRoleByTeamSlug(teamSlug, action),
         enabled: !!teamSlug && options.enabled,
+    });
+
+    return {
+        permitted: res,
+        isLoading,
+        isError,
+        error,
+    };
+}
+
+export function useAuthRoleByProject(
+    projectSlug: string,
+    action: string,
+    options: { enabled?: boolean } = { enabled: true }
+) {
+    const {
+        data: res,
+        isLoading,
+        isError,
+        error,
+    } = useQuery({
+        queryKey: [`authRoleProject-${action}`],
+        queryFn: () => authRoleByProjectSlug(projectSlug, action),
+        enabled: !!projectSlug && options.enabled,
+    });
+
+    return {
+        permitted: res,
+        isLoading,
+        isError,
+        error,
+    };
+}
+
+export function useAuthRoleByTask(
+    taskId: string,
+    projectSlug: string,
+    action: string,
+    options: { enabled?: boolean } = { enabled: true }
+) {
+    const {
+        data: res,
+        isLoading,
+        isError,
+        error,
+    } = useQuery({
+        queryKey: [`authRoleTask-${action}-${taskId}`],
+        queryFn: () => authRoleByTaskId(taskId, projectSlug, action),
+        enabled: !!taskId && options.enabled,
     });
 
     return {

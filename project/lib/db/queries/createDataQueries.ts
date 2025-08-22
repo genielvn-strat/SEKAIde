@@ -23,6 +23,7 @@ export const createData = {
             { name: "create_project", description: "Create new projects" },
             { name: "update_project", description: "Update existing projects" },
             { name: "delete_project", description: "Delete projects" },
+            { name: "reset_project", description: "Reset project back to default state" },
 
             { name: "create_list", description: "Create new lists" },
             { name: "update_list", description: "Update existing lists" },
@@ -39,7 +40,7 @@ export const createData = {
             { name: "create_comment", description: "Add comments to tasks" },
             { name: "update_comment", description: "Update your comments" },
             { name: "delete_comment", description: "Delete comments" },
-        ]);
+        ]).onConflictDoNothing();
     },
     rolePermissions: async () => {
         const rolePermissionMap: Record<string, string[]> = {
@@ -53,6 +54,7 @@ export const createData = {
             create_project: ["owner", "project_manager"],
             update_project: ["owner", "project_manager"],
             delete_project: ["owner", "project_manager"],
+            reset_project: ["owner", "project_manager"],
 
             create_list: ["owner", "project_manager"],
             update_list: ["owner", "project_manager"],

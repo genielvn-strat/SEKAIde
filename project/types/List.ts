@@ -5,6 +5,7 @@ export interface List {
     projectId: string;
     position: number;
     isFinal: boolean;
+    color?: "red" | "orange" | "yellow" | "green" | "blue" | "violet";
     createdAt: Date | string;
     updatedAt: Date | string;
 }

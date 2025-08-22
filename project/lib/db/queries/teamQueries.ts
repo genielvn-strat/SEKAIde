@@ -1,12 +1,16 @@
-import { teams, teamMembers, projects, roles } from "@/migrations/schema";
+import {
+    teams,
+    teamMembers,
+    projects,
+    roles,
+    rolePermissions,
+    permissions,
+    tasks,
+} from "@/migrations/schema";
 import { and, countDistinct, eq, or } from "drizzle-orm";
 import { CreateTeam, UpdateTeam } from "@/types/Team";
 import { failure, success } from "@/types/Response";
-import {
-    FetchJoinedTeams,
-    FetchOwnedTeams,
-    FetchTeamDetails,
-} from "@/types/ServerResponses";
+import { FetchTeams, FetchTeamDetails } from "@/types/ServerResponses";
 import { authorization } from "./authorizationQueries";
 import { db } from "../db";
 import { alias } from "drizzle-orm/pg-core";
@@ -16,10 +20,10 @@ export const teamQueries = {
         try {
             const memberSelf = alias(teamMembers, "memberSelf");
 
-            const result: FetchJoinedTeams[] = await db
+            const result: FetchTeams[] = await db
                 .select({
                     id: teams.id,
-                    teamName: teams.name,
+                    name: teams.name,
                     slug: teams.slug,
                     memberCount: countDistinct(teamMembers.userId).as(
                         "memberCount"
@@ -53,10 +57,10 @@ export const teamQueries = {
     },
     getByOwner: async (ownerId: string) => {
         try {
-            const result: FetchOwnedTeams[] = await db
+            const result: FetchTeams[] = await db
                 .select({
                     id: teams.id,
-                    teamName: teams.name,
+                    name: teams.name,
                     slug: teams.slug,
                     memberCount: countDistinct(teamMembers.userId).as(
                         "memberCount"
@@ -98,13 +102,18 @@ export const teamQueries = {
                     id: teams.id,
                     name: teams.name,
                     slug: teams.slug,
-                    ownerId: teams.ownerId,
+                    memberCount: countDistinct(teamMembers.userId).as(
+                        "memberCount"
+                    ),
+                    projectCount: countDistinct(projects.id).as("projectCount"),
+                    taskCount: countDistinct(tasks.id).as("taskCount"), // <-- new
                     createdAt: teams.createdAt,
                     updatedAt: teams.updatedAt,
                 })
-
                 .from(teams)
                 .innerJoin(teamMembers, eq(teams.id, teamMembers.teamId))
+                .leftJoin(projects, eq(projects.teamId, teams.id))
+                .leftJoin(tasks, eq(tasks.projectId, projects.id)) // <-- join tasks
                 .where(
                     and(
                         eq(teams.slug, slug),
@@ -114,11 +123,61 @@ export const teamQueries = {
                         )
                     )
                 )
+                .groupBy(
+                    teams.id,
+                    teams.name,
+                    teams.slug,
+                    teams.createdAt,
+                    teams.updatedAt
+                )
                 .then((res) => res[0] || null);
 
             return success(200, "Team details successfully fetched.", result);
-        } catch {
+        } catch (err) {
             return failure(500, "Failed to fetch team details");
+        }
+    },
+    getTeamsWithCreateProject: async (userId: string) => {
+        try {
+            const result: FetchTeams[] = await db
+                .select({
+                    id: teams.id,
+                    name: teams.name,
+                    slug: teams.slug,
+                    createdAt: teams.createdAt,
+                    updatedAt: teams.updatedAt,
+                    memberCount: countDistinct(teamMembers.userId).as(
+                        "memberCount"
+                    ),
+                    projectCount: countDistinct(projects.id).as("projectCount"),
+                })
+                .from(teams)
+                .innerJoin(teamMembers, eq(teams.id, teamMembers.teamId))
+                .innerJoin(roles, eq(teamMembers.roleId, roles.id))
+                .innerJoin(
+                    rolePermissions,
+                    eq(roles.id, rolePermissions.roleId)
+                )
+                .innerJoin(
+                    permissions,
+                    eq(rolePermissions.permissionId, permissions.id)
+                )
+                .leftJoin(projects, eq(teams.id, projects.teamId))
+                .where(
+                    and(
+                        eq(teamMembers.userId, userId),
+                        eq(permissions.name, "create_project")
+                    )
+                )
+                .groupBy(teams.id);
+
+            return success(
+                200,
+                "Team with create_project permission fetched successfully.",
+                result
+            );
+        } catch {
+            return failure(500, "Failed to fetch teams");
         }
     },
     create: async (data: CreateTeam) => {
