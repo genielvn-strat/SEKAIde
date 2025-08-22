@@ -57,7 +57,7 @@ export function useTeamWithCreateProject() {
         error,
     } = useQuery({
         queryKey: ["teamProjectCreate"],
-        queryFn: fetchTeamWithCreateProject,
+        queryFn: () => fetchTeamWithCreateProject(),
         enabled: true,
     });
 

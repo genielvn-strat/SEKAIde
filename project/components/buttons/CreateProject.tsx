@@ -20,6 +20,17 @@ import { toast } from "sonner";
 import { useProjectActions } from "@/hooks/useProjects";
 import { Textarea } from "@/components/ui/textarea";
 import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
     Form,
     FormField,
     FormItem,
@@ -57,6 +68,7 @@ const CreateProject: React.FC = () => {
     const form = useForm<CreateProjectInput>({
         resolver: zodResolver(projectSchema),
     });
+    console.log(teams, teamsError);
 
     const onSubmit = async (data: CreateProjectInput) => {
         try {
@@ -83,7 +95,31 @@ const CreateProject: React.FC = () => {
         }
     };
 
-    return (
+    return teams?.length == 0 ? (
+        <AlertDialog>
+            <AlertDialogTrigger asChild>
+                <Button className="flex flex-row items-center" type="button">
+                    <CirclePlus />
+                    Create Project
+                </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>No Teams Available</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        You don't have any teams you own or manage as
+                        a Project Manager. Would you like to create a new team?
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => router.push("/teams/")}>
+                        Create Team
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    ) : (
         <Dialog>
             <DialogTrigger asChild>
                 <Button className="flex flex-row items-center" type="button">
@@ -221,7 +257,15 @@ const CreateProject: React.FC = () => {
                                                     value="error"
                                                     disabled
                                                 >
-                                                    Failed to load teams
+                                                    {teamsError ??
+                                                        "Failed to load teams"}
+                                                </SelectItem>
+                                            ) : teams?.length === 0 ? (
+                                                <SelectItem
+                                                    value="none"
+                                                    disabled
+                                                >
+                                                    No teams available
                                                 </SelectItem>
                                             ) : (
                                                 teams?.map((team) => (
