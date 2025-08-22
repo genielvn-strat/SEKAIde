@@ -28,10 +28,19 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import { CalendarIcon, CirclePlus } from "lucide-react";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
 import { TypographyH2 } from "./typography/TypographyH2";
 import { Input } from "@/components/ui/input";
 import { useProjectActions } from "@/hooks/useProjects";
 import { Textarea } from "./ui/textarea";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { Calendar } from "./ui/calendar";
 
 interface UpdateProjectProps {
     project: FetchProject;
@@ -45,6 +54,7 @@ const UpdateProject: React.FC<UpdateProjectProps> = ({ project }) => {
         defaultValues: {
             name: project.name,
             description: project.description ?? undefined,
+            dueDate: project.dueDate ? new Date(project.dueDate) : undefined
         },
     });
 
@@ -115,6 +125,57 @@ const UpdateProject: React.FC<UpdateProjectProps> = ({ project }) => {
                                             placeholder="A project that displays Hello World to everyone."
                                         />
                                     </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="dueDate"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                    <FormLabel>Due date</FormLabel>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <FormControl>
+                                                <Button
+                                                    variant={"outline"}
+                                                    className={cn(
+                                                        "w-[240px] pl-3 text-left font-normal",
+                                                        !field.value &&
+                                                            "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    {field.value ? (
+                                                        format(
+                                                            field.value,
+                                                            "PPP"
+                                                        )
+                                                    ) : (
+                                                        <span>Pick a date</span>
+                                                    )}
+                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                </Button>
+                                            </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent
+                                            className="w-auto p-0"
+                                            align="start"
+                                        >
+                                            <Calendar
+                                                mode="single"
+                                                selected={field.value}
+                                                onSelect={field.onChange}
+                                                disabled={(date) =>
+                                                    date < new Date() ||
+                                                    date <
+                                                        new Date("1900-01-01")
+                                                }
+                                                captionLayout="dropdown"
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+
                                     <FormMessage />
                                 </FormItem>
                             )}

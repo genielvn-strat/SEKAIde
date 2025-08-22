@@ -88,6 +88,35 @@ export const authorization = {
             .then((res) => res[0] ?? null);
         return result;
     },
+    checkIfTeamMemberByProjectId: async (
+        projectId: string,
+        userId: string
+    ) => {
+        if (!projectId || !userId) {
+            throw new Error("Missing required fields");
+        }
+        const result = await db
+            .select({
+                id: teamMembers.id,
+                userId: teamMembers.userId,
+                teamId: teams.id,
+                roleId: teamMembers.roleId,
+                projectId: projects.id,
+                inviteConfirmed: teamMembers.inviteConfirmed,
+            })
+            .from(teamMembers)
+            .innerJoin(teams, eq(teamMembers.teamId, teams.id))
+            .innerJoin(projects, eq(teams.id, projects.teamId))
+            .where(
+                and(
+                    eq(projects.id, projectId),
+                    eq(teamMembers.userId, userId),
+                    eq(teamMembers.inviteConfirmed, true)
+                )
+            )
+            .then((res) => res[0] ?? null);
+        return result;
+    },
     checkIfTeamOwnedByUser: async (teamId: string, userId: string) => {
         if (!teamId || !userId) {
             throw new Error("Missing required fields");

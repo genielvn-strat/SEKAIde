@@ -13,6 +13,29 @@ import { authorization } from "./authorizationQueries";
 import { db } from "../db";
 import { CreateList } from "@/types/List";
 
+const defaultList = (projectId: string) => [
+    {
+        name: "To Do",
+        description: "Tasks to be done",
+        projectId: projectId,
+        color: "red" as const,
+        isFinal: false,
+    },
+    {
+        name: "In Progress",
+        description: "Tasks currently being worked on",
+        projectId: projectId,
+        color: "blue" as const,
+        isFinal: false,
+    },
+    {
+        name: "Done",
+        description: "Completed tasks",
+        projectId: projectId,
+        color: "green" as const,
+        isFinal: true,
+    },
+];
 export const projectQueries = {
     getBySlug: async (projectSlug: string, userId: string) => {
         if (!projectSlug || !userId)
@@ -39,10 +62,12 @@ export const projectQueries = {
                     createdAt: projects.createdAt,
                     updatedAt: projects.updatedAt,
                     dueDate: projects.dueDate,
+                    totalTaskCount: count(tasks.id).mapWith(Number),
                 })
                 .from(projects)
                 .innerJoin(teams, eq(projects.teamId, teams.id))
                 .innerJoin(teamMembers, eq(teams.id, teamMembers.teamId))
+                .leftJoin(tasks, eq(tasks.projectId, projects.id)) // include tasks
                 .where(
                     and(
                         eq(projects.slug, projectSlug),
@@ -52,6 +77,8 @@ export const projectQueries = {
                         )
                     )
                 )
+                .groupBy(projects.id, teams.name) // aggregate per project
+
                 .then((res) => res[0] || null);
 
             return success(200, "Projects successfully fetched.", result);
@@ -140,36 +167,16 @@ export const projectQueries = {
                 const project = inserted[0];
                 if (!project) return failure(500, "Failed to create project");
 
-                const defaultLists: CreateList[] = [
-                    {
-                        name: "To Do",
-                        description: "Tasks to be done",
+                const defaultLists: CreateList[] = defaultList(project.id).map(
+                    (lists, idx) => ({
+                        name: lists.name,
+                        description: lists.description,
+                        position: idx,
                         projectId: project.id,
-                        color: "red" as const,
-                        isFinal: false,
-                    },
-                    {
-                        name: "In Progress",
-                        description: "Tasks currently being worked on",
-                        projectId: project.id,
-                        color: "blue" as const,
-                        isFinal: false,
-                    },
-                    {
-                        name: "Done",
-                        description: "Completed tasks",
-                        projectId: project.id,
-                        color: "green" as const,
-                        isFinal: true,
-                    },
-                ].map((lists, idx) => ({
-                    name: lists.name,
-                    description: lists.description,
-                    position: idx,
-                    projectId: project.id,
-                    color: lists.color,
-                    isFinal: lists.isFinal,
-                }));
+                        color: lists.color,
+                        isFinal: lists.isFinal,
+                    })
+                );
 
                 await tx.insert(lists).values(defaultLists);
 
@@ -222,12 +229,12 @@ export const projectQueries = {
             return failure(500, "Failed to update project");
         }
     },
-    delete: async (projectSlug: string, userId: string) => {
-        if (!projectSlug || !userId) {
+    delete: async (projectId: string, userId: string) => {
+        if (!projectId || !userId) {
             return failure(500, "Missing required fields");
         }
-        const member = await authorization.checkIfTeamMemberByProjectSlug(
-            projectSlug,
+        const member = await authorization.checkIfTeamMemberByProjectId(
+            projectId,
             userId
         );
         if (!member) {
@@ -255,6 +262,67 @@ export const projectQueries = {
                 .where(eq(projects.id, member.projectId))
                 .returning();
             return success(200, "Project successfully deleted", result);
+        } catch {
+            return failure(500, "Failed to update project");
+        }
+    },
+    reset: async (projectId: string, userId: string) => {
+        if (!projectId || !userId) {
+            return failure(500, "Missing required fields");
+        }
+        const member = await authorization.checkIfTeamMemberByProjectId(
+            projectId,
+            userId
+        );
+        if (!member) {
+            return failure(
+                400,
+                "You are not authorized to delete this project"
+            );
+        }
+
+        const permission = await authorization.checkIfRoleHasPermission(
+            member.roleId,
+            "reset_project"
+        );
+
+        if (!permission) {
+            return failure(
+                400,
+                "You are not authorized to delete this project"
+            );
+        }
+
+        try {
+            const tasksDeleted = await db
+                .delete(tasks)
+                .where(eq(tasks.projectId, member.projectId))
+                .returning();
+            const listsDeleted = await db
+                .delete(lists)
+                .where(eq(lists.projectId, member.projectId))
+                .returning();
+            const defaultLists: CreateList[] = defaultList(
+                member.projectId
+            ).map((lists, idx) => ({
+                name: lists.name,
+                description: lists.description,
+                position: idx,
+                projectId: member.projectId,
+                color: lists.color,
+                isFinal: lists.isFinal,
+            }));
+
+            const listsCreated = await db.insert(lists).values(defaultLists).returning();
+            return success(
+                200,
+                "Project successfully reset to default",
+                {
+                    tasksDeleted,
+                    listsDeleted,
+                    listsCreated
+                }
+            );
         } catch {
             return failure(500, "Failed to update project");
         }

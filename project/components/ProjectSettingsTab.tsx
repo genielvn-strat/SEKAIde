@@ -29,6 +29,8 @@ import DeleteTeam from "./buttons/DeleteTeam";
 import LeaveTeam from "./buttons/LeaveTeam";
 import LoadingSkeletonCards from "./LoadingSkeletonCards";
 import UpdateProject from "./UpdateProject";
+import DeleteProject from "./buttons/DeleteProject";
+import ResetProject from "./buttons/ResetProject";
 
 interface ProjectSettingsTabProps {
     project: FetchProject;
@@ -39,6 +41,8 @@ const ProjectSettingsTab: React.FC<ProjectSettingsTabProps> = ({ project }) => {
         useAuthRoleByProject(project.slug, "update_project");
     const { permitted: permittedDelete, isLoading: deleteLoading } =
         useAuthRoleByProject(project.slug, "delete_project");
+    const { permitted: permittedReset } =
+        useAuthRoleByProject(project.slug, "reset_project");
 
     if (updateLoading || deleteLoading) return <LoadingSkeletonCards />;
 
@@ -46,20 +50,26 @@ const ProjectSettingsTab: React.FC<ProjectSettingsTabProps> = ({ project }) => {
         <div className="space-y-8">
             {permittedUpdate && <UpdateProject project={project} />}
 
-            {permittedDelete && 
-            <Card className="w-full max-w-xl border-destructive">
-                <CardHeader>
-                    <CardTitle className="text-destructive">
-                        <TypographyH2>Danger Zone</TypographyH2>
-                    </CardTitle>
-                    <CardDescription>
-                        Actions that can permanently affect your team.
-                    </CardDescription>
-                </CardHeader>
-                <CardFooter className="flex flex-col items-start gap-4">
-                </CardFooter>
-            </Card>
-            }
+            {permittedDelete && (
+                <Card className="w-full max-w-xl border-destructive">
+                    <CardHeader>
+                        <CardTitle className="text-destructive">
+                            <TypographyH2>Danger Zone</TypographyH2>
+                        </CardTitle>
+                        <CardDescription>
+                            Actions that can permanently affect your team.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardFooter className="flex flex-col items-start gap-4">
+                        {permittedReset && (
+                            <ResetProject projectDetails={project} />
+                        )}
+                        {permittedDelete && (
+                            <DeleteProject projectDetails={project} />
+                        )}
+                    </CardFooter>
+                </Card>
+            )}
         </div>
     );
 };

@@ -7,6 +7,7 @@ import {
     updateProject,
     fetchTeamProjects,
     fetchProjectBySlug,
+    resetProject,
 } from "@/actions/projectActions";
 import { UpdateProjectInput } from "@/lib/validations";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -83,7 +84,7 @@ export function useProjectActions() {
     });
 
     const del = useMutation({
-        mutationFn: ({ slug }: { slug: string }) => deleteProject(slug),
+        mutationFn: ({ id }: { id: string }) => deleteProject(id),
         onSuccess: () => {
             queryClient.invalidateQueries({
                 queryKey: ["projects", "projectDetails"],
@@ -108,11 +109,21 @@ export function useProjectActions() {
             });
         },
     });
+    const reset = useMutation({
+        mutationFn: ({ id }: { id: string }) => resetProject(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["projects", "projectDetails"],
+            });
+        },
+    });
     return {
         createProject: create.mutateAsync,
         deleteProject: del.mutateAsync,
+        resetProject: reset.mutateAsync,
         updateProject: update.mutateAsync,
         isCreating: create.isPending,
+        isDeleting: del.isPending,
     };
 }
 
