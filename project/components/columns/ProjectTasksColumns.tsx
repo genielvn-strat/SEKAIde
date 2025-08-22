@@ -134,19 +134,9 @@ export const ProjectTasksColumn: (
             const task = row.original;
             const [editDialog, showEditDialog] = useState(false);
             const [deleteDialog, showDeleteDialog] = useState(false);
-            const { permitted: permittedUpdate } = useAuthRoleByTask(
-                task.id,
-                projectSlug,
-                "update_task"
-            );
-            const { permitted: permittedDelete } = useAuthRoleByTask(
-                task.id,
-                projectSlug,
-                "delete_task"
-            );
 
             return (
-                (permittedUpdate || permittedDelete) && (
+                task.allowUpdate && (
                     <>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>

@@ -1,5 +1,5 @@
 import { users, tasks, projects, lists } from "@/migrations/schema";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, sql } from "drizzle-orm";
 import { CreateTask, UpdateTask } from "@/types/Task";
 import { failure, success } from "@/types/Response";
 import { authorization } from "./authorizationQueries";
@@ -21,6 +21,14 @@ export const taskQueries = {
             return failure(404, "Not found.");
         }
 
+        const canUpdate =
+            (await authorization
+                .checkIfRoleHasPermissionByProjectSlug(
+                    userId,
+                    projectSlug,
+                    "update_task"
+                )
+                .then((res) => (res ? true : false))) ?? false;
         try {
             const result: FetchTask = await db
                 .select({
@@ -41,6 +49,13 @@ export const taskQueries = {
                     listName: lists.name,
                     listColor: lists.color,
                     finished: tasks.finished,
+                    allowUpdate: sql<boolean>`
+                    CASE 
+                        WHEN ${tasks.assigneeId} = ${userId} THEN TRUE
+                        WHEN ${canUpdate} = TRUE THEN TRUE
+                        ELSE FALSE
+                    END
+                `,
                 })
                 .from(tasks)
                 .innerJoin(projects, eq(tasks.projectId, projects.id))
@@ -69,8 +84,16 @@ export const taskQueries = {
         if (!isAuthorized) {
             return failure(500, "You are not authorized to view these tasks.");
         }
-
         try {
+            const canUpdate =
+                (await authorization
+                    .checkIfRoleHasPermissionByProjectSlug(
+                        userId,
+                        projectSlug,
+                        "update_task"
+                    )
+                    .then((res) => (res ? true : false))) ?? false;
+    
             const result: FetchTask[] = await db
                 .select({
                     id: tasks.id,
@@ -90,6 +113,13 @@ export const taskQueries = {
                     listName: lists.name,
                     listColor: lists.color,
                     finished: tasks.finished,
+                    allowUpdate: sql<boolean>`
+                        CASE 
+                            WHEN ${tasks.assigneeId} = ${userId} THEN TRUE
+                            WHEN ${canUpdate} = TRUE THEN TRUE
+                            ELSE FALSE
+                        END
+                    `,
                 })
                 .from(tasks)
                 .innerJoin(projects, eq(tasks.projectId, projects.id))
@@ -97,7 +127,7 @@ export const taskQueries = {
                 .leftJoin(lists, eq(tasks.listId, lists.id))
                 .orderBy(asc(tasks.position))
                 .where(eq(projects.slug, projectSlug));
-
+            
             return success(200, "Project Tasks fetched successfully", result);
         } catch {
             return failure(500, "Failed to fetch task");

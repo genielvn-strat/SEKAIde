@@ -24,11 +24,7 @@ export function KanbanTask({
     projectSlug: string;
     task: FetchTask;
 }) {
-    const { permitted: permittedUpdate } = useAuthRoleByTask(
-        task.id,
-        projectSlug,
-        "update_task"
-    );
+    
 
     const { attributes, listeners, setNodeRef, transform, transition } =
         useSortable({ id: task.id });
@@ -41,7 +37,7 @@ export function KanbanTask({
     return (
         <Card
             ref={setNodeRef}
-            style={{ ...style, opacity: permittedUpdate ? 1 : 0.5 }}
+            style={{ ...style, opacity: task.allowUpdate ? 1 : 0.5 }}
         >
             <CardHeader>
                 <div className="flex justify-between">
@@ -49,12 +45,12 @@ export function KanbanTask({
                         <CardTitle>{task.title}</CardTitle>
                     </TaskDetails>
                     <div
-                        {...(permittedUpdate
+                        {...(task.allowUpdate
                             ? { ...attributes, ...listeners }
                             : {})}
                         className="p-0"
                     >
-                        {permittedUpdate && <Grip size={16} className="ml-2" />}
+                        {task.allowUpdate && <Grip size={16} className="ml-2" />}
                     </div>
                 </div>
                 <CardDescription className="mt-1 text-xs text-gray-600 dark:text-gray-300 line-clamp-2">
