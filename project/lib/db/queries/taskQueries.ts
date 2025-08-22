@@ -103,62 +103,7 @@ export const taskQueries = {
             return failure(500, "Failed to fetch task");
         }
     },
-    getByListId: async (projectSlug: string, listId: string) => {
-        if (!projectSlug || !listId) {
-            return failure(400, "Missing required fields");
-        }
-
-        const list = await authorization.checkIfListBelongsToProjectBySlug(
-            projectSlug,
-            listId
-        );
-
-        if (!list || !list.id || !list.projectId) {
-            return failure(500, "List not found in this project");
-        }
-
-        try {
-            const tasksInList: FetchTask[] = await db
-                .select({
-                    id: tasks.id,
-                    title: tasks.title,
-                    description: tasks.description,
-                    priority: tasks.priority,
-                    dueDate: tasks.dueDate,
-                    position: tasks.position,
-                    slug: tasks.slug,
-                    assigneeId: users.id,
-                    assigneeName: users.name,
-                    assigneeUsername: users.username,
-                    assigneeDisplayPicture: users.displayPictureLink,
-                    projectName: projects.name,
-                    projectSlug: projects.slug,
-                    listId: lists.id,
-                    listName: lists.name,
-                    listColor: lists.color,
-                    finished: tasks.finished,
-                })
-                .from(tasks)
-                .innerJoin(users, eq(tasks.assigneeId, users.id))
-                .innerJoin(projects, eq(tasks.projectId, projects.id))
-                .innerJoin(lists, eq(tasks.listId, lists.id))
-                .where(
-                    and(
-                        eq(projects.id, list.projectId),
-                        eq(tasks.listId, list.id)
-                    )
-                )
-                .orderBy(asc(tasks.position));
-
-            if (!tasksInList) {
-                return failure(500, "No tasks found for this list");
-            }
-
-            return success(200, "Task list fetched successfully", tasksInList);
-        } catch {
-            return failure(500, "Failed to fetch task list");
-        }
-    },
+    
     create: async (projectSlug: string, data: CreateTask, userId: string) => {
         if (!data.title || !data.listId) {
             return failure(400, "Missing required fields");

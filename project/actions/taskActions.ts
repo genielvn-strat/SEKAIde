@@ -19,11 +19,7 @@ export const fetchTasks = async (projectSlug: string) => {
     const tasks = await queries.tasks.getByProjectSlug(projectSlug, userId);
     return tasks;
 };
-export const fetchTasksList = async (projectSlug: string, listId: string) => {
-    await getUserDbId();
-    const tasks = await queries.tasks.getByListId(projectSlug, listId);
-    return tasks;
-};
+
 
 export const fetchTaskBySlug = async (
     taskSlug: string,

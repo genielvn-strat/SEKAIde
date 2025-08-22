@@ -2,7 +2,6 @@
 
 import {
     fetchTasks,
-    fetchTasksList,
     createTask,
     deleteTask,
     updateTask,
@@ -84,23 +83,7 @@ export function useTasks(
         error: !res?.success ? res?.message : error,
     };
 }
-export function useTasksList(projectSlug: string, listId: string) {
-    const {
-        data: res,
-        isLoading,
-        error,
-    } = useQuery({
-        queryKey: [`tasks-${listId}`, projectSlug],
-        queryFn: () => fetchTasksList(projectSlug, listId),
-        enabled: !!projectSlug,
-    });
 
-    return {
-        tasks: res?.success ? res.data : null,
-        isLoading,
-        error: !res?.success ? res?.message : error,
-    };
-}
 export function useTaskDetails(taskSlug: string, projectSlug: string) {
     const {
         data: res,
