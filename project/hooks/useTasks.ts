@@ -75,6 +75,7 @@ export function useTasks(
         queryKey: [`tasks`],
         queryFn: () => fetchTasks(projectSlug),
         enabled: !!projectSlug && options.enabled,
+        refetchInterval: 30000
     });
 
     return {

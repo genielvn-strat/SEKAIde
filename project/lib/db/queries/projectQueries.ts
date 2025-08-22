@@ -143,7 +143,12 @@ export const projectQueries = {
                 .innerJoin(projects, eq(teamMembers.teamId, projects.teamId))
                 .innerJoin(teams, eq(teamMembers.teamId, teams.id))
                 .leftJoin(tasks, eq(tasks.projectId, projects.id)) // join tasks to projects
-                .where(eq(teamMembers.userId, userId))
+                .where(
+                    and(
+                        eq(teamMembers.userId, userId),
+                        eq(teamMembers.inviteConfirmed, true)
+                    )
+                )
                 .groupBy(projects.id, teams.name); // group to aggregate per project
             return success(200, "Projects successfully fetched", result);
         } catch {
@@ -313,16 +318,15 @@ export const projectQueries = {
                 isFinal: lists.isFinal,
             }));
 
-            const listsCreated = await db.insert(lists).values(defaultLists).returning();
-            return success(
-                200,
-                "Project successfully reset to default",
-                {
-                    tasksDeleted,
-                    listsDeleted,
-                    listsCreated
-                }
-            );
+            const listsCreated = await db
+                .insert(lists)
+                .values(defaultLists)
+                .returning();
+            return success(200, "Project successfully reset to default", {
+                tasksDeleted,
+                listsDeleted,
+                listsCreated,
+            });
         } catch {
             return failure(500, "Failed to update project");
         }

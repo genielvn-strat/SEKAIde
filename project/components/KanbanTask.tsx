@@ -13,6 +13,10 @@ import { TypographyMuted } from "./typography/TypographyMuted";
 import { Badge } from "./ui/badge";
 import Link from "next/link";
 import { useAuthRoleByTask } from "@/hooks/useRoles";
+import TaskDetails from "./dialog/TaskDetails";
+import { Grip } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 export function KanbanTask({
     projectSlug,
     task,
@@ -38,49 +42,51 @@ export function KanbanTask({
         <Card
             ref={setNodeRef}
             style={{ ...style, opacity: permittedUpdate ? 1 : 0.5 }}
-            {...(permittedUpdate ? { ...attributes, ...listeners } : {})}
-            className="p-0 shadow-sm hover:shadow-md transition-shadow"
         >
             <CardHeader>
-                <Link
-                    href={`/projects/${projectSlug}/${task.slug}`}
-                    className="underline"
-                >
-                    <CardTitle>{task.title}</CardTitle>
-                </Link>
+                <div className="flex justify-between">
+                    <TaskDetails task={task}>
+                        <CardTitle>{task.title}</CardTitle>
+                    </TaskDetails>
+                    <div
+                        {...(permittedUpdate
+                            ? { ...attributes, ...listeners }
+                            : {})}
+                        className="p-0"
+                    >
+                        {permittedUpdate && <Grip size={16} className="ml-2" />}
+                    </div>
+                </div>
                 <CardDescription className="mt-1 text-xs text-gray-600 dark:text-gray-300 line-clamp-2">
                     {task.description}
-                    <div className="flex justify-between items-center mt-3 text-xs ">
-                        <Badge
-                            className={`capitalize ${
-                                task.priority === "high"
-                                    ? "bg-red-100 text-red-700"
-                                    : task.priority === "medium"
-                                    ? "bg-yellow-100 text-yellow-700"
-                                    : "bg-green-100 text-green-700"
-                            }`}
-                        >
-                            {task.priority}
-                        </Badge>
-                        {task.dueDate && (
-                            <span>
-                                {new Date(task.dueDate).toLocaleDateString(
-                                    "en-US",
-                                    {
-                                        month: "short",
-                                        day: "numeric",
-                                    }
-                                )}
-                            </span>
-                        )}
-                    </div>
                 </CardDescription>
+                <div className="flex justify-between items-center mt-3 text-xs ">
+                    <Badge
+                        className={`capitalize ${
+                            task.priority === "high"
+                                ? "bg-red-100 text-red-700"
+                                : task.priority === "medium"
+                                ? "bg-yellow-100 text-yellow-700"
+                                : "bg-green-100 text-green-700"
+                        }`}
+                    >
+                        {task.priority}
+                    </Badge>
+                    {task.dueDate && (
+                        <span>
+                            {new Date(task.dueDate).toLocaleDateString(
+                                "en-US",
+                                {
+                                    month: "short",
+                                    day: "numeric",
+                                }
+                            )}
+                        </span>
+                    )}
+                </div>
+
+                
             </CardHeader>
-            <CardContent>
-                <TypographyMuted>
-                    Assigned to: {task.assigneeName} ({task.assigneeUsername})
-                </TypographyMuted>
-            </CardContent>
         </Card>
     );
 }

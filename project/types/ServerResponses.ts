@@ -47,7 +47,7 @@ export type FetchTeamMember = {
     email: string;
     displayPictureLink: string;
     roleName: string;
-    roleColor: string;
+    roleColor?: string | null;
     inviteConfirmed: boolean;
 };
 
@@ -63,6 +63,7 @@ export type FetchTask = {
     assigneeId: string;
     assigneeName: string;
     assigneeUsername: string;
+    assigneeDisplayPicture: string;
     projectName: string;
     projectSlug: string;
     listId?: string | null;
@@ -96,6 +97,7 @@ export type FetchComment = {
     authorId: string;
     authorName: string;
     authorUsername: string;
+    authorDisplayPicture: string;
     createdAt: string | null;
     updatedAt: string | null;
 };

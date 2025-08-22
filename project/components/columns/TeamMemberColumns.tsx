@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import KickMember from "@/components/dialog/KickMember";
 import { useState } from "react";
 import { useAuthRoleByTeam } from "@/hooks/useRoles";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export const TeamMemberColumns: (
     teamSlug: string
@@ -27,11 +28,15 @@ export const TeamMemberColumns: (
             const member = row.original; // full object
             return (
                 <div className="flex items-center gap-2">
-                    <img
-                        src={member.displayPictureLink} // adjust field name
-                        alt={member.name}
-                        className="h-8 w-8 rounded-full object-cover"
-                    />
+                    <Avatar>
+                        <AvatarImage
+                            src={member.displayPictureLink}
+                        ></AvatarImage>
+                        <AvatarFallback>
+                            {member.name?.charAt(0)?.toUpperCase()}
+                        </AvatarFallback>
+                    </Avatar>
+
                     <div className="flex flex-col">
                         <TypographyP margin={false}>{member.name}</TypographyP>
                         <TypographyMuted>{member.username}</TypographyMuted>

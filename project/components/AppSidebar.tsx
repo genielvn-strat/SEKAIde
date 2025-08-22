@@ -26,6 +26,7 @@ import {
 } from "./ui/dropdown-menu";
 import { TypographyP } from "./typography/TypographyP";
 import { TypographyMuted } from "./typography/TypographyMuted";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const items = [
     {
@@ -94,10 +95,15 @@ export function AppSidebar() {
                             <DropdownMenuTrigger asChild>
                                 <SidebarMenuButton className="h-full">
                                     <div className="flex flex-row items-center gap-2 ">
-                                        <img
-                                            src={session.session?.user.imageUrl}
-                                            className="h-8 w-8 rounded-full object-cover"
-                                        />
+                                        <Avatar>
+                                            <AvatarImage
+                                                src={
+                                                    session.session?.user
+                                                        .imageUrl
+                                                }
+                                            ></AvatarImage>
+                                            <AvatarFallback>U</AvatarFallback>
+                                        </Avatar>
                                         <span>
                                             {session.session?.user.fullName ??
                                                 "User"}

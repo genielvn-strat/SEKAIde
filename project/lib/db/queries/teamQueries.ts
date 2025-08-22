@@ -37,7 +37,8 @@ export const teamQueries = {
                     memberSelf,
                     and(
                         eq(memberSelf.teamId, teams.id),
-                        eq(memberSelf.userId, userId)
+                        eq(memberSelf.userId, userId),
+                        eq(memberSelf.inviteConfirmed, true)
                     )
                 )
                 .innerJoin(teamMembers, eq(teamMembers.teamId, teams.id))

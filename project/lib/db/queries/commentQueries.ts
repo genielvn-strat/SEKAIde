@@ -41,10 +41,12 @@ export const commentQueries = {
                     updatedAt: comments.updatedAt,
                     authorName: users.name,
                     authorUsername: users.username,
+                    authorDisplayPicture: users.displayPictureLink,
                 })
                 .from(comments)
                 .innerJoin(users, eq(comments.authorId, users.id))
-                .where(eq(comments.taskId, task.id));
+                .where(eq(comments.taskId, task.id))
+                .orderBy(comments.createdAt);
 
             return success(200, "Comments fetch successfully`", result);
         } catch {

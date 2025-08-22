@@ -86,6 +86,7 @@ export function useAuthRoleByTask(
         queryKey: [`authRoleTask-${action}-${taskId}`],
         queryFn: () => authRoleByTaskId(taskId, projectSlug, action),
         enabled: !!taskId && options.enabled,
+        refetchOnWindowFocus: false
     });
 
     return {
