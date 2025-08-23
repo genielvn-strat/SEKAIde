@@ -122,9 +122,17 @@ export const listQueries = {
                 .update(lists)
                 .set({
                     ...data,
+                    updatedAt: new Date().toISOString(),
                 })
                 .where(eq(lists.id, list.id))
                 .returning();
+            // Update project's updateAt column
+            await db
+                .update(projects)
+                .set({
+                    updatedAt: new Date().toISOString(),
+                })
+                .where(eq(projects.id, list.projectId));
 
             return success(200, "List updated successfully", result[0]);
         } catch {

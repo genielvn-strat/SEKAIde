@@ -12,7 +12,6 @@ export const userQueries = {
         return result[0] || null;
     },
     create: async (data: CreateUser) => {
-        
         const result = await db.insert(users).values(data).returning();
         return result[0];
     },
@@ -30,7 +29,7 @@ export const userQueries = {
 
         const result = await db
             .update(users)
-            .set({ ...data })
+            .set({ ...data, updatedAt: new Date().toISOString() })
             .where(eq(users.id, user[0].id))
             .returning();
         return result[0];

@@ -226,6 +226,7 @@ export const projectQueries = {
                 .update(projects)
                 .set({
                     ...data,
+                    updatedAt: new Date().toISOString(),
                 })
                 .where(eq(projects.id, member.projectId))
                 .returning();

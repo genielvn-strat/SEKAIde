@@ -1,4 +1,4 @@
-import { users, comments } from "@/migrations/schema";
+import { users, comments, projects, tasks } from "@/migrations/schema";
 import { eq, sql } from "drizzle-orm";
 import { failure, success } from "@/types/Response";
 import { authorization } from "./authorizationQueries";
@@ -158,6 +158,20 @@ export const commentQueries = {
                 })
                 .where(eq(comments.id, commentId))
                 .returning();
+            // Update project's updateAt column
+            await db
+                .update(projects)
+                .set({
+                    updatedAt: new Date().toISOString(),
+                })
+                .where(eq(projects.id, task.projectId));
+            // Update task's updateAt column
+            await db
+                .update(tasks)
+                .set({
+                    updatedAt: new Date().toISOString(),
+                })
+                .where(eq(tasks.id, task.id));
             return success(200, "Comment updated successfully", result[0]);
         } catch {
             return failure(500, "Failed to update comment");

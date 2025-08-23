@@ -205,7 +205,8 @@ export const taskQueries = {
         const assigned = await db
             .select()
             .from(tasks)
-            .where(and(eq(tasks.slug, taskSlug), eq(tasks.assigneeId, userId)));
+            .where(and(eq(tasks.slug, taskSlug), eq(tasks.assigneeId, userId)))
+            .then((res) => res[0] ?? null);
         const permission = await authorization.checkIfRoleHasPermission(
             member.roleId,
             "update_task"
@@ -233,6 +234,13 @@ export const taskQueries = {
                 })
                 .where(eq(tasks.id, task.id))
                 .returning();
+            // Update project's updateAt column
+            await db
+                .update(projects)
+                .set({
+                    updatedAt: new Date().toISOString(),
+                })
+                .where(eq(projects.id, task.projectId));
             return success(200, "Task updated successfully", result[0]);
         } catch {
             return failure(200, "Failed to update task");
@@ -256,12 +264,13 @@ export const taskQueries = {
             .from(tasks)
             .where(
                 and(eq(tasks.id, selectedTaskId), eq(tasks.assigneeId, userId))
-            ).then(res => res[0] ?? null);
+            )
+            .then((res) => res[0] ?? null);
         const permission = await authorization.checkIfRoleHasPermission(
             member.roleId,
             "update_task"
         );
-        console.log(assigned, permission)
+        console.log(assigned, permission);
         if (!permission && !assigned)
             return failure(400, "Not authorized to arrange this task");
         try {
@@ -277,9 +286,9 @@ export const taskQueries = {
                     .returning();
                 if (updated) updatedTasks.push(updated);
             }
-            return success(200, "Task arranged successfully", updatedTasks)
+            return success(200, "Task arranged successfully", updatedTasks);
         } catch {
-            return failure(500, "Failed to arrange task.")
+            return failure(500, "Failed to arrange task.");
         }
     },
     delete: async (taskSlug: string, projectSlug: string, userId: string) => {
@@ -303,7 +312,8 @@ export const taskQueries = {
         const assigned = await db
             .select()
             .from(tasks)
-            .where(and(eq(tasks.slug, taskSlug), eq(tasks.assigneeId, userId)));
+            .where(and(eq(tasks.slug, taskSlug), eq(tasks.assigneeId, userId)))
+            .then((res) => res[0] ?? null);
         const permission = await authorization.checkIfRoleHasPermission(
             member.roleId,
             "delete_task"

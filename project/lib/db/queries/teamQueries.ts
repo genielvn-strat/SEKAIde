@@ -242,7 +242,7 @@ export const teamQueries = {
         try {
             const result = await db
                 .update(teams)
-                .set({ ...data })
+                .set({ ...data, updatedAt: new Date().toISOString() })
                 .where(eq(teams.id, member.teamId))
                 .returning();
             return success(200, "Team updated successfully", result[0]);
