@@ -38,7 +38,7 @@ export function KanbanBoardInterface({
         enabled: !!project,
     });
 
-    const { arrangeTask } = useTaskActions();
+    const { updateTask, arrangeTask } = useTaskActions();
     const { permitted: permittedCreateList } = useAuthRoleByProject(
         project.slug,
         "create_list"
@@ -165,6 +165,13 @@ export function KanbanBoardInterface({
                 );
 
                 const updated = [...otherTasks, ...newTargetTasks];
+                updateTask({
+                    taskSlug: activeTask.slug,
+                    data: {
+                        listId: overListId,
+                    },
+                    projectSlug: project.slug,
+                });
                 handleArrange(updated, activeTask.id);
                 return updated;
             });

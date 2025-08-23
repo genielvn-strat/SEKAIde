@@ -286,6 +286,12 @@ export const taskQueries = {
                     .returning();
                 if (updated) updatedTasks.push(updated);
             }
+            await db
+                .update(projects)
+                .set({
+                    updatedAt: new Date().toISOString(),
+                })
+                .where(eq(projects.id, member.projectId));
             return success(200, "Task arranged successfully", updatedTasks);
         } catch {
             return failure(500, "Failed to arrange task.");

@@ -92,7 +92,6 @@ const EditTask: React.FC<EditTaskProps> = ({ task, projectSlug, setOpen }) => {
                 throw new Error(response.message);
             }
             toast.success("Task has been updated successfully.");
-            form.reset();
         } catch (e) {
             if (e instanceof Error) {
                 form.setError("root", { message: e.message });
