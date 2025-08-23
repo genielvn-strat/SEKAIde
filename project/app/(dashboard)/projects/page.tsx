@@ -25,7 +25,7 @@ export default function ProjectsPage() {
     const { projects, isLoading, isError } = useProjects();
 
     const [searchQuery, setSearchQuery] = useState("");
-    const [sortCriteria, setSortCriteria] = useState("createdAt");
+    const [sortCriteria, setSortCriteria] = useState("updatedAt");
 
     const filteredAndSortedProjects = useMemo(() => {
         return projects
@@ -47,9 +47,15 @@ export default function ProjectsPage() {
                 if (sortCriteria === "completionRate") {
                     return b.completionRate - a.completionRate;
                 }
+                if (sortCriteria === "createdAt") {
+                    return (
+                        new Date(b.createdAt!).getTime() -
+                        new Date(a.createdAt!).getTime()
+                    );
+                }
                 return (
-                    new Date(b.createdAt!).getTime() -
-                    new Date(a.createdAt!).getTime()
+                    new Date(b.updatedAt!).getTime() -
+                    new Date(a.updatedAt!).getTime()
                 );
             });
     }, [projects, searchQuery, sortCriteria]);
@@ -98,14 +104,17 @@ export default function ProjectsPage() {
                             value={sortCriteria}
                             onValueChange={setSortCriteria}
                         >
-                            <DropdownMenuRadioItem value="createdAt">
-                                Creation date
+                            <DropdownMenuRadioItem value="updatedAt">
+                                Recently Updated
+                            </DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="completionRate">
+                                Completion Rate
                             </DropdownMenuRadioItem>
                             <DropdownMenuRadioItem value="name">
                                 Name
                             </DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="completionRate">
-                                Completion Rate
+                            <DropdownMenuRadioItem value="createdAt">
+                                Creation date
                             </DropdownMenuRadioItem>
                         </DropdownMenuRadioGroup>
                     </DropdownMenuContent>
@@ -116,7 +125,7 @@ export default function ProjectsPage() {
             <div className="flex flex-wrap gap-4">
                 {filteredAndSortedProjects?.length !== 0 ? (
                     filteredAndSortedProjects?.map((project) => (
-                        <ProjectCard key={project.id} project={project} />
+                        <ProjectCard key={project.id} project={project} small />
                     ))
                 ) : (
                     <Alert variant="default">
