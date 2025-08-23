@@ -34,7 +34,9 @@ export interface DashboardRecentComment {
     id: string;
     content: string;
     taskName: string;
+    taskSlug: string;
     projectName: string;
+    projectSlug: string;
     authorName: string;
     authorUsername: string;
     authorDisplayPicture: string;

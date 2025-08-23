@@ -17,7 +17,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from "date-fns";
-import { FolderOpen, LayoutList } from "lucide-react";
+import { FolderOpen, LayoutList, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import Priority from "./badge/Priority";
 
@@ -76,7 +76,7 @@ const Feed: React.FC<FeedProp> = ({ feed }) => {
                                     format(new Date(details.date), "PPP p")}
                             </CardDescription>
                         </CardHeader>
-                        <CardContent className="flex justify-between detailss-center text-sm text-muted-foreground">
+                        <CardContent>
                             <Card className="w-full max-w-lg">
                                 <CardHeader>
                                     <Link
@@ -90,12 +90,10 @@ const Feed: React.FC<FeedProp> = ({ feed }) => {
                                             {task.description}
                                         </CardDescription>
                                     )}
-                                <div className="flex justify-between items-center mt-3 text-xs ">
-                                    <Priority priority={task.priority} />
-
-                                </div>
+                                    <div className="flex justify-between items-center mt-3 text-xs ">
+                                        <Priority priority={task.priority} />
+                                    </div>
                                 </CardHeader>
-
                             </Card>
                         </CardContent>
                     </Card>
@@ -106,8 +104,8 @@ const Feed: React.FC<FeedProp> = ({ feed }) => {
                 return (
                     <Card>
                         <CardHeader>
-                            <div className="flex detailss-center space-x-2">
-                                <Avatar className="w-6 h-6">
+                            <CardTitle className="flex flex-row items-center gap-4">
+                                <Avatar className="w-8 h-8">
                                     <AvatarImage
                                         src={comment.authorDisplayPicture}
                                     />
@@ -115,22 +113,35 @@ const Feed: React.FC<FeedProp> = ({ feed }) => {
                                         {comment.authorName[0]}
                                     </AvatarFallback>
                                 </Avatar>
-                                <CardTitle>
-                                    {comment.authorName} commented on{" "}
-                                    {comment.taskName}
-                                </CardTitle>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="text-sm text-muted-foreground flex justify-between">
-                            <span>{comment.content}</span>
-                            {comment.createdAt && (
                                 <span>
-                                    {format(
-                                        new Date(comment.createdAt),
-                                        "PPP p"
-                                    )}
+                                    {comment.authorName} commented on a task.
                                 </span>
-                            )}
+                            </CardTitle>
+                            <CardDescription>
+                                {details.date &&
+                                    format(new Date(details.date), "PPP p")}
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex flex-col gap-1">
+                            <Card>
+                                <CardHeader>
+                                    <Link
+                                        href={`/projects/${comment.projectSlug}/${comment.taskSlug}`}
+                                        className="underline"
+                                    >
+                                        <CardTitle className="flex flex-row items-center gap-2">
+                                            <MessageCircle />
+                                            <span>
+                                                {comment.projectName} /{" "}
+                                                {comment.taskName}
+                                            </span>
+                                        </CardTitle>
+                                    </Link>
+                                    <CardDescription>
+                                        {comment.content}
+                                    </CardDescription>
+                                </CardHeader>
+                            </Card>
                         </CardContent>
                     </Card>
                 );
@@ -140,8 +151,8 @@ const Feed: React.FC<FeedProp> = ({ feed }) => {
                 return (
                     <Card>
                         <CardHeader>
-                            <div className="flex detailss-center space-x-2">
-                                <Avatar className="w-6 h-6">
+                            <CardTitle className="flex flex-row items-center gap-4">
+                                <Avatar className="w-8 h-8">
                                     <AvatarImage
                                         src={member.userDisplayPicture}
                                     />
@@ -149,17 +160,15 @@ const Feed: React.FC<FeedProp> = ({ feed }) => {
                                         {member.userName[0]}
                                     </AvatarFallback>
                                 </Avatar>
-                                <CardTitle>
-                                    {member.userName} joined {member.teamName}
-                                </CardTitle>
-                            </div>
+                                <span>
+                                    {member.userName} joined {member.teamName}.
+                                </span>
+                            </CardTitle>
+                            <CardDescription>
+                                {details.date &&
+                                    format(new Date(details.date), "PPP p")}
+                            </CardDescription>
                         </CardHeader>
-                        {member.createdAt && (
-                            <CardContent className="text-sm text-muted-foreground">
-                                Joined at:{" "}
-                                {format(new Date(member.createdAt), "PPP p")}
-                            </CardContent>
-                        )}
                     </Card>
                 );
 
@@ -168,7 +177,7 @@ const Feed: React.FC<FeedProp> = ({ feed }) => {
         }
     };
 
-    return card(feed);
+    return <div className="w-full">{card(feed)}</div>;
 };
 
 export default Feed;
