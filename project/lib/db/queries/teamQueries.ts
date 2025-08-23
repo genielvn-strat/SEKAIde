@@ -16,7 +16,7 @@ import { db } from "../db";
 import { alias } from "drizzle-orm/pg-core";
 
 export const teamQueries = {
-    getJoinedTeams: async (userId: string) => {
+    getUserTeamsWithDetail: async (userId: string) => {
         try {
             const memberSelf = alias(teamMembers, "memberSelf");
 
@@ -52,6 +52,22 @@ export const teamQueries = {
                 );
 
             return success(200, "Joined teams successfully fetched", result);
+        } catch {
+            return failure(500, "Failed to fetch joined teams");
+        }
+    },
+    getJoinedTeamsNoDetails: async (userId: string) => {
+        try {
+            const teams = await db
+                .select({ teamId: teamMembers.teamId })
+                .from(teamMembers)
+                .where(eq(teamMembers.userId, userId));
+
+            return success(
+                200,
+                "User teams fetched successfully",
+                teams.map((t) => t.teamId)
+            );
         } catch {
             return failure(500, "Failed to fetch joined teams");
         }
