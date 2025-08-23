@@ -19,6 +19,10 @@ import LoadingSkeletonCards from "./LoadingSkeletonCards";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuthRoleByProject } from "@/hooks/useRoles";
 import CreateList from "./buttons/CreateList";
+import { ArrangeTask, UpdateTask } from "@/types/Task";
+import { arrangeTask } from "@/actions/taskActions";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface KanbanBoardProps {
     project: FetchProject;
@@ -29,11 +33,12 @@ export function KanbanBoardInterface({
     project,
     tasks: initialTasks,
 }: KanbanBoardProps) {
+    const queryClient = useQueryClient();
     const { lists, isLoading: listLoading } = useLists(project.slug, {
         enabled: !!project,
     });
 
-    const { updateTask } = useTaskActions();
+    const { arrangeTask } = useTaskActions();
     const { permitted: permittedCreateList } = useAuthRoleByProject(
         project.slug,
         "create_list"
@@ -56,18 +61,51 @@ export function KanbanBoardInterface({
     if (listLoading) return <LoadingSkeletonCards />;
     if (!lists || !initialTasks || !tasks) return "An error has occured";
 
-    function handleDragStart(event: any) {
+    const handleArrange = async (
+        updatedTasks: FetchTask[],
+        selectedTaskId: string
+    ) => {
+        console.log("=== Current Task State by List ===");
+        const arranged =
+            lists?.flatMap((list) =>
+                updatedTasks
+                    .filter((t) => t.listId === list.id)
+                    .map((t, idx) => ({
+                        title: t.title,
+                        position: idx,
+                        id: t.id,
+                        listId: t.listId ?? null,
+                    }))
+            ) ?? [];
+        try {
+            const response = await arrangeTask({
+                tasks: arranged,
+                selectedTaskId: selectedTaskId,
+                projectSlug: project.slug,
+            });
+            if (!response.success) throw new Error(response.message);
+            toast.success("Task arranged successfully");
+        } catch (e) {
+            if (e instanceof Error) {
+                toast.error(e.message);
+            }
+        } finally {
+            queryClient.invalidateQueries({ queryKey: ["tasks"] });
+        }
+    };
+
+    const handleDragStart = (event: any) => {
         const { active } = event;
         const task = tasks.find((t) => t.id === active.id);
         setActiveTask(task || null);
-    }
+    };
 
-    function handleDragOver(event: any) {
+    const handleDragOver = (event: any) => {
         const { over } = event;
         setOverId(over?.id || null);
-    }
+    };
 
-    function handleDragEnd(event: DragEndEvent) {
+    const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
 
         if (!over) {
@@ -126,14 +164,9 @@ export function KanbanBoardInterface({
                     (t) => t.listId !== overListId
                 );
 
-                updateTask({
-                    taskSlug: activeTask.slug,
-                    data: {
-                        listId: overListId,
-                    },
-                    projectSlug: project.slug,
-                });
-                return [...otherTasks, ...newTargetTasks];
+                const updated = [...otherTasks, ...newTargetTasks];
+                handleArrange(updated, activeTask.id);
+                return updated;
             });
         } else {
             // Reordering within the same list
@@ -156,14 +189,15 @@ export function KanbanBoardInterface({
                 const otherTasks = prevTasks.filter(
                     (task) => task.listId !== activeListId
                 );
-                return [...otherTasks, ...newTasksInList];
+                const updated = [...otherTasks, ...newTasksInList];
+                handleArrange(updated, activeTask.id);
+                return updated;
             });
         }
 
         setActiveTask(null);
         setOverId(null);
-    }
-
+    };
     return (
         <Card className="p-3 bg-background dark:bg-background h-[60vh] md:h-[70vh]">
             <DndContext
@@ -196,10 +230,7 @@ export function KanbanBoardInterface({
                 </CardContent>
                 <DragOverlay>
                     {activeTask ? (
-                        <KanbanTask
-                            task={activeTask}
-                            activeId={null}
-                        />
+                        <KanbanTask task={activeTask} activeId={null} />
                     ) : null}
                 </DragOverlay>
             </DndContext>

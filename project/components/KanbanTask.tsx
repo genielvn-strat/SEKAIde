@@ -31,7 +31,6 @@ export function KanbanTask({
     const style = {
         transition,
     };
-    console.log(activeId, task.id)
 
     return (
         <Card

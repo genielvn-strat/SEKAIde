@@ -1,6 +1,6 @@
 import { users, tasks, projects, lists } from "@/migrations/schema";
 import { and, asc, eq, sql } from "drizzle-orm";
-import { CreateTask, UpdateTask } from "@/types/Task";
+import { ArrangeTask, CreateTask, UpdateTask } from "@/types/Task";
 import { failure, success } from "@/types/Response";
 import { authorization } from "./authorizationQueries";
 import { db } from "../db";
@@ -93,7 +93,7 @@ export const taskQueries = {
                         "update_task"
                     )
                     .then((res) => (res ? true : false))) ?? false;
-    
+
             const result: FetchTask[] = await db
                 .select({
                     id: tasks.id,
@@ -127,13 +127,13 @@ export const taskQueries = {
                 .leftJoin(lists, eq(tasks.listId, lists.id))
                 .orderBy(asc(tasks.position))
                 .where(eq(projects.slug, projectSlug));
-            
+
             return success(200, "Project Tasks fetched successfully", result);
         } catch {
             return failure(500, "Failed to fetch task");
         }
     },
-    
+
     create: async (projectSlug: string, data: CreateTask, userId: string) => {
         if (!data.title || !data.listId) {
             return failure(400, "Missing required fields");
@@ -236,6 +236,50 @@ export const taskQueries = {
             return success(200, "Task updated successfully", result[0]);
         } catch {
             return failure(200, "Failed to update task");
+        }
+    },
+    arrange: async (
+        arrangedTasks: ArrangeTask[],
+        selectedTaskId: string,
+        projectSlug: string,
+        userId: string
+    ) => {
+        const member = await authorization.checkIfTeamMemberByProjectSlug(
+            projectSlug,
+            userId
+        );
+        if (!member) {
+            return failure(400, "Not authorized to arrange this task");
+        }
+        const assigned = await db
+            .select()
+            .from(tasks)
+            .where(
+                and(eq(tasks.id, selectedTaskId), eq(tasks.assigneeId, userId))
+            ).then(res => res[0] ?? null);
+        const permission = await authorization.checkIfRoleHasPermission(
+            member.roleId,
+            "update_task"
+        );
+        console.log(assigned, permission)
+        if (!permission && !assigned)
+            return failure(400, "Not authorized to arrange this task");
+        try {
+            const updatedTasks = [];
+            for (const task of arrangedTasks) {
+                const [updated] = await db
+                    .update(tasks)
+                    .set({
+                        position: task.position,
+                        listId: task.listId,
+                    })
+                    .where(eq(tasks.id, task.id))
+                    .returning();
+                if (updated) updatedTasks.push(updated);
+            }
+            return success(200, "Task arranged successfully", updatedTasks)
+        } catch {
+            return failure(500, "Failed to arrange task.")
         }
     },
     delete: async (taskSlug: string, projectSlug: string, userId: string) => {
