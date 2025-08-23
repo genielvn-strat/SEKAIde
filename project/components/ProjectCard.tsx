@@ -15,11 +15,15 @@ import { Progress } from "./ui/progress";
 
 interface ProjectCardProps {
     project: FetchProject;
+    small?: boolean;
 }
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
+const ProjectCard: React.FC<ProjectCardProps> = ({
+    project,
+    small,
+}) => {
     return (
-        <Card className="w-full max-w-sm" key={project.id}>
+        <Card className={small ? "w-full max-w-sm" : "w-full"} key={project.id}>
             <CardHeader>
                 <Link href={`/projects/${project.slug}`}>
                     <CardTitle className="text-2xl truncate">

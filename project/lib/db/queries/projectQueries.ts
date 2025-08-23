@@ -5,7 +5,7 @@ import {
     lists,
     tasks,
 } from "@/migrations/schema";
-import { and, count, eq, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, or, sql } from "drizzle-orm";
 import { CreateProject, UpdateProject } from "@/types/Project";
 import { failure, success } from "@/types/Response";
 import { FetchProject } from "@/types/ServerResponses";
@@ -149,7 +149,8 @@ export const projectQueries = {
                         eq(teamMembers.inviteConfirmed, true)
                     )
                 )
-                .groupBy(projects.id, teams.name); // group to aggregate per project
+                .groupBy(projects.id, teams.name)
+                .orderBy(desc(projects.updatedAt)); // group to aggregate per project
             return success(200, "Projects successfully fetched", result);
         } catch {
             return failure(500, "Failed to fetch projects");

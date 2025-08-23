@@ -3,20 +3,35 @@ import {
     createPermissions,
     createRolePermissions,
 } from "@/actions/createActions";
-import CreateProject from "@/components/buttons/CreateProject";
 import Feed from "@/components/Feed";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import { TypographyH1 } from "@/components/typography/TypographyH1";
+import { TypographyH2 } from "@/components/typography/TypographyH2";
 import { TypographyMuted } from "@/components/typography/TypographyMuted";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useDashboard } from "@/hooks/useDashboard";
-import { TrendingUp, Users, CheckCircle, Clock, Plus } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { MessageCircleQuestion } from "lucide-react";
+import LoadingSkeletonCards from "@/components/LoadingSkeletonCards";
+import { useProjects } from "@/hooks/useProjects";
+import ProjectCard from "@/components/ProjectCard";
 
 export default function DashboardPage() {
-    const { overview, isLoading, error, isError } = useDashboard();
+    const {
+        overview,
+        isLoading: overviewLoading,
+        error,
+        isError,
+    } = useDashboard();
 
-    if (isLoading) return <LoadingSkeleton />;
+    const {
+        projects,
+        isLoading: projectsLoading,
+        error: projectError,
+        isError: projectIsError,
+    } = useProjects();
+
+    if (overviewLoading) return <LoadingSkeleton />;
 
     if (!overview || isError) return "An error has occured";
 
@@ -24,15 +39,67 @@ export default function DashboardPage() {
         <>
             <div className="doc-header flex flex-row justify-between items-center">
                 <div className="left">
-                    <TypographyH1>Home</TypographyH1>
+                    <TypographyH1>Dashboard</TypographyH1>
+                    <TypographyMuted>
+                        Welcome back! Here are the recent activities across your
+                        teams.
+                    </TypographyMuted>
                 </div>
-                
+                <div className="right"></div>
             </div>
-            <Separator className="my-4"/>
-            <div className="space-y-6">
-                {overview.map((m) => (
-                    <Feed feed={m} />
-                ))}
+            <Separator className="my-4" />
+            <div className="flex gap-8 flex-col-reverse md:flex-row">
+                <div className="space-y-4 w-full">
+                    <TypographyH2>Feed</TypographyH2>
+                    {/* <div className="flex flex-row gap-2">
+                        <CreateProject />
+                        <CreateTeam />
+                    </div> */}
+                    {overviewLoading ? (
+                        <LoadingSkeletonCards />
+                    ) : overview.length == 0 ? (
+                        <Alert variant="default">
+                            <MessageCircleQuestion />
+                            <AlertTitle>No recent activity</AlertTitle>
+                            <AlertDescription>
+                                Looks like nothing has happened here yet. Check
+                                back later for updates.
+                            </AlertDescription>
+                        </Alert>
+                    ) : (
+                        overview.map((m, idx) => <Feed feed={m} key={idx} />)
+                    )}
+                </div>
+                <div className="w-full">
+                    <div className="space-y-4 w-full">
+                        <TypographyH2>Recently Updated Projects</TypographyH2>
+                        {projectsLoading ? (
+                            <LoadingSkeletonCards />
+                        ) : projectError ? (
+                            "Error loading projects"
+                        ) : projects?.length == 0 ? (
+                            <Alert variant="default">
+                                <MessageCircleQuestion />
+                                <AlertTitle>No projects found</AlertTitle>
+                                <AlertDescription>
+                                    There are no projects available right now.
+                                    Please wait for one to be assigned, or
+                                    create a new project if you're a Project
+                                    Manager.
+                                </AlertDescription>
+                            </Alert>
+                        ) : (
+                            projects
+                                ?.slice(0, 3)
+                                .map((project) => (
+                                    <ProjectCard
+                                        key={project.id}
+                                        project={project}
+                                    />
+                                ))
+                        )}
+                    </div>
+                </div>
             </div>
         </>
     );
