@@ -2,6 +2,7 @@
 import { queries } from "@/lib/db";
 import { getUserDbId } from "./sessionActions";
 import { success } from "@/types/Response";
+import { DashboardRecent } from "@/types/Dashboard";
 
 export const fetchDashboard = async () => {
     const userId = await getUserDbId();
@@ -24,25 +25,25 @@ export const fetchDashboard = async () => {
                 .getRecentTeamMembers(teams)
                 .then((res) => res.data ?? []),
         ]);
-    const merged = [
+    const merged: DashboardRecent[] = [
         ...recentProjects.map((p) => ({
             data: { ...p },
-            type: "project",
+            type: "project" as const,
             date: p.createdAt,
         })),
         ...recentTasks.map((t) => ({
             data: { ...t },
-            type: "task",
+            type: "task" as const,
             date: t.createdAt,
         })),
         ...recentComments.map((c) => ({
             data: { ...c },
-            type: "comment",
+            type: "comment" as const,
             date: c.createdAt,
         })),
         ...recentTeamMembers.map((m) => ({
             data: { ...m },
-            type: "teamMember",
+            type: "teamMember" as const,
             date: m.createdAt,
         })),
     ];

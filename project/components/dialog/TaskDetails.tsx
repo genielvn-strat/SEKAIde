@@ -18,6 +18,7 @@ import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { CheckCircle2, Circle } from "lucide-react";
 import TaskDropDown from "../dropdown/TaskDropDown";
+import Priority from "../badge/Priority";
 
 interface TaskDetailsProps {
     task: FetchTask;
@@ -38,7 +39,9 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, children }) => {
                         <DrawerTitle className="flex flex-col gap-2">
                             <div className="flex flex-row justify-between">
                                 <TypographyH1>{task.title}</TypographyH1>
-                                {task.allowUpdate && <TaskDropDown task={task}/>}
+                                {task.allowUpdate && (
+                                    <TaskDropDown task={task} />
+                                )}
                             </div>
                             <div className="flex justify-between items-center">
                                 <div className="flex flex-row gap-2">
@@ -53,17 +56,8 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, children }) => {
                                             {task.listName}
                                         </Badge>
                                     )}
-                                    <Badge
-                                        className={`capitalize ${
-                                            task.priority === "high"
-                                                ? "bg-red-100 text-red-700"
-                                                : task.priority === "medium"
-                                                ? "bg-yellow-100 text-yellow-700"
-                                                : "bg-green-100 text-green-700"
-                                        }`}
-                                    >
-                                        {task.priority}
-                                    </Badge>
+                                    <Priority priority={task.priority} />
+
                                     <div className="flex items-center gap-2 text-sm">
                                         {task.finished && (
                                             <>

@@ -24,6 +24,7 @@ import EditTask from "../dialog/EditTask";
 import TaskDetails from "../dialog/TaskDetails";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import TaskDropDown from "../dropdown/TaskDropDown";
+import Priority from "../badge/Priority";
 
 export const ProjectTasksColumn: (
     projectSlug: string
@@ -69,19 +70,7 @@ export const ProjectTasksColumn: (
         header: () => <span className="hidden md:table-cell">Priority</span>,
         cell: ({ row }) => {
             const task = row.original;
-            return (
-                <Badge
-                    className={`capitalize hidden md:table-cell ${
-                        task.priority === "high"
-                            ? "bg-red-100 text-red-700"
-                            : task.priority === "medium"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-green-100 text-green-700"
-                    }`}
-                >
-                    {task.priority}
-                </Badge>
-            );
+            return <Priority priority={task.priority} />;
         },
     },
     {
@@ -133,8 +122,6 @@ export const ProjectTasksColumn: (
         id: "actions",
         cell: ({ row }) => {
             const task = row.original;
-            const [editDialog, showEditDialog] = useState(false);
-            const [deleteDialog, showDeleteDialog] = useState(false);
 
             return task.allowUpdate && <TaskDropDown task={task} />;
         },

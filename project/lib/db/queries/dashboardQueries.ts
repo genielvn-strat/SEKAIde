@@ -9,11 +9,17 @@ import {
 import { db } from "../db";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { failure, success } from "@/types/Response";
+import {
+    DashboardRecentComment,
+    DashboardRecentProject,
+    DashboardRecentTask,
+    DashboardRecentTeamMembers,
+} from "@/types/Dashboard";
 
 export const dashboardQueries = {
     getRecentProjects: async (teamIds: string[]) => {
         try {
-            const results = await db
+            const results: DashboardRecentProject[] = await db
                 // "[teamName] has created a new project, [projectName]"
                 // (then show the project card): projectName and projectDescription
                 .selectDistinct({
@@ -40,7 +46,7 @@ export const dashboardQueries = {
     },
     getRecentTasks: async (teamIds: string[]) => {
         try {
-            const results = await db
+            const results: DashboardRecentTask[] = await db
                 // "[assigneeName] has been assigned to a task, [taskName]"
                 // if no assigned, "[projectName] has a new task, [taskName]"
                 // (then show the task card): taskTitle, taskDescription
@@ -48,7 +54,9 @@ export const dashboardQueries = {
                     id: tasks.id,
                     title: tasks.title,
                     description: tasks.description,
+                    priority: tasks.priority,
                     projectName: projects.name,
+                    projectSlug: projects.slug,
                     assigneeName: users.name,
                     assigneeUsername: users.username,
                     assigneeDisplayPicture: users.displayPictureLink,
@@ -73,7 +81,7 @@ export const dashboardQueries = {
     },
     getRecentComments: async (teamIds: string[]) => {
         try {
-            const results = await db
+            const results: DashboardRecentComment[] = await db
                 // "[author] has commented to [taskName],"
                 // (then show comment card) author, username, displayPicture, comment, and taskTitle
                 .selectDistinct({
@@ -105,7 +113,7 @@ export const dashboardQueries = {
     },
     getRecentTeamMembers: async (teamIds: string[]) => {
         try {
-            const results = await db
+            const results: DashboardRecentTeamMembers[] = await db
                 // "[user] has joined [teamName]"
                 // (then show card): userName, userUsername, userDisplayPicture, teamName
                 .selectDistinct({

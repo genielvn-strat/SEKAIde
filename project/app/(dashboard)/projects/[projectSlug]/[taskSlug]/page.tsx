@@ -24,6 +24,7 @@ import CreateComment from "@/components/CreateComment";
 import CommentCard from "@/components/CommentCard";
 import { Button } from "@/components/ui/button";
 import TaskDropDown from "@/components/dropdown/TaskDropDown";
+import Priority from "@/components/badge/Priority";
 interface TaskProps {
     params: Promise<{
         projectSlug: string;
@@ -86,17 +87,8 @@ export default function TaskDetails({ params }: TaskProps) {
                                     {task.listName}
                                 </Badge>
                             )}
-                            <Badge
-                                className={`capitalize ${
-                                    task.priority === "high"
-                                        ? "bg-red-100 text-red-700"
-                                        : task.priority === "medium"
-                                        ? "bg-yellow-100 text-yellow-700"
-                                        : "bg-green-100 text-green-700"
-                                }`}
-                            >
-                                {task.priority}
-                            </Badge>
+                            <Priority priority={task.priority} />
+
                             <div className="flex items-center gap-2 text-sm">
                                 {task.finished && (
                                     <>

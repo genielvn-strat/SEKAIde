@@ -11,6 +11,7 @@ import {
 import { Badge } from "./ui/badge";
 import TaskDetails from "./dialog/TaskDetails";
 import { Grip } from "lucide-react";
+import Priority from "./badge/Priority";
 
 export function KanbanTask({
     task,
@@ -35,7 +36,10 @@ export function KanbanTask({
     return (
         <Card
             ref={setNodeRef}
-            style={{ ...style, opacity: !task.allowUpdate ? 0.5 : activeId === task.id ? 0 : 1 }}
+            style={{
+                ...style,
+                opacity: !task.allowUpdate ? 0.5 : activeId === task.id ? 0 : 1,
+            }}
             className={`${activeId === task.id ? "opacity-0" : "opacity-100"}`}
             {...(task.allowUpdate ? { ...attributes, ...listeners } : {})}
         >
@@ -54,17 +58,7 @@ export function KanbanTask({
                     {task.description}
                 </CardDescription>
                 <div className="flex justify-between items-center mt-3 text-xs ">
-                    <Badge
-                        className={`capitalize ${
-                            task.priority === "high"
-                                ? "bg-red-100 text-red-700"
-                                : task.priority === "medium"
-                                ? "bg-yellow-100 text-yellow-700"
-                                : "bg-green-100 text-green-700"
-                        }`}
-                    >
-                        {task.priority}
-                    </Badge>
+                    <Priority priority={task.priority} />
                     {task.dueDate && (
                         <span>
                             {new Date(task.dueDate).toLocaleDateString(

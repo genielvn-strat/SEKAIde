@@ -3,8 +3,13 @@ import {
     createPermissions,
     createRolePermissions,
 } from "@/actions/createActions";
+import CreateProject from "@/components/buttons/CreateProject";
+import Feed from "@/components/Feed";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
+import { TypographyH1 } from "@/components/typography/TypographyH1";
+import { TypographyMuted } from "@/components/typography/TypographyMuted";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { useDashboard } from "@/hooks/useDashboard";
 import { TrendingUp, Users, CheckCircle, Clock, Plus } from "lucide-react";
 
@@ -13,30 +18,40 @@ export default function DashboardPage() {
 
     if (isLoading) return <LoadingSkeleton />;
 
-    if (isError) return "An error has occured";
+    if (!overview || isError) return "An error has occured";
 
     return (
-        <div className="space-y-6">
-            <Button
-                onClick={async () => {
-                    createPermissions();
-                }}
-            >
-                Create Permissions
-            </Button>
-            <Button
-                onClick={async () => {
-                    createRolePermissions();
-                }}
-            >
-                Create Role Permission
-            </Button>
-            <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
-                {JSON.stringify(overview, null, 2)}
-            </pre>
-        </div>
+        <>
+            <div className="doc-header flex flex-row justify-between items-center">
+                <div className="left">
+                    <TypographyH1>Home</TypographyH1>
+                </div>
+                
+            </div>
+            <Separator className="my-4"/>
+            <div className="space-y-6">
+                {overview.map((m) => (
+                    <Feed feed={m} />
+                ))}
+            </div>
+        </>
     );
 }
+// <Button
+//     onClick={async () => {
+//         createPermissions();
+//     }}
+// >
+//     Create Permissions
+// </Button>
+// <Button
+//     onClick={async () => {
+//         createRolePermissions();
+//     }}
+// >
+//     Create Role Permission
+// </Button>
+
 // <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
 //     <div className="flex items-start">
 //         <div className="flex-shrink-0">
