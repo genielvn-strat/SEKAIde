@@ -61,7 +61,12 @@ export const teamQueries = {
             const teams = await db
                 .select({ teamId: teamMembers.teamId })
                 .from(teamMembers)
-                .where(eq(teamMembers.userId, userId));
+                .where(
+                    and(
+                        eq(teamMembers.userId, userId),
+                        eq(teamMembers.inviteConfirmed, true)
+                    )
+                );
 
             return success(
                 200,

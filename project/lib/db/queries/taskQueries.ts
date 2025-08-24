@@ -232,7 +232,8 @@ export const taskQueries = {
                     .where(eq(lists.id, data.listId))
                     .then((res) => res[0] ?? null);
             }
-            console.log(data);
+
+            const isFinished = data.finished ?? list?.isFinal;
             const result = await db
                 .update(tasks)
                 .set({
@@ -241,11 +242,10 @@ export const taskQueries = {
                         ? data.dueDate.toISOString()
                         : undefined,
                     updatedAt: new Date().toISOString(),
-                    ...(list !== undefined ? { finished: list.isFinal } : {}),
-                    ...(data.finished !== undefined
+                    ...(isFinished !== undefined
                         ? {
-                              finished: data.finished,
-                              finishedAt: data.finished
+                              finished: isFinished,
+                              finishedAt: isFinished
                                   ? new Date().toISOString()
                                   : null,
                           }
@@ -253,7 +253,6 @@ export const taskQueries = {
                 })
                 .where(eq(tasks.id, task.id))
                 .returning();
-            // Update project's updateAt column
             await db
                 .update(projects)
                 .set({
