@@ -11,6 +11,15 @@ import TeamMembersTab from "@/components/TeamMembersTab";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import TeamProjectsTab from "@/components/TeamProjectsTab";
 import TeamSettingsTab from "@/components/TeamSettingsTab";
+import {
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import Link from "next/link";
+import { SlashIcon } from "lucide-react";
 
 interface ProjectProps {
     params: Promise<{
@@ -44,6 +53,18 @@ export default function TeamDetails({ params }: ProjectProps) {
         <>
             <div className="doc-header flex flex-row justify-between items-center">
                 <div className="left">
+                    <Breadcrumb>
+                        <BreadcrumbList>
+                            <BreadcrumbItem>
+                                <BreadcrumbLink asChild>
+                                    <Link href="/teams">Teams</Link>
+                                </BreadcrumbLink>
+                            </BreadcrumbItem>
+                            <BreadcrumbSeparator>
+                                <SlashIcon />
+                            </BreadcrumbSeparator>
+                        </BreadcrumbList>
+                    </Breadcrumb>
                     <TypographyH1>{teamDetails.name}</TypographyH1>
                     <TypographyMuted>{teamDetails.slug}</TypographyMuted>
                 </div>

@@ -13,31 +13,35 @@ import {
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { useListActions } from "@/hooks/useLists";
-import { FetchList } from "@/types/ServerResponses";
+import { FetchList, FetchTask } from "@/types/ServerResponses";
+import { useTaskActions } from "@/hooks/useTasks";
+import { useRouter } from "next/navigation";
 
-interface DeleteListProps {
-    list: FetchList;
+interface DeleteTaskProps {
+    task: FetchTask;
     projectSlug: string;
     setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-const DeleteList: React.FC<DeleteListProps> = ({
-    list,
+const DeleteTask: React.FC<DeleteTaskProps> = ({
+    task,
     projectSlug,
     setOpen,
 }) => {
-    const { deleteList } = useListActions(projectSlug);
+    const router = useRouter();
+    const { deleteTask, isDeleting } = useTaskActions();
 
     const handleDelete = async () => {
         try {
-            const result = await deleteList({
-                listId: list.id,
+            const result = await deleteTask({
+                taskSlug: task.slug,
                 projectSlug,
             });
             if (!result.success) {
                 throw new Error(result.message);
             }
-            toast.success(`${list.name} has been deleted.`);
+            toast.success(`${task.title} has been deleted.`);
+            router.push(`/projects/${task.projectSlug}`);
         } catch (e) {
             if (e instanceof Error) {
                 toast.error(e.message);
@@ -52,15 +56,19 @@ const DeleteList: React.FC<DeleteListProps> = ({
         <AlertDialog open onOpenChange={setOpen}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Delete {list.name}?</AlertDialogTitle>
+                    <AlertDialogTitle>Delete {task.title}?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Are you sure you want to remove {list.name} from this
-                        project? All tasks on this list will be unlisted.
+                        Are you sure you want to remove {task.title} from this
+                        project?
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <Button variant="destructive" onClick={handleDelete}>
+                    <Button
+                        variant="destructive"
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                    >
                         Delete
                     </Button>
                 </AlertDialogFooter>
@@ -69,4 +77,4 @@ const DeleteList: React.FC<DeleteListProps> = ({
     );
 };
 
-export default DeleteList;
+export default DeleteTask;

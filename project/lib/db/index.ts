@@ -6,8 +6,10 @@ import { listQueries } from "./queries/listQueries";
 import { taskQueries } from "./queries/taskQueries";
 import { commentQueries } from "./queries/commentQueries";
 import { roleQueries } from "./queries/roleQueries";
+import { dashboardQueries } from "./queries/dashboardQueries";
 
 export const queries = {
+    dashboard: dashboardQueries,
     users: userQueries,
     teams: teamQueries,
     teamMembers: teamMemberQueries,

@@ -5,7 +5,7 @@ import {
     lists,
     tasks,
 } from "@/migrations/schema";
-import { and, count, eq, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, or, sql } from "drizzle-orm";
 import { CreateProject, UpdateProject } from "@/types/Project";
 import { failure, success } from "@/types/Response";
 import { FetchProject } from "@/types/ServerResponses";
@@ -143,8 +143,14 @@ export const projectQueries = {
                 .innerJoin(projects, eq(teamMembers.teamId, projects.teamId))
                 .innerJoin(teams, eq(teamMembers.teamId, teams.id))
                 .leftJoin(tasks, eq(tasks.projectId, projects.id)) // join tasks to projects
-                .where(eq(teamMembers.userId, userId))
-                .groupBy(projects.id, teams.name); // group to aggregate per project
+                .where(
+                    and(
+                        eq(teamMembers.userId, userId),
+                        eq(teamMembers.inviteConfirmed, true)
+                    )
+                )
+                .groupBy(projects.id, teams.name)
+                .orderBy(desc(projects.updatedAt)); // group to aggregate per project
             return success(200, "Projects successfully fetched", result);
         } catch {
             return failure(500, "Failed to fetch projects");
@@ -221,6 +227,7 @@ export const projectQueries = {
                 .update(projects)
                 .set({
                     ...data,
+                    updatedAt: new Date().toISOString(),
                 })
                 .where(eq(projects.id, member.projectId))
                 .returning();
@@ -313,16 +320,15 @@ export const projectQueries = {
                 isFinal: lists.isFinal,
             }));
 
-            const listsCreated = await db.insert(lists).values(defaultLists).returning();
-            return success(
-                200,
-                "Project successfully reset to default",
-                {
-                    tasksDeleted,
-                    listsDeleted,
-                    listsCreated
-                }
-            );
+            const listsCreated = await db
+                .insert(lists)
+                .values(defaultLists)
+                .returning();
+            return success(200, "Project successfully reset to default", {
+                tasksDeleted,
+                listsDeleted,
+                listsCreated,
+            });
         } catch {
             return failure(500, "Failed to update project");
         }

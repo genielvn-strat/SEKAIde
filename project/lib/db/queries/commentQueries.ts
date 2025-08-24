@@ -1,5 +1,5 @@
-import { users, comments } from "@/migrations/schema";
-import { eq } from "drizzle-orm";
+import { users, comments, projects, tasks } from "@/migrations/schema";
+import { eq, sql } from "drizzle-orm";
 import { failure, success } from "@/types/Response";
 import { authorization } from "./authorizationQueries";
 import { db } from "../db";
@@ -21,6 +21,15 @@ export const commentQueries = {
             return failure(400, "Not authorized to view this task.");
         }
 
+        const canUpdate =
+            (await authorization
+                .checkIfRoleHasPermissionByProjectSlug(
+                    userId,
+                    projectSlug,
+                    "update_comment"
+                )
+                .then((res) => (res ? true : false))) ?? false;
+
         const task = await authorization.checkIfTaskBelongsToProjectBySlug(
             projectSlug,
             taskSlug
@@ -41,10 +50,19 @@ export const commentQueries = {
                     updatedAt: comments.updatedAt,
                     authorName: users.name,
                     authorUsername: users.username,
+                    authorDisplayPicture: users.displayPictureLink,
+                    allowUpdate: sql<boolean>`
+                        CASE 
+                            WHEN ${comments.authorId} = ${userId} THEN TRUE
+                            WHEN ${canUpdate} = TRUE THEN TRUE
+                            ELSE FALSE
+                        END
+                    `,
                 })
                 .from(comments)
                 .innerJoin(users, eq(comments.authorId, users.id))
-                .where(eq(comments.taskId, task.id));
+                .where(eq(comments.taskId, task.id))
+                .orderBy(comments.createdAt);
 
             return success(200, "Comments fetch successfully`", result);
         } catch {
@@ -140,6 +158,20 @@ export const commentQueries = {
                 })
                 .where(eq(comments.id, commentId))
                 .returning();
+            // Update project's updateAt column
+            await db
+                .update(projects)
+                .set({
+                    updatedAt: new Date().toISOString(),
+                })
+                .where(eq(projects.id, task.projectId));
+            // Update task's updateAt column
+            await db
+                .update(tasks)
+                .set({
+                    updatedAt: new Date().toISOString(),
+                })
+                .where(eq(tasks.id, task.id));
             return success(200, "Comment updated successfully", result[0]);
         } catch {
             return failure(500, "Failed to update comment");

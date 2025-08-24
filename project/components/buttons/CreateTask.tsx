@@ -238,6 +238,38 @@ const CreateTask: React.FC<CreateTaskProps> = ({ projectSlug }) => {
                             )}
                         />
 
+                        <FormField
+                            control={form.control}
+                            name="listId"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>List</FormLabel>
+                                    <FormControl>
+                                        <Select
+                                            defaultValue={field.value}
+                                            onValueChange={field.onChange}
+                                        >
+                                            <SelectTrigger
+                                            >
+                                                <SelectValue placeholder="Select list" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {lists?.map((list) => (
+                                                    <SelectItem
+                                                        key={list.id}
+                                                        value={list.id}
+                                                        className={`flex flex-row items-center gap-4 text-rainbow-${list.color}`}
+                                                    >
+                                                        {list.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                         {permittedAssign ? (
                             <FormField
                                 control={form.control}
@@ -281,40 +313,6 @@ const CreateTask: React.FC<CreateTaskProps> = ({ projectSlug }) => {
                                 You can only assign this task to yourself.
                             </TypographyMuted>
                         )}
-
-                        <FormField
-                            control={form.control}
-                            name="listId"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>List</FormLabel>
-                                    <FormControl>
-                                        <Select
-                                            defaultValue={field.value}
-                                            onValueChange={field.onChange}
-                                        >
-                                            <SelectTrigger
-                                                disabled={!permittedAssign}
-                                            >
-                                                <SelectValue placeholder="Select list" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {lists?.map((list) => (
-                                                    <SelectItem
-                                                        key={list.id}
-                                                        value={list.id}
-                                                        className={`flex flex-row items-center gap-4 text-rainbow-${list.color}`}
-                                                    >
-                                                        {list.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
 
                         <FormField
                             control={form.control}

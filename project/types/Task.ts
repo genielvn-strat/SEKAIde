@@ -3,7 +3,7 @@ export interface Task {
     title: string;
     description?: string;
     projectId: string;
-    listId: string;
+    listId: string | null;
     assigneeId?: string;
     slug: string;
     finished: boolean;
@@ -22,3 +22,5 @@ export type CreateTask = Omit<
 export type UpdateTask = Partial<
     Omit<Task, "id" | "createdAt" | "updatedAt" | "projectId" | "slug">
 >;
+
+export type ArrangeTask = Pick<Task, "id" | "listId" | "position">

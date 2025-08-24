@@ -16,7 +16,7 @@ import { db } from "../db";
 import { alias } from "drizzle-orm/pg-core";
 
 export const teamQueries = {
-    getJoinedTeams: async (userId: string) => {
+    getUserTeamsWithDetail: async (userId: string) => {
         try {
             const memberSelf = alias(teamMembers, "memberSelf");
 
@@ -37,7 +37,8 @@ export const teamQueries = {
                     memberSelf,
                     and(
                         eq(memberSelf.teamId, teams.id),
-                        eq(memberSelf.userId, userId)
+                        eq(memberSelf.userId, userId),
+                        eq(memberSelf.inviteConfirmed, true)
                     )
                 )
                 .innerJoin(teamMembers, eq(teamMembers.teamId, teams.id))
@@ -51,6 +52,22 @@ export const teamQueries = {
                 );
 
             return success(200, "Joined teams successfully fetched", result);
+        } catch {
+            return failure(500, "Failed to fetch joined teams");
+        }
+    },
+    getJoinedTeamsNoDetails: async (userId: string) => {
+        try {
+            const teams = await db
+                .select({ teamId: teamMembers.teamId })
+                .from(teamMembers)
+                .where(eq(teamMembers.userId, userId));
+
+            return success(
+                200,
+                "User teams fetched successfully",
+                teams.map((t) => t.teamId)
+            );
         } catch {
             return failure(500, "Failed to fetch joined teams");
         }
@@ -241,7 +258,7 @@ export const teamQueries = {
         try {
             const result = await db
                 .update(teams)
-                .set({ ...data })
+                .set({ ...data, updatedAt: new Date().toISOString() })
                 .where(eq(teams.id, member.teamId))
                 .returning();
             return success(200, "Team updated successfully", result[0]);

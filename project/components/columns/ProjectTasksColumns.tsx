@@ -5,7 +5,7 @@ import { TypographyP } from "@/components/typography/TypographyP";
 import { Badge } from "@/components/ui/badge";
 import { FetchTask, FetchTeamMember } from "@/types/ServerResponses";
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, CheckSquare, Square } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -19,8 +19,12 @@ import { useAuthRoleByProject, useAuthRoleByTask } from "@/hooks/useRoles";
 import Link from "next/link";
 import { ro } from "date-fns/locale";
 import { Checkbox } from "../ui/checkbox";
-import DeleteTaskFromList from "../dialog/DeleteTaskFromList";
+import DeleteTask from "../dialog/DeleteTask";
 import EditTask from "../dialog/EditTask";
+import TaskDetails from "../dialog/TaskDetails";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import TaskDropDown from "../dropdown/TaskDropDown";
+import Priority from "../badge/Priority";
 
 export const ProjectTasksColumn: (
     projectSlug: string
@@ -29,12 +33,7 @@ export const ProjectTasksColumn: (
         accessorKey: "title",
         header: "Task Title",
         cell: ({ row }) => (
-            <Link
-                href={`/projects/${projectSlug}/${row.original.slug}`}
-                className="underline"
-            >
-                {row.original.title}
-            </Link>
+            <TaskDetails task={row.original}>{row.original.title}</TaskDetails>
         ),
     },
     {
@@ -45,33 +44,33 @@ export const ProjectTasksColumn: (
             if (!task.assigneeName && !task.assigneeUsername)
                 return "Unassigned";
             return (
-                <div className="flex flex-col">
-                    <TypographyP margin={false}>
-                        {task.assigneeName}
-                    </TypographyP>
-                    <TypographyMuted>{task.assigneeUsername}</TypographyMuted>
+                <div className="flex items-center gap-2">
+                    <Avatar>
+                        <AvatarImage
+                            src={task.assigneeDisplayPicture}
+                        ></AvatarImage>
+                        <AvatarFallback>
+                            {task.assigneeName?.charAt(0)?.toUpperCase()}
+                        </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                        <TypographyP margin={false}>
+                            {task.assigneeName}
+                        </TypographyP>
+                        <TypographyMuted>
+                            {task.assigneeUsername}
+                        </TypographyMuted>
+                    </div>
                 </div>
             );
         },
     },
     {
         accessorKey: "priority",
-        header: "Priority",
+        header: () => <span className="hidden md:table-cell">Priority</span>,
         cell: ({ row }) => {
             const task = row.original;
-            return (
-                <Badge
-                    className={`capitalize ${
-                        task.priority === "high"
-                            ? "bg-red-100 text-red-700"
-                            : task.priority === "medium"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-green-100 text-green-700"
-                    }`}
-                >
-                    {task.priority}
-                </Badge>
-            );
+            return <Priority priority={task.priority} />;
         },
     },
     {
@@ -89,73 +88,42 @@ export const ProjectTasksColumn: (
     },
     {
         accessorKey: "listName",
-        header: "List",
+        header: () => <span className="hidden md:table-cell">List</span>,
         cell: ({ row }) => {
             const task = row.original;
             if (!task.listId) return "Unlisted";
             return (
-                <span className={`text-rainbow-${task.listColor}`}>
+                <Badge
+                    variant="default"
+                    className={`bg-${task.listColor}-100  text-${task.listColor}-700 capitalize border hidden md:table-cell`}
+                >
                     {task.listName}
-                </span>
+                </Badge>
             );
         },
     },
     {
         accessorKey: "finished",
-        header: "Finished",
+        header: () => <span className="hidden md:table-cell">Finished</span>,
         cell: ({ row }) => {
             const task = row.original;
-            return <Checkbox disabled checked={task.finished}></Checkbox>;
+            return (
+                <span className="hidden md:table-cell">
+                    {task.finished ? (
+                        <CheckSquare className="text-green-600 w-4 h-4" />
+                    ) : (
+                        <Square className="text-gray-400 w-4 h-4" />
+                    )}
+                </span>
+            );
         },
     },
     {
         id: "actions",
         cell: ({ row }) => {
             const task = row.original;
-            const [editDialog, showEditDialog] = useState(false);
-            const [deleteDialog, showDeleteDialog] = useState(false);
-            const { permitted: permittedUpdate } = useAuthRoleByTask(
-                task.id,
-                projectSlug,
-                "update_task"
-            );
-            const { permitted: permittedDelete } = useAuthRoleByTask(
-                task.id,
-                projectSlug,
-                "delete_task"
-            );
 
-            return (
-                (permittedUpdate || permittedDelete) && (
-                    <>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                    <span className="sr-only">Open menu</span>
-                                    <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                    onClick={() => showEditDialog(true)}
-                                >
-                                    Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                    className="text-destructive"
-                                    onClick={() => showDeleteDialog(true)}
-                                >
-                                    Delete
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                        {
-                            deleteDialog && <DeleteTaskFromList task={task} projectSlug={projectSlug} setOpen={showDeleteDialog}/>
-                        }
-                        {editDialog && <EditTask task={task} projectSlug={projectSlug} setOpen={showEditDialog}/>}
-                    </>
-                )
-            );
+            return task.allowUpdate && <TaskDropDown task={task} />;
         },
     },
 ];

@@ -13,32 +13,35 @@ import {
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { useListActions } from "@/hooks/useLists";
-import { FetchList, FetchTask } from "@/types/ServerResponses";
-import { useTaskActions } from "@/hooks/useTasks";
+import { FetchComment, FetchList } from "@/types/ServerResponses";
+import { useCommentActions } from "@/hooks/useComments";
 
-interface DeleteTaskFromListProps {
-    task: FetchTask;
+interface DeleteCommentProps {
+    comment: FetchComment;
+    taskSlug: string;
     projectSlug: string;
     setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-const DeleteTaskFromList: React.FC<DeleteTaskFromListProps> = ({
-    task,
+const DeleteComment: React.FC<DeleteCommentProps> = ({
+    comment,
     projectSlug,
+    taskSlug,
     setOpen,
 }) => {
-    const { deleteTask, isDeleting } = useTaskActions();
+    const { deleteComment } = useCommentActions(taskSlug);
 
     const handleDelete = async () => {
         try {
-            const result = await deleteTask({
-                taskSlug: task.slug,
+            const result = await deleteComment({
+                commentId: comment.id,
+                taskSlug,
                 projectSlug,
             });
             if (!result.success) {
                 throw new Error(result.message);
             }
-            toast.success(`${task.title} has been deleted.`);
+            toast.success(`Comment has been deleted.`);
         } catch (e) {
             if (e instanceof Error) {
                 toast.error(e.message);
@@ -53,21 +56,23 @@ const DeleteTaskFromList: React.FC<DeleteTaskFromListProps> = ({
         <AlertDialog open onOpenChange={setOpen}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Delete {task.title}?</AlertDialogTitle>
+                    <AlertDialogTitle>Delete Comment?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Are you sure you want to remove {task.title} from this
-                        project?
+                        This cannot be undone.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+                    <AlertDialogAction
+                        className="bg-destructive dark:bg-destructive"
+                        onClick={handleDelete}
+                    >
                         Delete
-                    </Button>
+                    </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
     );
 };
 
-export default DeleteTaskFromList;
+export default DeleteComment;

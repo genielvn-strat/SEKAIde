@@ -1,55 +1,151 @@
 "use client";
-import { createPermissions, createRolePermissions } from "@/actions/createActions";
-import { Button } from "@/components/ui/button";
-import { TrendingUp, Users, CheckCircle, Clock, Plus } from "lucide-react";
+import {
+    createPermissions,
+    createRolePermissions,
+} from "@/actions/createActions";
+import Feed from "@/components/Feed";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
+import { TypographyH1 } from "@/components/typography/TypographyH1";
+import { TypographyH2 } from "@/components/typography/TypographyH2";
+import { TypographyMuted } from "@/components/typography/TypographyMuted";
+import { Separator } from "@/components/ui/separator";
+import { useDashboard } from "@/hooks/useDashboard";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { MessageCircleQuestion } from "lucide-react";
+import LoadingSkeletonCards from "@/components/LoadingSkeletonCards";
+import { useProjects } from "@/hooks/useProjects";
+import ProjectCard from "@/components/ProjectCard";
 
 export default function DashboardPage() {
+    const {
+        overview,
+        isLoading: overviewLoading,
+        error,
+        isError,
+    } = useDashboard();
+
+    const {
+        projects,
+        isLoading: projectsLoading,
+        error: projectError,
+        isError: projectIsError,
+    } = useProjects();
+
+    if (overviewLoading) return <LoadingSkeleton />;
+
+    if (!overview || isError) return "An error has occured";
+
     return (
-        <div className="space-y-6">
-            <Button
-                onClick={async () => {
-                    createPermissions();
-                }}
-            >
-                Create Permissions
-            </Button>
-            <Button
-                onClick={async () => {
-                    createRolePermissions();
-                }}
-            >
-                Create Role Permission
-            </Button>
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                <div className="flex items-start">
-                    <div className="flex-shrink-0">
-                        <div className="w-8 h-8 bg-blue_munsell-500 rounded-full flex items-center justify-center">
-                            <TrendingUp className="text-white" size={16} />
-                        </div>
-                    </div>
-                    <div className="ml-3">
-                        <h3 className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                            Dashboard Implementation Tasks
-                        </h3>
-                        <div className="mt-2 text-sm text-blue-800 dark:text-blue-200">
-                            <ul className="list-disc list-inside space-y-1">
-                                <li>
-                                    Task 4.2: Create project listing and
-                                    dashboard interface
-                                </li>
-                                <li>
-                                    Task 5.3: Set up client-side state
-                                    management with Zustand
-                                </li>
-                                <li>
-                                    Task 6.6: Optimize performance and implement
-                                    loading states
-                                </li>
-                            </ul>
-                        </div>
+        <>
+            <div className="doc-header flex flex-row justify-between items-center">
+                <div className="left">
+                    <TypographyH1>Dashboard</TypographyH1>
+                    <TypographyMuted>
+                        Welcome back! Here are the recent activities across your
+                        teams.
+                    </TypographyMuted>
+                </div>
+                <div className="right"></div>
+            </div>
+            <Separator className="my-4" />
+            <div className="flex gap-8 flex-col-reverse md:flex-row">
+                <div className="space-y-4 w-full">
+                    <TypographyH2>Feed</TypographyH2>
+                    {/* <div className="flex flex-row gap-2">
+                        <CreateProject />
+                        <CreateTeam />
+                    </div> */}
+                    {overviewLoading ? (
+                        <LoadingSkeletonCards />
+                    ) : overview.length == 0 ? (
+                        <Alert variant="default">
+                            <MessageCircleQuestion />
+                            <AlertTitle>No recent activity</AlertTitle>
+                            <AlertDescription>
+                                Looks like nothing has happened here yet. Check
+                                back later for updates.
+                            </AlertDescription>
+                        </Alert>
+                    ) : (
+                        overview.map((m, idx) => <Feed feed={m} key={idx} />)
+                    )}
+                </div>
+                <div className="w-full">
+                    <div className="space-y-4 w-full">
+                        <TypographyH2>Recently Updated Projects</TypographyH2>
+                        {projectsLoading ? (
+                            <LoadingSkeletonCards />
+                        ) : projectError ? (
+                            "Error loading projects"
+                        ) : projects?.length == 0 ? (
+                            <Alert variant="default">
+                                <MessageCircleQuestion />
+                                <AlertTitle>No projects found</AlertTitle>
+                                <AlertDescription>
+                                    There are no projects available right now.
+                                    Please wait for one to be assigned, or
+                                    create a new project if you're a Project
+                                    Manager.
+                                </AlertDescription>
+                            </Alert>
+                        ) : (
+                            projects
+                                ?.slice(0, 3)
+                                .map((project) => (
+                                    <ProjectCard
+                                        key={project.id}
+                                        project={project}
+                                    />
+                                ))
+                        )}
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 }
+// <Button
+//     onClick={async () => {
+//         createPermissions();
+//     }}
+// >
+//     Create Permissions
+// </Button>
+// <Button
+//     onClick={async () => {
+//         createRolePermissions();
+//     }}
+// >
+//     Create Role Permission
+// </Button>
+
+// <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+//     <div className="flex items-start">
+//         <div className="flex-shrink-0">
+//             <div className="w-8 h-8 bg-blue_munsell-500 rounded-full flex items-center justify-center">
+//                 <TrendingUp className="text-white" size={16} />
+//             </div>
+//         </div>
+//         <div className="ml-3">
+//             <h3 className="text-sm font-medium text-blue-900 dark:text-blue-100">
+//                 Dashboard Implementation Tasks
+//             </h3>
+//             <div className="mt-2 text-sm text-blue-800 dark:text-blue-200">
+//                 <ul className="list-disc list-inside space-y-1">
+//                     <li>
+//                         Task 4.2: Create project listing and
+//                         dashboard interface
+//                     </li>
+//                     <li>
+//                         Task 5.3: Set up client-side state
+//                         management with Zustand
+//                     </li>
+//                     <li>
+//                         Task 6.6: Optimize performance and implement
+//                         loading states
+//                     </li>
+//                 </ul>
+//             </div>
+//         </div>
+//     </div>
+// </div>

@@ -2,7 +2,7 @@
 
 import { queries } from "@/lib/db";
 import { getUserDbId } from "./sessionActions";
-import { CreateTask, UpdateTask } from "@/types/Task";
+import { ArrangeTask, CreateTask, UpdateTask } from "@/types/Task";
 import {
     CreateTaskInput,
     createTaskSchema,
@@ -17,11 +17,6 @@ import { ZodError } from "zod";
 export const fetchTasks = async (projectSlug: string) => {
     const userId = await getUserDbId();
     const tasks = await queries.tasks.getByProjectSlug(projectSlug, userId);
-    return tasks;
-};
-export const fetchTasksList = async (projectSlug: string, listId: string) => {
-    await getUserDbId();
-    const tasks = await queries.tasks.getByListId(projectSlug, listId);
     return tasks;
 };
 
@@ -51,7 +46,7 @@ export const createTask = async (
             lower: true,
             strict: true,
         })}-${nanoid(6)}`,
-        assigneeId: data.assigneeId ?? userId, 
+        assigneeId: data.assigneeId ?? userId,
     };
     return await queries.tasks.create(projectSlug, taskData, userId);
 };
@@ -78,4 +73,13 @@ export const updateTask = async (
         ...data,
     };
     return await queries.tasks.update(taskSlug, taskData, projectSlug, userId);
+};
+export const arrangeTask = async (
+    tasks: ArrangeTask[],
+    selectedTaskId: string,
+    projectSlug: string
+) => {
+    const userId = await getUserDbId();
+
+    return await queries.tasks.arrange(tasks, selectedTaskId, projectSlug, userId);
 };

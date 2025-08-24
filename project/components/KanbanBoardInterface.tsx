@@ -19,24 +19,33 @@ import LoadingSkeletonCards from "./LoadingSkeletonCards";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuthRoleByProject } from "@/hooks/useRoles";
 import CreateList from "./buttons/CreateList";
+import { ArrangeTask, UpdateTask } from "@/types/Task";
+import { arrangeTask } from "@/actions/taskActions";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface KanbanBoardProps {
     project: FetchProject;
-    tasks: FetchTask[]
+    tasks: FetchTask[];
 }
 
-export function KanbanBoardInterface({ project, tasks: initialTasks }: KanbanBoardProps) {
+export function KanbanBoardInterface({
+    project,
+    tasks: initialTasks,
+}: KanbanBoardProps) {
+    const queryClient = useQueryClient();
     const { lists, isLoading: listLoading } = useLists(project.slug, {
         enabled: !!project,
     });
-    
-    const { updateTask } = useTaskActions();
+
+    const { updateTask, arrangeTask } = useTaskActions();
     const { permitted: permittedCreateList } = useAuthRoleByProject(
         project.slug,
         "create_list"
     );
     const [tasks, setTasks] = useState<FetchTask[]>([]);
     const [activeTask, setActiveTask] = useState<FetchTask | null>(null);
+    const [overId, setOverId] = useState<string | null>(null);
 
     useEffect(() => {
         if (initialTasks) setTasks(initialTasks);
@@ -52,13 +61,51 @@ export function KanbanBoardInterface({ project, tasks: initialTasks }: KanbanBoa
     if (listLoading) return <LoadingSkeletonCards />;
     if (!lists || !initialTasks || !tasks) return "An error has occured";
 
-    function handleDragStart(event: any) {
+    const handleArrange = async (
+        updatedTasks: FetchTask[],
+        selectedTaskId: string
+    ) => {
+        console.log("=== Current Task State by List ===");
+        const arranged =
+            lists?.flatMap((list) =>
+                updatedTasks
+                    .filter((t) => t.listId === list.id)
+                    .map((t, idx) => ({
+                        title: t.title,
+                        position: idx,
+                        id: t.id,
+                        listId: t.listId ?? null,
+                    }))
+            ) ?? [];
+        try {
+            const response = await arrangeTask({
+                tasks: arranged,
+                selectedTaskId: selectedTaskId,
+                projectSlug: project.slug,
+            });
+            if (!response.success) throw new Error(response.message);
+            toast.success("Task arranged successfully");
+        } catch (e) {
+            if (e instanceof Error) {
+                toast.error(e.message);
+            }
+        } finally {
+            queryClient.invalidateQueries({ queryKey: ["tasks"] });
+        }
+    };
+
+    const handleDragStart = (event: any) => {
         const { active } = event;
         const task = tasks.find((t) => t.id === active.id);
         setActiveTask(task || null);
-    }
+    };
 
-    function handleDragEnd(event: DragEndEvent) {
+    const handleDragOver = (event: any) => {
+        const { over } = event;
+        setOverId(over?.id || null);
+    };
+
+    const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
 
         if (!over) {
@@ -117,6 +164,7 @@ export function KanbanBoardInterface({ project, tasks: initialTasks }: KanbanBoa
                     (t) => t.listId !== overListId
                 );
 
+                const updated = [...otherTasks, ...newTargetTasks];
                 updateTask({
                     taskSlug: activeTask.slug,
                     data: {
@@ -124,7 +172,8 @@ export function KanbanBoardInterface({ project, tasks: initialTasks }: KanbanBoa
                     },
                     projectSlug: project.slug,
                 });
-                return [...otherTasks, ...newTargetTasks];
+                handleArrange(updated, activeTask.id);
+                return updated;
             });
         } else {
             // Reordering within the same list
@@ -147,18 +196,21 @@ export function KanbanBoardInterface({ project, tasks: initialTasks }: KanbanBoa
                 const otherTasks = prevTasks.filter(
                     (task) => task.listId !== activeListId
                 );
-                return [...otherTasks, ...newTasksInList];
+                const updated = [...otherTasks, ...newTasksInList];
+                handleArrange(updated, activeTask.id);
+                return updated;
             });
         }
 
         setActiveTask(null);
-    }
-
+        setOverId(null);
+    };
     return (
         <Card className="p-3 bg-background dark:bg-background h-[60vh] md:h-[70vh]">
             <DndContext
                 sensors={sensors}
                 onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
                 onDragEnd={handleDragEnd}
             >
                 <CardContent className="flex p-2 space-x-6 overflow-x-auto h-full">
@@ -174,6 +226,8 @@ export function KanbanBoardInterface({ project, tasks: initialTasks }: KanbanBoa
                                 <KanbanColumn
                                     list={list}
                                     tasks={taskList}
+                                    activeId={activeTask?.id ?? null}
+                                    overId={overId}
                                     projectSlug={project.slug}
                                 />
                             </SortableContext>
@@ -183,10 +237,7 @@ export function KanbanBoardInterface({ project, tasks: initialTasks }: KanbanBoa
                 </CardContent>
                 <DragOverlay>
                     {activeTask ? (
-                        <KanbanTask
-                            projectSlug={project.slug}
-                            task={activeTask}
-                        />
+                        <KanbanTask task={activeTask} activeId={null} />
                     ) : null}
                 </DragOverlay>
             </DndContext>

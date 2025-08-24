@@ -92,7 +92,6 @@ const EditTask: React.FC<EditTaskProps> = ({ task, projectSlug, setOpen }) => {
                 throw new Error(response.message);
             }
             toast.success("Task has been updated successfully.");
-            form.reset();
         } catch (e) {
             if (e instanceof Error) {
                 form.setError("root", { message: e.message });
@@ -243,6 +242,37 @@ const EditTask: React.FC<EditTaskProps> = ({ task, projectSlug, setOpen }) => {
                             )}
                         />
 
+                        <FormField
+                            control={form.control}
+                            name="listId"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>List</FormLabel>
+                                    <FormControl>
+                                        <Select
+                                            defaultValue={field.value}
+                                            onValueChange={field.onChange}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select list" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {lists?.map((list) => (
+                                                    <SelectItem
+                                                        key={list.id}
+                                                        value={list.id}
+                                                        className={`flex flex-row items-center gap-4 text-rainbow-${list.color}`}
+                                                    >
+                                                        {list.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                         {permittedAssign ? (
                             <FormField
                                 control={form.control}
@@ -286,38 +316,6 @@ const EditTask: React.FC<EditTaskProps> = ({ task, projectSlug, setOpen }) => {
                                 You can only assign this task to yourself.
                             </TypographyMuted>
                         )}
-                        <FormField
-                            control={form.control}
-                            name="listId"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>List</FormLabel>
-                                    <FormControl>
-                                        <Select
-                                            defaultValue={field.value}
-                                            onValueChange={field.onChange}
-                                        >
-                                            <SelectTrigger
-                                            >
-                                                <SelectValue placeholder="Select list" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {lists?.map((list) => (
-                                                    <SelectItem
-                                                        key={list.id}
-                                                        value={list.id}
-                                                        className={`flex flex-row items-center gap-4 text-rainbow-${list.color}`}
-                                                    >
-                                                        {list.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
 
                         <FormField
                             control={form.control}

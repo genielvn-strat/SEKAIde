@@ -16,9 +16,9 @@ import { failure, success } from "@/types/Response";
 
 export const fetchTeams = async () => {
     const userId = await getUserDbId();
-    const result = await queries.teams.getJoinedTeams(userId);
+    const result = await queries.teams.getUserTeamsWithDetail(userId);
 
-    return result
+    return result;
 };
 
 export const fetchTeamBySlug = async (slug: string) => {

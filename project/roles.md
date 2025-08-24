@@ -1,0 +1,19 @@
+| Permission          | Member | Project Manager | Admin (Owner) |
+| ------------------- | :----: | :-------------: | :-----------: |
+| **kick\_members**   |    ❌   |        ✅        |       ✅       |
+| **invite\_members** |    ❌   |        ✅        |       ✅       |
+| **update\_members** |    ❌   |        ✅        |       ✅       |
+| **update\_team**    |    ❌   |        ❌        |       ✅       |
+| **delete\_team**    |    ❌   |        ❌        |       ✅       |
+| **create\_project** |    ❌   |        ✅        |       ✅       |
+| **update\_project** |    ❌   |        ✅        |       ✅       |
+| **delete\_project** |    ❌   |        ✅        |       ✅       |
+| **create\_list**    |    ⭕   |        ✅        |       ✅       |
+| **update\_list**    |    ⭕   |        ✅        |       ✅       |
+| **delete\_list**    |    ❌   |        ✅        |       ✅       |
+| **create\_task**    |    ⭕   |        ✅        |       ✅       |
+| **update\_task**    |    ⭕   |        ✅        |       ✅       |
+| **delete\_task**    |    ⭕   |        ✅        |       ✅       |
+| **create\_comment** |    ⭕   |        ✅        |       ✅       |
+| **update\_comment** |    ⭕   |        ✅        |       ✅       |
+| **delete\_comment** |    ⭕   |        ✅        |       ✅       |

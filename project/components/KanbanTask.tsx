@@ -4,83 +4,74 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
     Card,
-    CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { TypographyMuted } from "./typography/TypographyMuted";
 import { Badge } from "./ui/badge";
-import Link from "next/link";
-import { useAuthRoleByTask } from "@/hooks/useRoles";
-export function KanbanTask({
-    projectSlug,
-    task,
-}: {
-    projectSlug: string;
-    task: FetchTask;
-}) {
-    const { permitted: permittedUpdate } = useAuthRoleByTask(
-        task.id,
-        projectSlug,
-        "update_task"
-    );
+import TaskDetails from "./dialog/TaskDetails";
+import { Grip } from "lucide-react";
+import Priority from "./badge/Priority";
 
-    const { attributes, listeners, setNodeRef, transform, transition } =
-        useSortable({ id: task.id });
+export function KanbanTask({
+    task,
+    activeId,
+}: {
+    task: FetchTask;
+    activeId: string | null;
+}) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: task.id });
 
     const style = {
-        transform: CSS.Transform.toString(transform),
         transition,
     };
 
     return (
         <Card
             ref={setNodeRef}
-            style={{ ...style, opacity: permittedUpdate ? 1 : 0.5 }}
-            {...(permittedUpdate ? { ...attributes, ...listeners } : {})}
-            className="p-0 shadow-sm hover:shadow-md transition-shadow"
+            style={{
+                ...style,
+                opacity: !task.allowUpdate ? 0.5 : activeId === task.id ? 0 : 1,
+            }}
+            className={`${activeId === task.id ? "opacity-0" : "opacity-100"}`}
+            {...(task.allowUpdate ? { ...attributes, ...listeners } : {})}
         >
             <CardHeader>
-                <Link
-                    href={`/projects/${projectSlug}/${task.slug}`}
-                    className="underline"
-                >
-                    <CardTitle>{task.title}</CardTitle>
-                </Link>
-                <CardDescription className="mt-1 text-xs text-gray-600 dark:text-gray-300 line-clamp-2">
-                    {task.description}
-                    <div className="flex justify-between items-center mt-3 text-xs ">
-                        <Badge
-                            className={`capitalize ${
-                                task.priority === "high"
-                                    ? "bg-red-100 text-red-700"
-                                    : task.priority === "medium"
-                                    ? "bg-yellow-100 text-yellow-700"
-                                    : "bg-green-100 text-green-700"
-                            }`}
-                        >
-                            {task.priority}
-                        </Badge>
-                        {task.dueDate && (
-                            <span>
-                                {new Date(task.dueDate).toLocaleDateString(
-                                    "en-US",
-                                    {
-                                        month: "short",
-                                        day: "numeric",
-                                    }
-                                )}
-                            </span>
+                <div className="flex justify-between">
+                    <TaskDetails task={task}>
+                        <CardTitle>{task.title}</CardTitle>
+                    </TaskDetails>
+                    <div className="p-0">
+                        {task.allowUpdate && (
+                            <Grip size={16} className="ml-2" />
                         )}
                     </div>
+                </div>
+                <CardDescription className="mt-1 text-xs text-gray-600 dark:text-gray-300 line-clamp-2">
+                    {task.description}
                 </CardDescription>
+                <div className="flex justify-between items-center mt-3 text-xs ">
+                    <Priority priority={task.priority} />
+                    {task.dueDate && (
+                        <span>
+                            {new Date(task.dueDate).toLocaleDateString(
+                                "en-US",
+                                {
+                                    month: "short",
+                                    day: "numeric",
+                                }
+                            )}
+                        </span>
+                    )}
+                </div>
             </CardHeader>
-            <CardContent>
-                <TypographyMuted>
-                    Assigned to: {task.assigneeName} ({task.assigneeUsername})
-                </TypographyMuted>
-            </CardContent>
         </Card>
     );
 }

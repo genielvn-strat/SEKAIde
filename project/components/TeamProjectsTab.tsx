@@ -121,7 +121,7 @@ const TeamProjectsTab: React.FC<TeamProjectsTabProps> = ({
                     </Alert>
                 ) : (
                     filteredAndSortedProjects?.map((project) => (
-                        <ProjectCard key={project.id} project={project} />
+                        <ProjectCard key={project.id} project={project} small={true} />
                     ))
                 )}
             </div>

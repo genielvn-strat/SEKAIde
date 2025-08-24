@@ -2,14 +2,15 @@
 
 import {
     fetchTasks,
-    fetchTasksList,
     createTask,
     deleteTask,
     updateTask,
     fetchTaskBySlug,
+    arrangeTask,
 } from "@/actions/taskActions";
 import { CreateTaskInput, UpdateTaskInput } from "@/lib/validations";
 import { FetchTask } from "@/types/ServerResponses";
+import { ArrangeTask } from "@/types/Task";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function useTaskActions() {
@@ -54,11 +55,26 @@ export function useTaskActions() {
             queryClient.invalidateQueries({ queryKey: [`tasks`] });
         },
     });
+    const arrange = useMutation({
+        mutationFn: ({
+            tasks,
+            selectedTaskId,
+            projectSlug,
+        }: {
+            tasks: ArrangeTask[];
+            selectedTaskId: string;
+            projectSlug: string;
+        }) => arrangeTask(tasks, selectedTaskId, projectSlug),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`tasks`] });
+        },
+    });
 
     return {
         createTask: create.mutateAsync,
         deleteTask: del.mutateAsync,
         updateTask: update.mutateAsync,
+        arrangeTask: arrange.mutateAsync,
         isCreating: create.isPending,
         isDeleting: del.isPending,
     };
@@ -75,6 +91,7 @@ export function useTasks(
         queryKey: [`tasks`],
         queryFn: () => fetchTasks(projectSlug),
         enabled: !!projectSlug && options.enabled,
+        refetchInterval: 30000,
     });
 
     return {
@@ -83,23 +100,7 @@ export function useTasks(
         error: !res?.success ? res?.message : error,
     };
 }
-export function useTasksList(projectSlug: string, listId: string) {
-    const {
-        data: res,
-        isLoading,
-        error,
-    } = useQuery({
-        queryKey: [`tasks-${listId}`, projectSlug],
-        queryFn: () => fetchTasksList(projectSlug, listId),
-        enabled: !!projectSlug,
-    });
 
-    return {
-        tasks: res?.success ? res.data : null,
-        isLoading,
-        error: !res?.success ? res?.message : error,
-    };
-}
 export function useTaskDetails(taskSlug: string, projectSlug: string) {
     const {
         data: res,
