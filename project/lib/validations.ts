@@ -51,7 +51,7 @@ export const taskSchema = z.object({
     priority: z.enum(["low", "medium", "high"]),
     listId: z.string(),
     assigneeId: z.string().uuid().optional(),
-    position: z.number().nonnegative("Position must be positive"),
+    position: z.number().nonnegative("Position must be positive").optional(),
     finished: z.boolean(),
     dueDate: z.date().min(new Date(), "Due date must be in future").optional(),
 });

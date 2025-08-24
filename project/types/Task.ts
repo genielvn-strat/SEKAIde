@@ -9,7 +9,7 @@ export interface Task {
     finished: boolean;
     priority: "low" | "medium" | "high";
     dueDate?: Date;
-    position: number;
+    position?: number;
     createdAt: Date;
     updatedAt: Date;
     finishedAt: Date | null;
