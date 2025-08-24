@@ -10,7 +10,11 @@ import {
 import { and, countDistinct, eq, or } from "drizzle-orm";
 import { CreateTeam, UpdateTeam } from "@/types/Team";
 import { failure, success } from "@/types/Response";
-import { FetchTeams, FetchTeamDetails } from "@/types/ServerResponses";
+import {
+    FetchTeams,
+    FetchTeamDetails,
+    FetchInvitedTeams,
+} from "@/types/ServerResponses";
 import { authorization } from "./authorizationQueries";
 import { db } from "../db";
 import { alias } from "drizzle-orm/pg-core";
@@ -200,6 +204,29 @@ export const teamQueries = {
             );
         } catch {
             return failure(500, "Failed to fetch teams");
+        }
+    },
+    getInvitedTeams: async (userId: string) => {
+        try {
+            const result: FetchInvitedTeams[] = await db
+                .select({
+                    teamMemberId: teamMembers.id,
+                    teamName: teams.name,
+                    teamId: teams.id,
+                    roleName: roles.name,
+                })
+                .from(teamMembers)
+                .innerJoin(teams, eq(teamMembers.teamId, teams.id))
+                .innerJoin(roles, eq(teamMembers.roleId, roles.id))
+                .where(
+                    and(
+                        eq(teamMembers.userId, userId),
+                        eq(teamMembers.inviteConfirmed, false)
+                    )
+                );
+            return success(200, "Invited teams fetched successfully", result);
+        } catch {
+            return failure(500, "Failed to fetch invited teams");
         }
     },
     create: async (data: CreateTeam) => {

@@ -7,6 +7,7 @@ import {
     updateTeam,
     fetchTeamBySlug,
     fetchTeamWithCreateProject,
+    fetchInvitedTeams,
 } from "@/actions/teamActions";
 import { UpdateTeamInput } from "@/lib/validations";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -29,6 +30,26 @@ export function useTeams() {
         error: !res?.success ? res?.message : error,
     };
 }
+
+export function useInvitedTeams() {
+    const {
+        data: res,
+        isLoading,
+        isError,
+        error,
+    } = useQuery({
+        queryKey: ["invited"],
+        queryFn: () => fetchInvitedTeams(),
+    });
+
+    return {
+        teams: res?.success ? res.data : null,
+        isLoading,
+        isError: !res?.success ? true : isError,
+        error: !res?.success ? res?.message : error,
+    };
+}
+
 export function useTeamDetails(teamSlug: string) {
     const {
         data: res,

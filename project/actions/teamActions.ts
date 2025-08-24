@@ -30,7 +30,10 @@ export const fetchTeamWithCreateProject = async () => {
     const userId = await getUserDbId();
     return await queries.teams.getTeamsWithCreateProject(userId);
 };
-
+export const fetchInvitedTeams = async () => {
+    const userId = await getUserDbId();
+    return await queries.teams.getInvitedTeams(userId);
+};
 export const createTeam = async (data: CreateTeamInput) => {
     const userId = await getUserDbId();
     try {

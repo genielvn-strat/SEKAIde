@@ -35,12 +35,12 @@ const items = [
         icon: Home,
     },
     {
-        title: "Notification",
+        title: "Notifications",
         url: "/notifications",
         icon: Bell,
     },
     {
-        title: "Team",
+        title: "Teams",
         url: "/teams",
         icon: Users,
     },

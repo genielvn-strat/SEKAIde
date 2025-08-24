@@ -21,6 +21,13 @@ export type FetchTeamDetails = {
     updatedAt: string | null;
 };
 
+export type FetchInvitedTeams = {
+    teamMemberId: string;
+    teamName: string;
+    teamId: string;
+    roleName: string;
+};
+
 // Projects
 
 export type FetchProject = {
