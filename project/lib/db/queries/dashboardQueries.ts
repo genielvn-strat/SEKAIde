@@ -11,6 +11,7 @@ import { and, desc, eq, inArray } from "drizzle-orm";
 import { failure, success } from "@/types/Response";
 import {
     DashboardRecentComment,
+    DashboardRecentFinishedTask,
     DashboardRecentProject,
     DashboardRecentTask,
     DashboardRecentTeamMembers,
@@ -69,6 +70,43 @@ export const dashboardQueries = {
                 .leftJoin(users, eq(tasks.assigneeId, users.id))
                 .where(inArray(teamMembers.teamId, teamIds))
                 .orderBy(desc(tasks.createdAt))
+                .limit(10);
+            return success(
+                200,
+                "Dashboard Tasks fetched successfully",
+                results
+            );
+        } catch {
+            return failure(500, "Failed to fetch Dashboard Tasks");
+        }
+    },
+    getRecentlyFinishedTasks: async (teamIds: string[]) => {
+        try {
+            const results: DashboardRecentFinishedTask[] = await db
+                .selectDistinct({
+                    id: tasks.id,
+                    title: tasks.title,
+                    description: tasks.description,
+                    priority: tasks.priority,
+                    projectName: projects.name,
+                    projectSlug: projects.slug,
+                    assigneeName: users.name,
+                    assigneeUsername: users.username,
+                    assigneeDisplayPicture: users.displayPictureLink,
+                    slug: tasks.slug,
+                    finishedAt: tasks.finishedAt,
+                })
+                .from(tasks)
+                .innerJoin(projects, eq(tasks.projectId, projects.id))
+                .innerJoin(teamMembers, eq(teamMembers.teamId, projects.teamId))
+                .leftJoin(users, eq(tasks.assigneeId, users.id))
+                .where(
+                    and(
+                        inArray(teamMembers.teamId, teamIds),
+                        eq(tasks.finished, true)
+                    )
+                )
+                .orderBy(desc(tasks.finishedAt))
                 .limit(10);
             return success(
                 200,

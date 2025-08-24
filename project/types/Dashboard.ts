@@ -1,8 +1,9 @@
 export interface DashboardRecent {
-    type: "project" | "task" | "comment" | "teamMember";
+    type: "project" | "task" | "finished" | "comment" | "teamMember";
     data:
         | DashboardRecentProject
         | DashboardRecentTask
+        | DashboardRecentFinishedTask
         | DashboardRecentComment
         | DashboardRecentTeamMembers;
     date: string | null;
@@ -28,6 +29,19 @@ export interface DashboardRecentTask {
     assigneeDisplayPicture: string | null;
     slug: string;
     createdAt: string | null;
+}
+export interface DashboardRecentFinishedTask {
+    id: string;
+    title: string;
+    description: string | null;
+    priority: string;
+    projectName: string;
+    projectSlug: string;
+    assigneeName: string | null;
+    assigneeUsername: string | null;
+    assigneeDisplayPicture: string | null;
+    slug: string;
+    finishedAt: string | null;
 }
 
 export interface DashboardRecentComment {

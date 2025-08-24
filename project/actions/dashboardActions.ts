@@ -10,21 +10,27 @@ export const fetchDashboard = async () => {
         .getJoinedTeamsNoDetails(userId)
         .then((res) => res.data ?? []);
 
-    const [recentProjects, recentTasks, recentComments, recentTeamMembers] =
-        await Promise.all([
-            queries.dashboard
-                .getRecentProjects(teams)
-                .then((res) => res.data ?? []),
-            queries.dashboard
-                .getRecentTasks(teams)
-                .then((res) => res.data ?? []),
-            queries.dashboard
-                .getRecentComments(teams)
-                .then((res) => res.data ?? []),
-            queries.dashboard
-                .getRecentTeamMembers(teams)
-                .then((res) => res.data ?? []),
-        ]);
+    const [
+        recentProjects,
+        recentTasks,
+        recentFinishedTasks,
+        recentComments,
+        recentTeamMembers,
+    ] = await Promise.all([
+        queries.dashboard
+            .getRecentProjects(teams)
+            .then((res) => res.data ?? []),
+        queries.dashboard.getRecentTasks(teams).then((res) => res.data ?? []),
+        queries.dashboard
+            .getRecentlyFinishedTasks(teams)
+            .then((res) => res.data ?? []),
+        queries.dashboard
+            .getRecentComments(teams)
+            .then((res) => res.data ?? []),
+        queries.dashboard
+            .getRecentTeamMembers(teams)
+            .then((res) => res.data ?? []),
+    ]);
     const merged: DashboardRecent[] = [
         ...recentProjects.map((p) => ({
             data: { ...p },
@@ -35,6 +41,11 @@ export const fetchDashboard = async () => {
             data: { ...t },
             type: "task" as const,
             date: t.createdAt,
+        })),
+        ...recentFinishedTasks.map((t) => ({
+            data: { ...t },
+            type: "finished" as const,
+            date: t.finishedAt,
         })),
         ...recentComments.map((c) => ({
             data: { ...c },
