@@ -5,18 +5,11 @@ import { TypographyH1 } from "@/components/typography/TypographyH1";
 import { TypographyMuted } from "@/components/typography/TypographyMuted";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { useCommentActions, useComments } from "@/hooks/useComments";
+import { useComments } from "@/hooks/useComments";
 import { useTaskDetails } from "@/hooks/useTasks";
-import {
-    commentSchema,
-    CreateCommentInput,
-    UpdateCommentInput,
-} from "@/lib/validations";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, SlashIcon } from "lucide-react";
 import { notFound } from "next/navigation";
 import { use } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TypographyP } from "@/components/typography/TypographyP";
 import { TypographyH2 } from "@/components/typography/TypographyH2";
@@ -25,6 +18,14 @@ import CommentCard from "@/components/CommentCard";
 import { Button } from "@/components/ui/button";
 import TaskDropDown from "@/components/dropdown/TaskDropDown";
 import Priority from "@/components/badge/Priority";
+import {
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import Link from "next/link";
 interface TaskProps {
     params: Promise<{
         projectSlug: string;
@@ -65,12 +66,36 @@ export default function TaskDetails({ params }: TaskProps) {
             <div className="doc-header flex flex-col justify-between gap-4">
                 <div className="flex flex-col gap-2">
                     <div className="flex flex-row justify-between">
-                        <div className="flex flex-row items-center gap-4">
-                            <TypographyH1>{task.title}</TypographyH1>
-                            <TypographyMuted>
-                                {" "}
-                                // {task.projectName}
-                            </TypographyMuted>
+                        <div>
+                            <Breadcrumb>
+                                <BreadcrumbList>
+                                    <BreadcrumbItem>
+                                        <BreadcrumbLink asChild>
+                                            <Link href="/projects">
+                                                Projects
+                                            </Link>
+                                        </BreadcrumbLink>
+                                    </BreadcrumbItem>
+                                    <BreadcrumbSeparator>
+                                        <SlashIcon />
+                                    </BreadcrumbSeparator>
+                                    <BreadcrumbItem>
+                                        <BreadcrumbLink asChild>
+                                            <Link
+                                                href={`/projects/${task.projectSlug}`}
+                                            >
+                                                {task.projectName}
+                                            </Link>
+                                        </BreadcrumbLink>
+                                    </BreadcrumbItem>
+                                    <BreadcrumbSeparator>
+                                        <SlashIcon />
+                                    </BreadcrumbSeparator>
+                                </BreadcrumbList>
+                            </Breadcrumb>
+                            <div className="flex flex-row items-center gap-4">
+                                <TypographyH1>{task.title}</TypographyH1>
+                            </div>
                         </div>
                         {task.allowUpdate && <TaskDropDown task={task} />}
                     </div>

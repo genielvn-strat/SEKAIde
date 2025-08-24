@@ -14,15 +14,15 @@ import { ProjectTasksColumn } from "@/components/columns/ProjectTasksColumns";
 import { useTasks } from "@/hooks/useTasks";
 import CreateTask from "@/components/buttons/CreateTask";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import { TypographyH2 } from "@/components/typography/TypographyH2";
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import ProjectSettingsTab from "@/components/ProjectSettingsTab";
+import { SlashIcon } from "lucide-react";
+import Link from "next/link";
 interface ProjectProps {
     params: Promise<{
         projectSlug: string;
@@ -48,7 +48,6 @@ export default function ProjectDetails({ params }: ProjectProps) {
     }
 
     if (isError || !tasks) {
-        console.error("Error loading project:", error);
         return (
             <div className="error">
                 Error loading project. Please try again later.
@@ -60,6 +59,20 @@ export default function ProjectDetails({ params }: ProjectProps) {
         <>
             <div className="doc-header flex flex-row justify-between items-center">
                 <div className="left">
+                    <Breadcrumb>
+                        <BreadcrumbList>
+                            <BreadcrumbItem>
+                            <BreadcrumbLink asChild>
+                                <Link href="/projects">
+                                    Projects
+                                </Link>
+                            </BreadcrumbLink>
+                            </BreadcrumbItem>
+                            <BreadcrumbSeparator>
+                                <SlashIcon />
+                            </BreadcrumbSeparator>
+                        </BreadcrumbList>
+                    </Breadcrumb>
                     <div className="flex flex-row items-center gap-4">
                         <TypographyH1>{project.name}</TypographyH1>
                         <TypographyMuted>// {project.teamName}</TypographyMuted>
@@ -69,13 +82,14 @@ export default function ProjectDetails({ params }: ProjectProps) {
                 <div className="right"></div>
             </div>
             <Separator className="my-4" />
-            <Tabs defaultValue="board">
+            <Tabs defaultValue="overview">
                 <TabsList>
+                    <TabsTrigger value="overview">Overview</TabsTrigger>
                     <TabsTrigger value="board">Board</TabsTrigger>
                     <TabsTrigger value="tasks">Task List</TabsTrigger>
                     <TabsTrigger value="settings">Settings</TabsTrigger>
                 </TabsList>
-
+                <TabsContent value="overview"></TabsContent>
                 <TabsContent value="board">
                     <KanbanBoardInterface project={project} tasks={tasks} />
                 </TabsContent>
