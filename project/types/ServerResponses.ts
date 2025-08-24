@@ -78,6 +78,7 @@ export type FetchTask = {
         | null;
     finished: boolean;
     allowUpdate: boolean;
+    finishedAt: string | null;
 };
 
 // Lists

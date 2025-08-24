@@ -1,5 +1,5 @@
 {
-  "id": "86eaad0a-e301-47fd-bc9a-1f3d0573ab47",
+  "id": "a3653014-151e-4bc6-8ec0-5e61085eb81c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -118,6 +118,20 @@
           "primaryKey": false,
           "notNull": true
         },
+        "isFinal": {
+          "name": "isFinal",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "color": {
+          "name": "color",
+          "type": "color",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -182,7 +196,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "permissions_name_unique": {
+          "name": "permissions_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -246,8 +268,7 @@
           "name": "due_date",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
+          "notNull": false
         }
       },
       "indexes": {},
@@ -377,10 +398,10 @@
         },
         "color": {
           "name": "color",
-          "type": "text",
+          "type": "color",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false,
-          "default": "'#0a0a0a'"
+          "notNull": false
         }
       },
       "indexes": {},
@@ -432,7 +453,7 @@
           "name": "list_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "assignee_id": {
           "name": "assignee_id",
@@ -446,7 +467,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "'low'"
+          "default": "'medium'"
         },
         "position": {
           "name": "position",
@@ -459,6 +480,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "finished": {
+          "name": "finished",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         },
         "due_date": {
           "name": "due_date",
@@ -479,6 +507,12 @@
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
+        },
+        "finished_at": {
+          "name": "finished_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -506,7 +540,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
+          "onDelete": "set null",
           "onUpdate": "no action"
         },
         "tasks_assignee_id_users_id_fk": {
@@ -519,7 +553,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
@@ -776,6 +810,18 @@
     }
   },
   "enums": {
+    "public.color": {
+      "name": "color",
+      "schema": "public",
+      "values": [
+        "red",
+        "orange",
+        "yellow",
+        "green",
+        "blue",
+        "violet"
+      ]
+    },
     "public.task_priority": {
       "name": "task_priority",
       "schema": "public",

@@ -50,12 +50,13 @@ export const taskQueries = {
                     listColor: lists.color,
                     finished: tasks.finished,
                     allowUpdate: sql<boolean>`
-                    CASE 
-                        WHEN ${tasks.assigneeId} = ${userId} THEN TRUE
-                        WHEN ${canUpdate} = TRUE THEN TRUE
-                        ELSE FALSE
-                    END
-                `,
+                        CASE 
+                            WHEN ${tasks.assigneeId} = ${userId} THEN TRUE
+                            WHEN ${canUpdate} = TRUE THEN TRUE
+                            ELSE FALSE
+                        END
+                    `,
+                    finishedAt: tasks.finishedAt,
                 })
                 .from(tasks)
                 .innerJoin(projects, eq(tasks.projectId, projects.id))
@@ -120,6 +121,7 @@ export const taskQueries = {
                             ELSE FALSE
                         END
                     `,
+                    finishedAt: tasks.finishedAt,
                 })
                 .from(tasks)
                 .innerJoin(projects, eq(tasks.projectId, projects.id))
@@ -166,6 +168,13 @@ export const taskQueries = {
                 .insert(tasks)
                 .values({
                     ...data,
+                    ...(data.finished !== undefined
+                        ? {
+                              finishedAt: data.finished
+                                  ? new Date().toISOString()
+                                  : null,
+                          }
+                        : {}),
                     projectId: project.id,
                     dueDate: data.dueDate?.toISOString(),
                 })
@@ -230,6 +239,13 @@ export const taskQueries = {
                         ? data.dueDate.toISOString()
                         : undefined,
                     updatedAt: new Date().toISOString(),
+                    ...(data.finished !== undefined
+                        ? {
+                              finishedAt: data.finished
+                                  ? new Date().toISOString()
+                                  : null,
+                          }
+                        : {}),
                     ...(list !== undefined ? { finished: list.isFinal } : {}),
                 })
                 .where(eq(tasks.id, task.id))

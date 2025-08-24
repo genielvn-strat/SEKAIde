@@ -117,7 +117,7 @@ export const lists = pgTable(
             columns: [table.projectId],
             foreignColumns: [projects.id],
             name: "lists_project_id_projects_id_fk",
-        }).onDelete("set null"),
+        }).onDelete("cascade"),
     ]
 );
 
@@ -137,6 +137,7 @@ export const tasks = pgTable(
         dueDate: timestamp("due_date", { mode: "string" }),
         createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
         updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow(),
+        finishedAt: timestamp("finished_at", { mode: "string" }),
     },
     (table) => [
         foreignKey({
