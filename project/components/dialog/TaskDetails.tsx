@@ -30,7 +30,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, children }) => {
 
     return (
         <Drawer>
-            <DrawerTrigger className="underline text-left p-0">
+            <DrawerTrigger className="text-left p-0">
                 {children}
             </DrawerTrigger>
             <DrawerContent>
