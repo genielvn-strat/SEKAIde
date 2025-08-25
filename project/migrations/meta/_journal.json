@@ -15,6 +15,13 @@
       "when": 1756088603378,
       "tag": "0001_striped_dragon_man",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1756090109207,
+      "tag": "0002_cool_power_man",
+      "breakpoints": true
     }
   ]
 }

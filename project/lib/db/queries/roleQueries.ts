@@ -17,19 +17,10 @@ export const roleQueries = {
         }
 
         try {
-            const role = await db
-                .select()
-                .from(roles)
-                .where(eq(roles.id, member.roleId))
-                .then((res) => res[0] ?? null);
-
-            if (!role || role.priority === null || role.priority === undefined)
-                return failure(404, "Member role not found");
-
             const result = await db
                 .select()
                 .from(roles)
-                .where(gte(roles.priority, role.priority))
+                .where(gte(roles.priority, member.rolePriority))
                 .orderBy(asc(roles.priority));
             return success(200, "Roles fetch successfully", result);
         } catch {

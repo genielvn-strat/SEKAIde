@@ -45,10 +45,12 @@ export const authorization = {
             .select({
                 id: teamMembers.id,
                 roleId: teamMembers.roleId,
+                rolePriority: roles.priority,
                 inviteConfirmed: teamMembers.inviteConfirmed,
             })
             .from(teamMembers)
             .innerJoin(teams, eq(teamMembers.teamId, teams.id))
+            .innerJoin(roles, eq(roles.id, teamMembers.roleId))
             .where(
                 and(
                     eq(teams.slug, teamSlug),
@@ -88,10 +90,7 @@ export const authorization = {
             .then((res) => res[0] ?? null);
         return result;
     },
-    checkIfTeamMemberByProjectId: async (
-        projectId: string,
-        userId: string
-    ) => {
+    checkIfTeamMemberByProjectId: async (projectId: string, userId: string) => {
         if (!projectId || !userId) {
             throw new Error("Missing required fields");
         }
@@ -141,11 +140,13 @@ export const authorization = {
                 id: teamMembers.id,
                 userId: teamMembers.userId,
                 roleId: teamMembers.roleId,
+                rolePriority: roles.priority,
                 teamId: teams.id,
                 inviteConfirmed: teamMembers.inviteConfirmed,
             })
             .from(teamMembers)
             .innerJoin(teams, eq(teamMembers.teamId, teams.id))
+            .innerJoin(roles, eq(roles.id, teamMembers.roleId))
             .where(
                 and(
                     eq(teams.slug, teamSlug),

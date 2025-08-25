@@ -78,16 +78,12 @@ export const TeamMemberColumns: (
         id: "actions",
         cell: ({ row }) => {
             const [kickDialog, showKickDialog] = useState(false);
-            const { permitted: permittedKick } = useAuthRoleByTeam(
-                teamSlug,
-                "kick_members"
-            );
+            const permittedKick = row.original.allowKick;
             const memberId = row.original.userId;
             const memberName = row.original.name;
             const memberRoleName = row.original.roleName;
             return (
-                permittedKick &&
-                memberRoleName != "Owner" && (
+                permittedKick && (
                     <>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>

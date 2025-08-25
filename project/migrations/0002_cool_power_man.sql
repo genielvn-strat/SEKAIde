@@ -1,0 +1,1 @@
+ALTER TABLE "roles" ALTER COLUMN "priority" SET NOT NULL;

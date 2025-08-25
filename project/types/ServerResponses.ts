@@ -56,6 +56,7 @@ export type FetchTeamMember = {
     roleName: string;
     roleColor?: string | null;
     inviteConfirmed: boolean;
+    allowKick?: boolean;
 };
 
 // Tasks

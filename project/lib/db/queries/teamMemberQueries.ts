@@ -19,6 +19,15 @@ export const teamMemberQueries = {
                 "You are not authorized to view this team members"
             );
 
+        const canKick =
+            (await authorization
+                .checkIfRoleHasPermissionByTeamSlug(
+                    userId,
+                    teamSlug,
+                    "kick_members"
+                )
+                .then((res) => (res ? true : false))) ?? false;
+
         try {
             const result: FetchTeamMember[] = await db
                 .select({
@@ -30,6 +39,13 @@ export const teamMemberQueries = {
                     roleName: roles.name,
                     roleColor: roles.color,
                     inviteConfirmed: teamMembers.inviteConfirmed,
+                    allowKick: sql<boolean>`
+                        CASE
+                            WHEN ${teamMembers.userId} = ${member.userId} THEN FALSE
+                            WHEN ${canKick} = TRUE AND roles.priority >= ${member.rolePriority} THEN TRUE
+                            ELSE FALSE
+                        END
+                    `,
                 })
                 .from(teamMembers)
                 .innerJoin(users, eq(users.id, teamMembers.userId))
@@ -158,19 +174,24 @@ export const teamMemberQueries = {
 
         try {
             const targetMember = await db
-                .select({ id: teamMembers.id, roleName: roles.name })
+                .select({ id: teamMembers.id, rolePriority: roles.priority })
                 .from(teamMembers)
                 .innerJoin(roles, eq(roles.id, teamMembers.roleId))
                 .where(
                     and(
                         eq(teamMembers.userId, targetUserId),
-                        eq(teamMembers.teamId, member.teamId),
-                        ne(roles.nameId, "owner") // is not an admin
+                        eq(teamMembers.teamId, member.teamId)
                     )
                 )
                 .then((res) => res[0] ?? null);
 
-            if (!targetMember) return failure(400, "This member is an owner.");
+            if (!targetMember)
+                return failure(400, "This member is not part of the team.");
+            if (targetMember.rolePriority < member.rolePriority)
+                return failure(
+                    400,
+                    "You cannot kick a member higher than you."
+                );
 
             const result = await db
                 .delete(teamMembers)
