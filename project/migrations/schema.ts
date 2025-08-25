@@ -203,6 +203,7 @@ export const roles = pgTable(
         name: text().notNull(),
         nameId: text().notNull(),
         color: color(),
+        priority: integer().notNull(),
     },
     (table) => [unique("roles_nameId_unique").on(table.nameId)]
 );

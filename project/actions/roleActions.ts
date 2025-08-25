@@ -4,8 +4,9 @@ import { queries } from "@/lib/db";
 import { authorization } from "@/lib/db/queries/authorizationQueries";
 import { getUserDbId } from "./sessionActions";
 
-export const fetchRoles = async () => {
-    const result = await queries.roles.getRoles();
+export const fetchRoles = async (teamSlug: string) => {
+    const userId = await getUserDbId();
+    const result = await queries.roles.getRoles(userId, teamSlug);
     return result;
 };
 

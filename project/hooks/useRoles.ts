@@ -1,18 +1,23 @@
 "use client";
 
-import { authRoleByProjectSlug, authRoleByTaskId, authRoleByTeamSlug, fetchRoles } from "@/actions/roleActions";
+import {
+    authRoleByProjectSlug,
+    authRoleByTaskId,
+    authRoleByTeamSlug,
+    fetchRoles,
+} from "@/actions/roleActions";
 import { teams } from "@/migrations/schema";
 import { useQuery } from "@tanstack/react-query";
 
-export function useRoles() {
+export function useRoles(teamSlug: string) {
     const {
         data: res,
         isLoading,
         isError,
         error,
     } = useQuery({
-        queryKey: ["roles"],
-        queryFn: () => fetchRoles(),
+        queryKey: ["roles", teamSlug],
+        queryFn: () => fetchRoles(teamSlug),
     });
 
     return {
@@ -86,7 +91,7 @@ export function useAuthRoleByTask(
         queryKey: [`authRoleTask-${action}-${taskId}`],
         queryFn: () => authRoleByTaskId(taskId, projectSlug, action),
         enabled: !!taskId && options.enabled,
-        refetchOnWindowFocus: false
+        refetchOnWindowFocus: false,
     });
 
     return {

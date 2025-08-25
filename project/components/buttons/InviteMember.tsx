@@ -44,7 +44,7 @@ const InviteMember: React.FC<InviteMemberProps> = ({ teamSlug }) => {
         roles,
         isLoading: rolesLoading,
         isError: rolesIsError,
-    } = useRoles();
+    } = useRoles(teamSlug);
 
     const form = useForm<CreateTeamMemberInput>({
         resolver: zodResolver(teamMemberSchema),
