@@ -1,20 +1,50 @@
 import { FetchInvitedTeams } from "@/types/ServerResponses";
 import React from "react";
-import { Card, CardContent, CardHeader } from "./ui/card";
+import { Card, CardHeader } from "./ui/card";
 import { Button } from "./ui/button";
-import { TypographyP } from "./typography/TypographyP";
+import { useTeamMemberActions } from "@/hooks/useTeamMembers";
+import { toast } from "sonner";
 
 interface TeamInvitationCardProps {
     team: FetchInvitedTeams;
 }
 
 const TeamInvitationCard: React.FC<TeamInvitationCardProps> = ({ team }) => {
+    const { accept, acceptLoading, reject, rejectLoading } =
+        useTeamMemberActions();
+
     const handleAccept = async () => {
-        console.log("TODO: accept", team.teamId);
+        try {
+            const response = await accept({
+                teamMemberId: team.teamMemberId,
+            });
+            if (!response.success) {
+                throw new Error(response.message);
+            }
+            toast.success("Team invitation accepted successfully.");
+        } catch (e) {
+            if (e instanceof Error) {
+                toast.error(e.message);
+                return;
+            }
+        }
     };
 
     const handleReject = async () => {
-        console.log("TODO: reject", team.teamId);
+        try {
+            const response = await reject({
+                teamMemberId: team.teamMemberId,
+            });
+            if (!response.success) {
+                throw new Error(response.message);
+            }
+            toast.success("Team invitation rejected.");
+        } catch (e) {
+            if (e instanceof Error) {
+                toast.error(e.message);
+                return;
+            }
+        }
     };
 
     return (
@@ -26,10 +56,18 @@ const TeamInvitationCard: React.FC<TeamInvitationCardProps> = ({ team }) => {
                     <span className="font-semibold">{team.roleName}</span>.
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="default" onClick={handleAccept}>
+                    <Button
+                        variant="default"
+                        onClick={handleAccept}
+                        disabled={acceptLoading || rejectLoading}
+                    >
                         Accept
                     </Button>
-                    <Button variant="destructive" onClick={handleReject}>
+                    <Button
+                        variant="destructive"
+                        onClick={handleReject}
+                        disabled={acceptLoading || rejectLoading}
+                    >
                         Decline
                     </Button>
                 </div>

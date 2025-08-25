@@ -6,6 +6,8 @@ import { TypographyH2 } from "@/components/typography/TypographyH2";
 import { TypographyMuted } from "@/components/typography/TypographyMuted";
 import { Separator } from "@/components/ui/separator";
 import { useInvitedTeams } from "@/hooks/useTeams";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { MessageCircleQuestion } from "lucide-react";
 
 export default function NotificationsPage() {
     const { teams } = useInvitedTeams();
@@ -25,9 +27,21 @@ export default function NotificationsPage() {
             <div className="space-y-4 w-full">
                 <TypographyH2>Team Invitations</TypographyH2>
                 <div className="space-y-4 w-full">
-                    {teams?.map((t) => (
-                        <TeamInvitationCard team={t} />
-                    ))}
+                    {teams?.length == 0 ? (
+                        <Alert variant="default">
+                            <MessageCircleQuestion />
+                            <AlertTitle>No team invitations</AlertTitle>
+                            <AlertDescription>
+                                You don't have any pending invitations right
+                                now. When someone invites you to join their
+                                team, you'll see it here.
+                            </AlertDescription>
+                        </Alert>
+                    ) : (
+                        teams?.map((t) => (
+                            <TeamInvitationCard team={t} key={t.teamMemberId} />
+                        ))
+                    )}
                 </div>
             </div>
         </>

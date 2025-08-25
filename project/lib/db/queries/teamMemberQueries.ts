@@ -89,8 +89,51 @@ export const teamMemberQueries = {
             return failure(500, "Failed to fetch team members");
         }
     },
-    accept: "", // Set invite to true
-    reject: "", // Delete the row
+    accept: async (teamMemberId: string) => {
+        try {
+            const membership = await db
+                .select()
+                .from(teamMembers)
+                .where(eq(teamMembers.id, teamMemberId))
+                .then((res) => res[0] ?? null);
+
+            if (!membership) return failure(400, "How did we get here?");
+
+            const result = await db
+                .update(teamMembers)
+                .set({ inviteConfirmed: true })
+                .where(eq(teamMembers.id, teamMemberId))
+                .returning();
+
+            return success(
+                200,
+                "Team invitation accepted successfully",
+                result
+            );
+        } catch {
+            return failure(500, "Failed to accept team invitation");
+        }
+    },
+    reject: async (teamMemberId: string) => {
+        try {
+            const membership = await db
+                .select()
+                .from(teamMembers)
+                .where(eq(teamMembers.id, teamMemberId))
+                .then((res) => res[0] ?? null);
+
+            if (!membership) return failure(400, "How did we get here?");
+
+            const result = await db
+                .delete(teamMembers)
+                .where(eq(teamMembers.id, teamMemberId))
+                .returning();
+
+            return success(200, "Team invitation rejected.", result);
+        } catch {
+            return failure(500, "Failed to reject team invitation");
+        }
+    },
     invite: async (
         teamSlug: string,
         data: CreateTeamMemberInput,

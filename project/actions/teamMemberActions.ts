@@ -19,10 +19,16 @@ export const createMember = async (
     const userId = await getUserDbId();
     return await queries.teamMembers.invite(teamSlug, data, userId);
 };
-
 export const deleteMember = async (teamSlug: string, targerUserId: string) => {
     const userId = await getUserDbId();
     return await queries.teamMembers.kick(teamSlug, targerUserId, userId);
+};
+
+export const acceptMembership = async (teamMemberId: string) => {
+    return await queries.teamMembers.accept(teamMemberId);
+};
+export const rejectMembership = async (teamMemberId: string) => {
+    return await queries.teamMembers.reject(teamMemberId);
 };
 export const leaveMember = async (teamSlug: string) => {
     const userId = await getUserDbId();

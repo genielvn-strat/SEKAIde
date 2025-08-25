@@ -1,11 +1,13 @@
 "use client";
 
 import {
+    acceptMembership,
     createMember,
     deleteMember,
     fetchTeamMembersByProjectSlug,
     fetchTeamMembersByTeamSlug,
     leaveMember,
+    rejectMembership,
 } from "@/actions/teamMemberActions";
 import { CreateTeamMemberInput } from "@/lib/validations";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -68,6 +70,22 @@ export function useTeamMemberActions() {
             queryClient.invalidateQueries({ queryKey: [`teamMembers`] });
         },
     });
+    const accept = useMutation({
+        mutationFn: ({ teamMemberId }: { teamMemberId: string }) =>
+            acceptMembership(teamMemberId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`teamMembers`] });
+            queryClient.invalidateQueries({ queryKey: [`invited`] });
+        },
+    });
+    const reject = useMutation({
+        mutationFn: ({ teamMemberId }: { teamMemberId: string }) =>
+            rejectMembership(teamMemberId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`teamMembers`] });
+            queryClient.invalidateQueries({ queryKey: [`invited`] });
+        },
+    });
     const kick = useMutation({
         mutationFn: ({
             teamSlug,
@@ -90,7 +108,11 @@ export function useTeamMemberActions() {
 
     return {
         invite: invite.mutateAsync,
+        accept: accept.mutateAsync,
+        reject: reject.mutateAsync,
         kick: kick.mutateAsync,
         leave: leave.mutateAsync,
+        acceptLoading: accept.isPending,
+        rejectLoading: reject.isPending,
     };
 }
