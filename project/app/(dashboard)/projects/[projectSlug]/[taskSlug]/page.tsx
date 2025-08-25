@@ -126,7 +126,16 @@ export default function TaskDetails({ params }: TaskProps) {
                             </div>
                         </div>
                         {task.dueDate && (
-                            <span className="text-sm text-muted-foreground">
+                            <span
+                                className={`text-sm text-muted-foreground ${
+                                    task.dueDate &&
+                                    !task.finished &&
+                                    new Date(task.dueDate) < new Date()
+                                        ? "text-red-600 font-semibold"
+                                        : ""
+                                }
+                            `}
+                            >
                                 Due{" "}
                                 {new Date(task.dueDate).toLocaleDateString(
                                     "en-US",

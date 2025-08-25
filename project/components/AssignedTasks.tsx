@@ -14,10 +14,19 @@ interface AssignedTasksProps {
 const AssignedTasks: React.FC<AssignedTasksProps> = ({ tasks }) => {
     const { id } = useUser();
 
-    const assignedTasks = useMemo(
-        () => tasks.filter((t) => t.assigneeId === id),
-        [tasks, id]
-    );
+    const assignedTasks = useMemo(() => {
+        return tasks
+            .filter((t) => t.assigneeId === id && !t.finished)
+            .sort((a, b) => {
+                if (!a.dueDate && !b.dueDate) return 0;
+                if (!a.dueDate) return 1;
+                if (!b.dueDate) return -1;
+                return (
+                    new Date(a.dueDate).getTime() -
+                    new Date(b.dueDate).getTime()
+                );
+            });
+    }, [tasks, id]);
 
     return (
         <div className="flex flex-col gap-2">

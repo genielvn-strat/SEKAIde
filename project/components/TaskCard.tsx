@@ -66,7 +66,15 @@ const TaskCard: React.FC<TaskCardProps> = ({ task: task, small }) => {
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
                 <div>
-                    <div className="flex flex-row items-center gap-4">
+                    <div
+                        className={`flex flex-row items-center gap-4 ${
+                            task.dueDate &&
+                            !task.finished &&
+                            new Date(task.dueDate) < new Date()
+                                ? "text-red-600 font-semibold"
+                                : ""
+                        }`}
+                    >
                         <Clock />
                         <TypographyP>
                             {!task.dueDate
