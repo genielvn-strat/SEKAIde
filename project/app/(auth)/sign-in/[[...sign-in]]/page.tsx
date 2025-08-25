@@ -1,13 +1,8 @@
-"use client"
-import { SignIn, useAuth } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
+"use client";
+import { SignIn } from "@clerk/nextjs";
 
 // TODO: Task 2.3 - Create sign-in and sign-up pages
 export default function SignInPage() {
-    const session = useAuth();
-
-    if (session.userId) redirect("/dashboard");
-
     return <SignIn afterSignInUrl={"/dashboard"} />;
 }
 
