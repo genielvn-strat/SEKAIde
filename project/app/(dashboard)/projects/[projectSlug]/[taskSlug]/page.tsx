@@ -26,6 +26,7 @@ import {
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import Link from "next/link";
+import ListBadge from "@/components/badge/ListBadge";
 interface TaskProps {
     params: Promise<{
         projectSlug: string;
@@ -102,15 +103,10 @@ export default function TaskDetails({ params }: TaskProps) {
                     <div className="flex justify-between items-center">
                         <div className="flex flex-row gap-2">
                             {task.listName && (
-                                <Badge
-                                    className={`capitalize border ${
-                                        task.listColor
-                                            ? `bg-${task.listColor}-100 text-${task.listColor}-700`
-                                            : ""
-                                    }`}
-                                >
-                                    {task.listName}
-                                </Badge>
+                                <ListBadge
+                                    listColor={task.listColor}
+                                    listName={task.listName}
+                                />
                             )}
                             <Priority priority={task.priority} />
 

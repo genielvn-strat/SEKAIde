@@ -10,6 +10,7 @@ import TaskDetails from "../dialog/TaskDetails";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import TaskDropDown from "../dropdown/TaskDropDown";
 import Priority from "../badge/Priority";
+import ListBadge from "../badge/ListBadge";
 
 export const ProjectTasksColumn: (
     projectSlug: string
@@ -76,14 +77,12 @@ export const ProjectTasksColumn: (
         header: () => <span className="hidden md:table-cell">List</span>,
         cell: ({ row }) => {
             const task = row.original;
-            if (!task.listId) return "Unlisted";
+            if (!task.listId || !task.listName) return "Unlisted";
             return (
-                <Badge
-                    variant="default"
-                    className={`bg-${task.listColor}-100  text-${task.listColor}-700 capitalize border hidden md:table-cell`}
-                >
-                    {task.listName}
-                </Badge>
+                <ListBadge
+                    listColor={task.listColor}
+                    listName={task.listName}
+                />
             );
         },
     },
