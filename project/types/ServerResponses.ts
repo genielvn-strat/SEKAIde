@@ -85,7 +85,7 @@ export type FetchTask = {
         | "violet"
         | null;
     finished: boolean;
-    allowUpdate: boolean;
+    allowUpdate?: boolean;
     finishedAt: string | null;
 };
 

@@ -4,7 +4,7 @@ import { getUserDbId } from "./sessionActions";
 import { success } from "@/types/Response";
 import { DashboardRecent } from "@/types/Dashboard";
 
-export const fetchDashboard = async () => {
+export const fetchFeed = async () => {
     const userId = await getUserDbId();
     const teams = await queries.teams
         .getJoinedTeamsNoDetails(userId)
@@ -65,3 +65,9 @@ export const fetchDashboard = async () => {
     );
     return success(200, "Dashboard fetched successfully", merged);
 };
+
+export const fetchAssignedTasks = async () => {
+    const userId = await getUserDbId();
+
+    return await queries.dashboard.getAssignedTasks(userId)
+}

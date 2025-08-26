@@ -18,7 +18,12 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from "date-fns";
-import { CircleCheck, FolderOpen, LayoutList, MessageCircle } from "lucide-react";
+import {
+    CircleCheck,
+    FolderOpen,
+    LayoutList,
+    MessageCircle,
+} from "lucide-react";
 import Link from "next/link";
 import Priority from "./badge/Priority";
 
@@ -26,7 +31,7 @@ interface FeedProp {
     feed: DashboardRecent;
 }
 
-const Feed: React.FC<FeedProp> = ({ feed }) => {
+const FeedCard: React.FC<FeedProp> = ({ feed }) => {
     const card = (details: DashboardRecent) => {
         switch (details.type) {
             case "project":
@@ -106,7 +111,9 @@ const Feed: React.FC<FeedProp> = ({ feed }) => {
                         <CardHeader>
                             <CardTitle className="flex flex-row items-center gap-4">
                                 <CircleCheck />{" "}
-                                <span>{finished.assigneeName} has finished a task.</span>
+                                <span>
+                                    {finished.assigneeName} has finished a task.
+                                </span>
                             </CardTitle>
                             <CardDescription>
                                 {details.date &&
@@ -128,7 +135,9 @@ const Feed: React.FC<FeedProp> = ({ feed }) => {
                                         </CardDescription>
                                     )}
                                     <div className="flex justify-between items-center mt-3 text-xs ">
-                                        <Priority priority={finished.priority} />
+                                        <Priority
+                                            priority={finished.priority}
+                                        />
                                     </div>
                                 </CardHeader>
                             </Card>
@@ -217,4 +226,4 @@ const Feed: React.FC<FeedProp> = ({ feed }) => {
     return <div className="w-full">{card(feed)}</div>;
 };
 
-export default Feed;
+export default FeedCard;

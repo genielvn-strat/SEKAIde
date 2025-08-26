@@ -25,10 +25,16 @@ import TaskDetails from "./dialog/TaskDetails";
 
 interface TaskCardProps {
     task: FetchTask;
+    showProject?: boolean;
+
     small?: boolean;
 }
 
-const TaskCard: React.FC<TaskCardProps> = ({ task: task, small }) => {
+const TaskCard: React.FC<TaskCardProps> = ({
+    task: task,
+    showProject,
+    small,
+}) => {
     return (
         <Card className={small ? "w-full max-w-sm" : "w-full"} key={task.id}>
             <CardHeader>
@@ -64,26 +70,30 @@ const TaskCard: React.FC<TaskCardProps> = ({ task: task, small }) => {
                     </div>
                 </div>
             </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-                <div>
-                    <div
-                        className={`flex flex-row items-center gap-4 ${
-                            task.dueDate &&
-                            !task.finished &&
-                            new Date(task.dueDate) < new Date()
-                                ? "text-red-600 font-semibold"
-                                : ""
-                        }`}
-                    >
-                        <Clock />
-                        <TypographyP>
-                            {!task.dueDate
-                                ? "No due date"
-                                : `Due ${new Date(
-                                      task.dueDate
-                                  ).toLocaleDateString()}`}
-                        </TypographyP>
-                    </div>
+            <CardContent className="flex flex-col gap-1">
+                <div
+                    className={`flex flex-row items-center gap-4 ${
+                        task.dueDate &&
+                        !task.finished &&
+                        new Date(task.dueDate) < new Date()
+                            ? "text-red-600 font-semibold"
+                            : ""
+                    }`}
+                >
+                    <Clock />
+                    <TypographyP>
+                        {!task.dueDate
+                            ? "No due date"
+                            : `Due ${new Date(
+                                  task.dueDate
+                              ).toLocaleDateString()}`}
+                    </TypographyP>
+                </div>
+                <div className={`flex flex-row items-center gap-4`}>
+                    <FolderOpen />
+                    <TypographyP>
+                        {task.projectName}
+                    </TypographyP>
                 </div>
             </CardContent>
         </Card>
