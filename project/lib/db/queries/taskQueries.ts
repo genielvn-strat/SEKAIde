@@ -61,7 +61,7 @@ export const taskQueries = {
                 .from(tasks)
                 .innerJoin(projects, eq(tasks.projectId, projects.id))
                 .innerJoin(users, eq(tasks.assigneeId, users.id))
-                .innerJoin(lists, eq(tasks.listId, lists.id))
+                .leftJoin(lists, eq(tasks.listId, lists.id))
                 .where(
                     and(
                         eq(tasks.slug, taskSlug),

@@ -17,7 +17,7 @@ import { FolderOpen, Home, Users, User, ChevronDown, Bell } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
 import { Button } from "./ui/button";
-import { SignOutButton, UserButton, useSession } from "@clerk/nextjs";
+import { SignOutButton, useAuth, UserButton, useSession } from "@clerk/nextjs";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -27,6 +27,7 @@ import {
 import { TypographyP } from "./typography/TypographyP";
 import { TypographyMuted } from "./typography/TypographyMuted";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { redirect } from "next/navigation";
 
 const items = [
     {
@@ -53,6 +54,7 @@ const items = [
 
 export function AppSidebar() {
     const session = useSession();
+    const { signOut } = useAuth();
 
     return (
         <Sidebar>
@@ -115,11 +117,11 @@ export function AppSidebar() {
                                 side="top"
                                 className="w-[--radix-popper-anchor-width]"
                             >
-                                <DropdownMenuItem>
-                                    <Link href="/settings">Settings</Link>
+                                <DropdownMenuItem onClick={() => {redirect("/settings")}}>
+                                    Settings
                                 </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                    <SignOutButton redirectUrl="/" />
+                                <DropdownMenuItem onClick={() => {signOut({redirectUrl: "/"})}}>
+                                    Sign Out
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>

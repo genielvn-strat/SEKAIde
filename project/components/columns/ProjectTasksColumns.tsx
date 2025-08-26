@@ -6,21 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { FetchTask, FetchTeamMember } from "@/types/ServerResponses";
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal, CheckSquare, Square } from "lucide-react";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import KickMember from "@/components/dialog/KickMember";
-import { useState } from "react";
-import { useAuthRoleByProject, useAuthRoleByTask } from "@/hooks/useRoles";
-import Link from "next/link";
-import { ro } from "date-fns/locale";
-import { Checkbox } from "../ui/checkbox";
-import DeleteTask from "../dialog/DeleteTask";
-import EditTask from "../dialog/EditTask";
 import TaskDetails from "../dialog/TaskDetails";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import TaskDropDown from "../dropdown/TaskDropDown";
