@@ -113,6 +113,8 @@ const TeamOverviewTab: React.FC<TeamOverviewTabProps> = ({
             color: "hsl(var(--chart-1))",
         },
     } satisfies ChartConfig;
+    const avgTasksPerDay =
+        tasksPerDay.reduce((sum, d) => sum + d.count, 0) / tasksPerDay.length;
 
     // --- Task distribution by listName
     const listCounts: Record<string, number> = {};
@@ -161,7 +163,7 @@ const TeamOverviewTab: React.FC<TeamOverviewTabProps> = ({
     return (
         <div className="flex flex-col gap-4">
             <TypographyH2>Team Summary</TypographyH2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {/* Total Members */}
                 <Card className="rounded-2xl shadow-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -192,6 +194,20 @@ const TeamOverviewTab: React.FC<TeamOverviewTabProps> = ({
                     </CardHeader>
                     <CardContent>
                         <p className="text-2xl font-bold">{tasks.length}</p>
+                    </CardContent>
+                </Card>
+                {/* Average finished tasks per day */}
+                <Card className="rounded-2xl shadow-sm">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-lg">
+                            Avg Finished / Day (7d)
+                        </CardTitle>
+                        <ListChecks className="text-orange-500 w-6 h-6" />
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-2xl font-bold">
+                            {avgTasksPerDay.toFixed(1)}
+                        </p>
                     </CardContent>
                 </Card>
             </div>
