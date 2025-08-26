@@ -65,7 +65,7 @@ export default function ProjectsPage() {
     }
 
     if (!projects || isError) {
-        return "Error loading projects";
+        return "=== ERROR ===";
     }
 
     return (

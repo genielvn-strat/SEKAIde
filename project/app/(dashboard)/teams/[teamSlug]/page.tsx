@@ -24,6 +24,7 @@ import { useTeamProjects } from "@/hooks/useProjects";
 import { useTeamMembers } from "@/hooks/useTeamMembers";
 import { useTeamTasks } from "@/hooks/useTasks";
 import TeamOverviewTab from "@/components/TeamOverviewTab";
+import LoadingSkeletonCards from "@/components/LoadingSkeletonCards";
 
 interface ProjectProps {
     params: Promise<{
@@ -66,12 +67,8 @@ export default function TeamDetails({ params }: ProjectProps) {
         return <LoadingSkeleton />;
     }
 
-    if (teamsIsError || !members || !projects || !tasks) {
-        return (
-            <div className="flex items-center justify-center min-h-screen text-red-500">
-                Error loading team. Please try again later.
-            </div>
-        );
+    if (teamsIsError) {
+        return "=== ERROR ===";
     }
 
     if (!teamDetails) {
@@ -108,21 +105,39 @@ export default function TeamDetails({ params }: ProjectProps) {
                     <TabsTrigger value="settings">Settings</TabsTrigger>
                 </TabsList>
                 <TabsContent value="overview">
-                    <TeamOverviewTab
-                        projects={projects}
-                        tasks={tasks}
-                        members={members}
-                        teamSlug={teamSlug}
-                    />
+                    {projectsIsLoading || tasksIsLoading || membersIsLoading ? (
+                        <LoadingSkeletonCards />
+                    ) : projectsIsError || tasksIsError || membersIsError ? (
+                        "=== ERROR ==="
+                    ) : (
+                        <TeamOverviewTab
+                            projects={projects}
+                            tasks={tasks}
+                            members={members}
+                            teamSlug={teamSlug}
+                        />
+                    )}
                 </TabsContent>
                 <TabsContent value="members">
-                    <TeamMembersTab members={members} teamSlug={teamSlug} />
+                    {membersIsLoading ? (
+                        <LoadingSkeletonCards />
+                    ) : membersIsError ? (
+                        "=== ERROR ==="
+                    ) : (
+                        <TeamMembersTab members={members} teamSlug={teamSlug} />
+                    )}
                 </TabsContent>
                 <TabsContent value="projects">
-                    <TeamProjectsTab
-                        projects={projects}
-                        teamDetails={teamDetails}
-                    />
+                    {projectsIsLoading ? (
+                        <LoadingSkeletonCards />
+                    ) : projectsIsError ? (
+                        "=== ERROR ==="
+                    ) : (
+                        <TeamProjectsTab
+                            projects={projects}
+                            teamDetails={teamDetails}
+                        />
+                    )}
                 </TabsContent>
                 <TabsContent value="settings">
                     <TeamSettingsTab teamDetails={teamDetails} />

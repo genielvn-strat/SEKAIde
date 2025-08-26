@@ -34,7 +34,11 @@ export function KanbanBoardInterface({
     tasks: initialTasks,
 }: KanbanBoardProps) {
     const queryClient = useQueryClient();
-    const { lists, isLoading: listLoading } = useLists(project.slug, {
+    const {
+        lists,
+        isLoading: listLoading,
+        isError: listError,
+    } = useLists(project.slug, {
         enabled: !!project,
     });
 
@@ -59,7 +63,7 @@ export function KanbanBoardInterface({
         })
     );
     if (listLoading) return <LoadingSkeletonCards />;
-    if (!lists || !initialTasks || !tasks) return "An error has occured";
+    if (!lists || listError) return "=== ERROR ===";
 
     const handleArrange = async (
         updatedTasks: FetchTask[],

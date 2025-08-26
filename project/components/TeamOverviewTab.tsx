@@ -32,9 +32,9 @@ import {
 import { toKebab } from "@/lib/utils";
 
 interface TeamOverviewTabProps {
-    projects: FetchProject[];
-    tasks: FetchTask[];
-    members: FetchTeamMember[];
+    projects?: FetchProject[] | null;
+    tasks?: FetchTask[] | null;
+    members?: FetchTeamMember[] | null;
     teamSlug: string;
 }
 
@@ -45,6 +45,8 @@ const TeamOverviewTab: React.FC<TeamOverviewTabProps> = ({
     tasks,
     projects,
 }) => {
+    if (!projects || !tasks || !members) return "=== ERROR ==="
+
     const totalMembers = members.length;
     const totalProjects = projects.length;
 

@@ -30,8 +30,8 @@ export function useTeamMembers(
     return {
         members: res?.success ? res.data : null,
         isLoading,
-        isError: !res?.success ? true : isError,
-        error: !res?.success ? res?.message : error,
+        isError,
+        error,
     };
 }
 export function useTeamMembersByProject(
@@ -52,8 +52,8 @@ export function useTeamMembersByProject(
     return {
         members: res?.success ? res.data : null,
         isLoading,
-        isError: !res?.success ? true : isError,
-        error: !res?.success ? res?.message : error,
+        isError,
+        error,
     };
 }
 export function useTeamMemberActions() {

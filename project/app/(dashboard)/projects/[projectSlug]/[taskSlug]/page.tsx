@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import Link from "next/link";
 import ListBadge from "@/components/badge/ListBadge";
+import LoadingSkeletonCards from "@/components/LoadingSkeletonCards";
 interface TaskProps {
     params: Promise<{
         projectSlug: string;
@@ -42,7 +43,11 @@ export default function TaskDetails({ params }: TaskProps) {
         projectSlug
     );
 
-    const { comments } = useComments(taskSlug, projectSlug, {
+    const {
+        comments,
+        isLoading: commentsLoading,
+        isError: commentsError,
+    } = useComments(taskSlug, projectSlug, {
         enabled: !!task,
     });
 
@@ -50,16 +55,12 @@ export default function TaskDetails({ params }: TaskProps) {
         return <LoadingSkeleton />;
     }
 
-    if (isError) {
-        return (
-            <div className="error">
-                Error loading task. Please try again later.
-            </div>
-        );
-    }
-
     if (!task) {
         return notFound();
+    }
+
+    if (isError) {
+        return "=== ERROR ===";
     }
 
     return (
@@ -188,7 +189,11 @@ export default function TaskDetails({ params }: TaskProps) {
                 </Button>
             </div>
             <div className="space-y-4 my-2">
-                {comments && comments.length > 0 ? (
+                {commentsLoading ? (
+                    <LoadingSkeletonCards />
+                ) : commentsError ? (
+                    "=== ERROR ==="
+                ) : comments && comments.length > 0 ? (
                     comments.map((comment) => (
                         <CommentCard
                             comment={comment}

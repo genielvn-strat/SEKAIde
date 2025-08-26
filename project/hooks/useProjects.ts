@@ -25,9 +25,9 @@ export function useProjects() {
 
     return {
         projects: res?.success ? res?.data : [],
-        isError: !res?.success ? res?.message : isError,
+        isError,
         isLoading,
-        error: !res?.success ? res?.message : error,
+        error,
     };
 }
 export function useTeamProjects(
@@ -49,7 +49,7 @@ export function useTeamProjects(
         projects: res?.success ? res.data : null,
         isLoading,
         isError: !res?.success ? true : isError,
-        error: !res?.success ? res?.message : error,
+        error,
     };
 }
 export function useProjectDetails(slug: string) {

@@ -51,11 +51,7 @@ export default function ProjectDetails({ params }: ProjectProps) {
     }
 
     if (isError || !tasks) {
-        return (
-            <div className="error">
-                Error loading project. Please try again later.
-            </div>
-        );
+        return "=== ERROR ===";
     }
 
     return (

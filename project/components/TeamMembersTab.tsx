@@ -10,7 +10,7 @@ import { DataTableSkeleton } from "./DataTableSkeleton";
 import { FetchTeamMember } from "@/types/ServerResponses";
 
 interface TeamMembersTabProps {
-    members: FetchTeamMember[];
+    members?: FetchTeamMember[] | null;
     teamSlug: string;
 }
 
@@ -18,6 +18,7 @@ const TeamMembersTab: React.FC<TeamMembersTabProps> = ({
     members,
     teamSlug,
 }) => {
+    if (!members) return "=== ERROR ===";
     const { permitted: permittedInvite } = useAuthRoleByTeam(
         teamSlug,
         "invite_members"

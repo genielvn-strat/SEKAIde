@@ -20,28 +20,24 @@ import TaskCard from "@/components/TaskCard";
 export default function DashboardPage() {
     const {
         feed,
-        isLoading: overviewLoading,
+        isLoading: feedLoading,
+        isError: feedIsError,
         error: overviewError,
-        isError: overviewIsError,
     } = useFeed();
 
     const {
         tasks,
         isLoading: tasksLoading,
-        error: tasksError,
         isError: tasksIsError,
+        error: tasksError,
     } = useAssignedTasks();
 
     const {
         projects,
         isLoading: projectsLoading,
-        error: projectError,
         isError: projectIsError,
+        error: projectError,
     } = useProjects();
-
-    if (overviewLoading) return <LoadingSkeleton />;
-
-    if (!feed || overviewIsError) return "An error has occured";
 
     return (
         <>
@@ -59,13 +55,11 @@ export default function DashboardPage() {
             <div className="flex gap-8 flex-col-reverse md:flex-row">
                 <div className="space-y-4 w-full">
                     <TypographyH2>Feed</TypographyH2>
-                    {/* <div className="flex flex-row gap-2">
-                        <CreateProject />
-                        <CreateTeam />
-                    </div> */}
-                    {overviewLoading ? (
+                    {feedLoading ? (
                         <LoadingSkeletonCards />
-                    ) : feed.length == 0 ? (
+                    ) : feedIsError ? (
+                        "=== ERROR ==="
+                    ) : feed?.length == 0 ? (
                         <Alert variant="default">
                             <MessageCircleQuestion />
                             <AlertTitle>No recent activity</AlertTitle>
@@ -75,7 +69,7 @@ export default function DashboardPage() {
                             </AlertDescription>
                         </Alert>
                     ) : (
-                        feed.map((m, idx) => <FeedCard feed={m} key={idx} />)
+                        feed?.map((m, idx) => <FeedCard feed={m} key={idx} />)
                     )}
                 </div>
 
@@ -85,7 +79,7 @@ export default function DashboardPage() {
                         {tasksLoading ? (
                             <LoadingSkeletonCards />
                         ) : tasksIsError ? (
-                            "Error loading tasks"
+                            "=== ERROR ==="
                         ) : tasks?.length == 0 ? (
                             <Alert variant="default">
                                 <MessageCircleQuestion />
@@ -98,7 +92,9 @@ export default function DashboardPage() {
                         ) : (
                             tasks
                                 ?.slice(0, 7)
-                                .map((task) => <TaskCard task={task} />)
+                                .map((task) => (
+                                    <TaskCard key={task.id} task={task} />
+                                ))
                         )}
                     </div>
                     <div className="space-y-4 w-full">
@@ -106,7 +102,7 @@ export default function DashboardPage() {
                         {projectsLoading ? (
                             <LoadingSkeletonCards />
                         ) : projectIsError ? (
-                            "Error loading projects"
+                            "=== ERROR ==="
                         ) : projects?.length == 0 ? (
                             <Alert variant="default">
                                 <MessageCircleQuestion />

@@ -8,9 +8,14 @@ import { Separator } from "@/components/ui/separator";
 import { useInvitedTeams } from "@/hooks/useTeams";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { MessageCircleQuestion } from "lucide-react";
+import LoadingSkeletonCards from "@/components/LoadingSkeletonCards";
 
 export default function NotificationsPage() {
-    const { teams } = useInvitedTeams();
+    const {
+        teams,
+        isError: teamsIsError,
+        isLoading: teamsIsLoading,
+    } = useInvitedTeams();
 
     return (
         <>
@@ -27,7 +32,11 @@ export default function NotificationsPage() {
             <div className="space-y-4 w-full">
                 <TypographyH2>Team Invitations</TypographyH2>
                 <div className="space-y-4 w-full">
-                    {teams?.length == 0 ? (
+                    {teamsIsLoading ? (
+                        <LoadingSkeletonCards />
+                    ) : teamsIsError ? (
+                        "=== ERROR ==="
+                    ) : teams?.length == 0 ? (
                         <Alert variant="default">
                             <MessageCircleQuestion />
                             <AlertTitle>No team invitations</AlertTitle>

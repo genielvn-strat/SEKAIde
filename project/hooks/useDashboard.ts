@@ -17,7 +17,7 @@ export function useFeed() {
         feed: res?.success ? res?.data : null,
         isLoading,
         isError: !res?.success ? true : isError,
-        error: !res?.success ? res?.message : error,
+        error,
     };
 }
 

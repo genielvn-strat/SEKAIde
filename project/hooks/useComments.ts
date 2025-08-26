@@ -17,6 +17,7 @@ export function useComments(
     const {
         data: res,
         isLoading,
+        isError,
         error,
     } = useQuery({
         queryKey: [`comments-${taskSlug}`, projectSlug],
@@ -27,7 +28,8 @@ export function useComments(
     return {
         comments: res?.success ? res.data : null,
         isLoading,
-        error: !res?.success ? res?.message : error,
+        isError,
+        error,
     };
 }
 export function useCommentActions(taskSlug: string) {

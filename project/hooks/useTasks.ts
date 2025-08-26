@@ -100,7 +100,7 @@ export function useTasks(
         tasks: res?.success ? res.data : null,
         isError,
         isLoading,
-        error: !res?.success ? res?.message : error,
+        error,
     };
 }
 export function useTeamTasks(
@@ -123,7 +123,7 @@ export function useTeamTasks(
         tasks: res?.success ? res.data : null,
         isError,
         isLoading,
-        error: !res?.success ? res?.message : error,
+        error,
     };
 }
 
@@ -143,6 +143,6 @@ export function useTaskDetails(taskSlug: string, projectSlug: string) {
         task: res?.success ? res.data : null,
         isLoading,
         isError,
-        error: !res?.success ? res?.message : error,
+        error,
     };
 }

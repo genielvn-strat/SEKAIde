@@ -21,7 +21,7 @@ import {
 import { Button } from "./ui/button";
 
 interface TeamProjectsTabProps {
-    projects: FetchProject[];
+    projects?: FetchProject[] | null;
     teamDetails: FetchTeamDetails;
 }
 
@@ -29,6 +29,8 @@ const TeamProjectsTab: React.FC<TeamProjectsTabProps> = ({
     projects,
     teamDetails: teamDetails,
 }) => {
+    if (!projects) return "=== ERROR ===";
+
     const { permitted: permittedCreate } = useAuthRoleByTeam(
         teamDetails.slug,
         "create_project"

@@ -6,7 +6,7 @@ import { TypographyMuted } from "@/components/typography/TypographyMuted";
 import { Separator } from "@/components/ui/separator";
 import CreateTeam from "@/components/buttons/CreateTeam";
 import TeamCard from "@/components/TeamCard";
-import { useState, useMemo } from "react"; 
+import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import {
     DropdownMenu,
@@ -56,7 +56,7 @@ export default function TeamPage() {
     }
 
     if (!teams || isError) {
-        return "Error loading teams";
+        return "=== ERROR ===";
     }
 
     return (
