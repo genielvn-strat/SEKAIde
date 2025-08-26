@@ -1,4 +1,4 @@
-import { users, tasks, projects, lists } from "@/migrations/schema";
+import { users, tasks, projects, lists, teams } from "@/migrations/schema";
 import { and, asc, eq, sql } from "drizzle-orm";
 import { ArrangeTask, CreateTask, UpdateTask } from "@/types/Task";
 import { failure, success } from "@/types/Response";
@@ -129,6 +129,66 @@ export const taskQueries = {
                 .leftJoin(lists, eq(tasks.listId, lists.id))
                 .orderBy(asc(tasks.position))
                 .where(eq(projects.slug, projectSlug));
+
+            return success(200, "Project Tasks fetched successfully", result);
+        } catch {
+            return failure(500, "Failed to fetch task");
+        }
+    },
+    getByTeamSlug: async (teamSlug: string, userId: string) => {
+        const isAuthorized = await authorization.checkIfTeamMemberByTeamSlug(
+            teamSlug,
+            userId
+        );
+
+        if (!isAuthorized) {
+            return failure(500, "You are not authorized to view these tasks.");
+        }
+        try {
+            const canUpdate =
+                (await authorization
+                    .checkIfRoleHasPermissionByTeamSlug(
+                        userId,
+                        teamSlug,
+                        "update_task"
+                    )
+                    .then((res) => (res ? true : false))) ?? false;
+
+            const result: FetchTask[] = await db
+                .selectDistinct({
+                    id: tasks.id,
+                    title: tasks.title,
+                    description: tasks.description,
+                    priority: tasks.priority,
+                    dueDate: tasks.dueDate,
+                    position: tasks.position,
+                    slug: tasks.slug,
+                    assigneeId: users.id,
+                    assigneeName: users.name,
+                    assigneeUsername: users.username,
+                    assigneeDisplayPicture: users.displayPictureLink,
+                    projectName: projects.name,
+                    projectSlug: projects.slug,
+                    listId: lists.id,
+                    listName: lists.name,
+                    listColor: lists.color,
+                    finished: tasks.finished,
+                    allowUpdate: sql<boolean>`
+                        CASE 
+                            WHEN ${tasks.assigneeId} = ${userId} THEN TRUE
+                            WHEN ${canUpdate} = TRUE THEN TRUE
+                            ELSE FALSE
+                        END
+                    `,
+                    finishedAt: tasks.finishedAt,
+                })
+                .from(tasks)
+                .innerJoin(projects, eq(tasks.projectId, projects.id))
+                .innerJoin(users, eq(tasks.assigneeId, users.id))
+                .innerJoin(teams, eq(teams.id, projects.teamId))
+                .leftJoin(lists, eq(tasks.listId, lists.id))
+                .orderBy(asc(tasks.position))
+                .where(eq(teams.slug, teamSlug));
 
             return success(200, "Project Tasks fetched successfully", result);
         } catch {

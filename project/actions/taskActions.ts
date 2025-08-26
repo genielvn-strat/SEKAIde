@@ -19,6 +19,11 @@ export const fetchTasks = async (projectSlug: string) => {
     const tasks = await queries.tasks.getByProjectSlug(projectSlug, userId);
     return tasks;
 };
+export const fetchTeamTasks = async (teamSlug: string) => {
+    const userId = await getUserDbId();
+    const tasks = await queries.tasks.getByTeamSlug(teamSlug, userId);
+    return tasks;
+};
 
 export const fetchTaskBySlug = async (
     taskSlug: string,
@@ -81,5 +86,10 @@ export const arrangeTask = async (
 ) => {
     const userId = await getUserDbId();
 
-    return await queries.tasks.arrange(tasks, selectedTaskId, projectSlug, userId);
+    return await queries.tasks.arrange(
+        tasks,
+        selectedTaskId,
+        projectSlug,
+        userId
+    );
 };

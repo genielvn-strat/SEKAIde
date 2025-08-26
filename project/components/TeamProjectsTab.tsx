@@ -7,7 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { MessageCircleQuestion, ListFilter } from "lucide-react";
 import { useAuthRoleByTeam } from "@/hooks/useRoles";
 import CreateTeamProject from "./buttons/CreateTeamProject";
-import { FetchTeamDetails } from "@/types/ServerResponses";
+import { FetchProject, FetchTeamDetails } from "@/types/ServerResponses";
 import { Input } from "./ui/input";
 import {
     DropdownMenu,
@@ -21,13 +21,14 @@ import {
 import { Button } from "./ui/button";
 
 interface TeamProjectsTabProps {
+    projects: FetchProject[];
     teamDetails: FetchTeamDetails;
 }
 
 const TeamProjectsTab: React.FC<TeamProjectsTabProps> = ({
+    projects,
     teamDetails: teamDetails,
 }) => {
-    const { projects, isLoading, isError } = useTeamProjects(teamDetails.slug);
     const { permitted: permittedCreate } = useAuthRoleByTeam(
         teamDetails.slug,
         "create_project"
@@ -62,9 +63,6 @@ const TeamProjectsTab: React.FC<TeamProjectsTabProps> = ({
                 );
             });
     }, [projects, searchQuery, sortCriteria]);
-
-    if (isLoading) return <LoadingSkeletonCards />;
-    if (!projects || isError) return "An error has occurred";
 
     return (
         <div className="flex flex-col gap-4">
@@ -121,7 +119,11 @@ const TeamProjectsTab: React.FC<TeamProjectsTabProps> = ({
                     </Alert>
                 ) : (
                     filteredAndSortedProjects?.map((project) => (
-                        <ProjectCard key={project.id} project={project} small={true} />
+                        <ProjectCard
+                            key={project.id}
+                            project={project}
+                            small={true}
+                        />
                     ))
                 )}
             </div>

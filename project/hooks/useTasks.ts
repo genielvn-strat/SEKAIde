@@ -7,6 +7,7 @@ import {
     updateTask,
     fetchTaskBySlug,
     arrangeTask,
+    fetchTeamTasks,
 } from "@/actions/taskActions";
 import { CreateTaskInput, UpdateTaskInput } from "@/lib/validations";
 import { FetchTask } from "@/types/ServerResponses";
@@ -85,6 +86,7 @@ export function useTasks(
 ) {
     const {
         data: res,
+        isError,
         isLoading,
         error,
     } = useQuery({
@@ -96,6 +98,30 @@ export function useTasks(
 
     return {
         tasks: res?.success ? res.data : null,
+        isError,
+        isLoading,
+        error: !res?.success ? res?.message : error,
+    };
+}
+export function useTeamTasks(
+    teamSlug: string,
+    options: { enabled?: boolean } = { enabled: true }
+) {
+    const {
+        data: res,
+        isLoading,
+        isError,
+        error,
+    } = useQuery({
+        queryKey: [`teamTasks`],
+        queryFn: () => fetchTeamTasks(teamSlug),
+        enabled: !!teamSlug && options.enabled,
+        refetchInterval: 30000,
+    });
+
+    return {
+        tasks: res?.success ? res.data : null,
+        isError,
         isLoading,
         error: !res?.success ? res?.message : error,
     };

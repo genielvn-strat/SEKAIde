@@ -7,20 +7,22 @@ import { DataTable } from "./DataTable";
 import { TeamMemberColumns } from "./columns/TeamMemberColumns";
 import { useTeamMembers } from "@/hooks/useTeamMembers";
 import { DataTableSkeleton } from "./DataTableSkeleton";
+import { FetchTeamMember } from "@/types/ServerResponses";
 
 interface TeamMembersTabProps {
+    members: FetchTeamMember[];
     teamSlug: string;
 }
 
-const TeamMembersTab: React.FC<TeamMembersTabProps> = ({ teamSlug }) => {
-    const { members, isLoading, isError } = useTeamMembers(teamSlug);
+const TeamMembersTab: React.FC<TeamMembersTabProps> = ({
+    members,
+    teamSlug,
+}) => {
     const { permitted: permittedInvite } = useAuthRoleByTeam(
         teamSlug,
         "invite_members"
     );
-    if (isLoading) return <DataTableSkeleton />;
-    if (!members || isError)
-        return "An error has occurred while loading members";
+
     return (
         <div className="flex flex-col gap-4">
             {permittedInvite && (

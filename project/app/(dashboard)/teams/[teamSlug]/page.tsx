@@ -20,6 +20,10 @@ import {
 } from "@/components/ui/breadcrumb";
 import Link from "next/link";
 import { SlashIcon } from "lucide-react";
+import { useTeamProjects } from "@/hooks/useProjects";
+import { useTeamMembers } from "@/hooks/useTeamMembers";
+import { useTeamTasks } from "@/hooks/useTasks";
+import TeamOverviewTab from "@/components/TeamOverviewTab";
 
 interface ProjectProps {
     params: Promise<{
@@ -29,15 +33,40 @@ interface ProjectProps {
 
 export default function TeamDetails({ params }: ProjectProps) {
     const { teamSlug } = use(params);
+    const {
+        teamDetails,
+        isLoading: teamsLoading,
+        isError: teamsIsError,
+        error: teamsError,
+    } = useTeamDetails(teamSlug);
+    const {
+        projects,
+        isLoading: projectsIsLoading,
+        isError: projectsIsError,
+        error: projectsError,
+    } = useTeamProjects(teamSlug, {
+        enabled: !!teamDetails,
+    });
+    const {
+        members,
+        isLoading: membersIsLoading,
+        isError: membersIsError,
+        error: membersError,
+    } = useTeamMembers(teamSlug, {
+        enabled: !!teamDetails,
+    });
+    const {
+        tasks,
+        isLoading: tasksIsLoading,
+        isError: tasksIsError,
+        error: tasksError,
+    } = useTeamTasks(teamSlug, { enabled: !!teamDetails });
 
-    const { teamDetails, isLoading, isError, error } = useTeamDetails(teamSlug);
-
-    if (isLoading) {
+    if (teamsLoading) {
         return <LoadingSkeleton />;
     }
 
-    if (isError) {
-        console.error("Error loading project:", error);
+    if (teamsIsError || !members || !projects || !tasks) {
         return (
             <div className="flex items-center justify-center min-h-screen text-red-500">
                 Error loading team. Please try again later.
@@ -50,7 +79,7 @@ export default function TeamDetails({ params }: ProjectProps) {
     }
 
     return (
-        <>
+        <div className="overflow-x-hidden">
             <div className="doc-header flex flex-row justify-between items-center">
                 <div className="left">
                     <Breadcrumb>
@@ -71,22 +100,34 @@ export default function TeamDetails({ params }: ProjectProps) {
                 <div className="right"></div>
             </div>
             <Separator className="my-4" />
-            <Tabs defaultValue="members">
+            <Tabs defaultValue="overview">
                 <TabsList>
+                    <TabsTrigger value="overview">Overview</TabsTrigger>
                     <TabsTrigger value="members">Members</TabsTrigger>
                     <TabsTrigger value="projects">Projects</TabsTrigger>
                     <TabsTrigger value="settings">Settings</TabsTrigger>
                 </TabsList>
+                <TabsContent value="overview">
+                    <TeamOverviewTab
+                        projects={projects}
+                        tasks={tasks}
+                        members={members}
+                        teamSlug={teamSlug}
+                    />
+                </TabsContent>
                 <TabsContent value="members">
-                    <TeamMembersTab teamSlug={teamSlug} />
+                    <TeamMembersTab members={members} teamSlug={teamSlug} />
                 </TabsContent>
                 <TabsContent value="projects">
-                    <TeamProjectsTab teamDetails={teamDetails} />
+                    <TeamProjectsTab
+                        projects={projects}
+                        teamDetails={teamDetails}
+                    />
                 </TabsContent>
                 <TabsContent value="settings">
                     <TeamSettingsTab teamDetails={teamDetails} />
                 </TabsContent>
             </Tabs>
-        </>
+        </div>
     );
 }

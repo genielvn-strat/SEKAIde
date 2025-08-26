@@ -3,6 +3,7 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2, Circle, CalendarCheck2 } from "lucide-react";
 import { TypographyH2 } from "./typography/TypographyH2";
+import { getWeekNumber } from "@/lib/utils";
 
 interface ProjectOverviewProps {
     tasks: FetchTask[];
@@ -12,7 +13,6 @@ const ProjectOverview: React.FC<ProjectOverviewProps> = ({ tasks }) => {
     const totalFinished = tasks.filter((t) => t.finished).length;
     const totalUnfinished = tasks.filter((t) => !t.finished).length;
 
-    // Count finished tasks per week (using ISO week number)
     const finishedPerWeek: Record<string, number> = {};
     tasks.forEach((t) => {
         if (t.finishedAt) {
@@ -68,17 +68,5 @@ const ProjectOverview: React.FC<ProjectOverviewProps> = ({ tasks }) => {
     );
 };
 
-// Helper to get ISO week number
-function getWeekNumber(date: Date): number {
-    const tmp = new Date(
-        Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
-    );
-    const dayNum = tmp.getUTCDay() || 7;
-    tmp.setUTCDate(tmp.getUTCDate() + 4 - dayNum);
-    const yearStart = new Date(Date.UTC(tmp.getUTCFullYear(), 0, 1));
-    return Math.ceil(
-        ((tmp.getTime() - yearStart.getTime()) / 86400000 + 1) / 7
-    );
-}
 
 export default ProjectOverview;
