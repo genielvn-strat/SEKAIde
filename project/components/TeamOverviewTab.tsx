@@ -30,6 +30,7 @@ import {
     ChartTooltipContent,
 } from "./ui/chart";
 import { toKebab } from "@/lib/utils";
+import ErrorAlert from "./ErrorAlert";
 
 interface TeamOverviewTabProps {
     projects?: FetchProject[] | null;
@@ -45,7 +46,7 @@ const TeamOverviewTab: React.FC<TeamOverviewTabProps> = ({
     tasks,
     projects,
 }) => {
-    if (!projects || !tasks || !members) return "=== ERROR ==="
+    if (!projects || !tasks || !members) return <ErrorAlert />;
 
     const totalMembers = members.length;
     const totalProjects = projects.length;

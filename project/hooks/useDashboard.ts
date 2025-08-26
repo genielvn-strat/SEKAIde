@@ -16,7 +16,7 @@ export function useFeed() {
     return {
         feed: res?.success ? res?.data : null,
         isLoading,
-        isError: !res?.success ? true : isError,
+        isError,
         error,
     };
 }
@@ -36,7 +36,7 @@ export function useAssignedTasks() {
     return {
         tasks: res?.success ? res.data : null,
         isLoading,
-        error: !res?.success ? res?.message : error,
+        error,
         isError,
     };
 }

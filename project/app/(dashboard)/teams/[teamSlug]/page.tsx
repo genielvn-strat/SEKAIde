@@ -25,6 +25,7 @@ import { useTeamMembers } from "@/hooks/useTeamMembers";
 import { useTeamTasks } from "@/hooks/useTasks";
 import TeamOverviewTab from "@/components/TeamOverviewTab";
 import LoadingSkeletonCards from "@/components/LoadingSkeletonCards";
+import ErrorAlert from "@/components/ErrorAlert";
 
 interface ProjectProps {
     params: Promise<{
@@ -68,7 +69,7 @@ export default function TeamDetails({ params }: ProjectProps) {
     }
 
     if (teamsIsError) {
-        return "=== ERROR ===";
+        return <ErrorAlert message={teamsError?.message} />;
     }
 
     if (!teamDetails) {
@@ -108,7 +109,13 @@ export default function TeamDetails({ params }: ProjectProps) {
                     {projectsIsLoading || tasksIsLoading || membersIsLoading ? (
                         <LoadingSkeletonCards />
                     ) : projectsIsError || tasksIsError || membersIsError ? (
-                        "=== ERROR ==="
+                        <ErrorAlert
+                            message={
+                                projectsError?.message ||
+                                tasksError?.message ||
+                                membersError?.message
+                            }
+                        />
                     ) : (
                         <TeamOverviewTab
                             projects={projects}
@@ -122,7 +129,7 @@ export default function TeamDetails({ params }: ProjectProps) {
                     {membersIsLoading ? (
                         <LoadingSkeletonCards />
                     ) : membersIsError ? (
-                        "=== ERROR ==="
+                        <ErrorAlert message={membersError?.message} />
                     ) : (
                         <TeamMembersTab members={members} teamSlug={teamSlug} />
                     )}
@@ -131,7 +138,7 @@ export default function TeamDetails({ params }: ProjectProps) {
                     {projectsIsLoading ? (
                         <LoadingSkeletonCards />
                     ) : projectsIsError ? (
-                        "=== ERROR ==="
+                        <ErrorAlert message={projectsError?.message} />
                     ) : (
                         <TeamProjectsTab
                             projects={projects}

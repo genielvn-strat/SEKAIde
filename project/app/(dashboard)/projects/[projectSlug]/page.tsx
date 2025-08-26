@@ -26,6 +26,7 @@ import Link from "next/link";
 import ProjectOverview from "@/components/ProjectOverview";
 import { TypographyH2 } from "@/components/typography/TypographyH2";
 import AssignedTasks from "@/components/AssignedTasks";
+import ErrorAlert from "@/components/ErrorAlert";
 interface ProjectProps {
     params: Promise<{
         projectSlug: string;
@@ -51,7 +52,7 @@ export default function ProjectDetails({ params }: ProjectProps) {
     }
 
     if (isError || !tasks) {
-        return "=== ERROR ===";
+        return <ErrorAlert message={error?.message} />;
     }
 
     return (

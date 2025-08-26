@@ -9,11 +9,13 @@ import { useInvitedTeams } from "@/hooks/useTeams";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { MessageCircleQuestion } from "lucide-react";
 import LoadingSkeletonCards from "@/components/LoadingSkeletonCards";
+import ErrorAlert from "@/components/ErrorAlert";
 
 export default function NotificationsPage() {
     const {
         teams,
         isError: teamsIsError,
+        error: teamsError,
         isLoading: teamsIsLoading,
     } = useInvitedTeams();
 
@@ -35,7 +37,7 @@ export default function NotificationsPage() {
                     {teamsIsLoading ? (
                         <LoadingSkeletonCards />
                     ) : teamsIsError ? (
-                        "=== ERROR ==="
+                        <ErrorAlert message={teamsError?.message} />
                     ) : teams?.length == 0 ? (
                         <Alert variant="default">
                             <MessageCircleQuestion />

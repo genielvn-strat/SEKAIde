@@ -2,8 +2,6 @@
 
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import { TypographyH1 } from "@/components/typography/TypographyH1";
-import { TypographyMuted } from "@/components/typography/TypographyMuted";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useComments } from "@/hooks/useComments";
 import { useTaskDetails } from "@/hooks/useTasks";
@@ -28,6 +26,7 @@ import {
 import Link from "next/link";
 import ListBadge from "@/components/badge/ListBadge";
 import LoadingSkeletonCards from "@/components/LoadingSkeletonCards";
+import ErrorAlert from "@/components/ErrorAlert";
 interface TaskProps {
     params: Promise<{
         projectSlug: string;
@@ -46,7 +45,8 @@ export default function TaskDetails({ params }: TaskProps) {
     const {
         comments,
         isLoading: commentsLoading,
-        isError: commentsError,
+        isError: commentsIsError,
+        error: commentsError,
     } = useComments(taskSlug, projectSlug, {
         enabled: !!task,
     });
@@ -60,7 +60,7 @@ export default function TaskDetails({ params }: TaskProps) {
     }
 
     if (isError) {
-        return "=== ERROR ===";
+        return <ErrorAlert message={error?.message} />;
     }
 
     return (
@@ -191,8 +191,8 @@ export default function TaskDetails({ params }: TaskProps) {
             <div className="space-y-4 my-2">
                 {commentsLoading ? (
                     <LoadingSkeletonCards />
-                ) : commentsError ? (
-                    "=== ERROR ==="
+                ) : commentsIsError ? (
+                    <ErrorAlert message={commentsError?.message} />
                 ) : comments && comments.length > 0 ? (
                     comments.map((comment) => (
                         <CommentCard

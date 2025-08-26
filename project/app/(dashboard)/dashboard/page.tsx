@@ -16,13 +16,14 @@ import LoadingSkeletonCards from "@/components/LoadingSkeletonCards";
 import { useProjects } from "@/hooks/useProjects";
 import ProjectCard from "@/components/ProjectCard";
 import TaskCard from "@/components/TaskCard";
+import ErrorAlert from "@/components/ErrorAlert";
 
 export default function DashboardPage() {
     const {
         feed,
         isLoading: feedLoading,
         isError: feedIsError,
-        error: overviewError,
+        error: feedError,
     } = useFeed();
 
     const {
@@ -35,8 +36,8 @@ export default function DashboardPage() {
     const {
         projects,
         isLoading: projectsLoading,
-        isError: projectIsError,
-        error: projectError,
+        isError: projectsIsError,
+        error: projectsError,
     } = useProjects();
 
     return (
@@ -58,7 +59,7 @@ export default function DashboardPage() {
                     {feedLoading ? (
                         <LoadingSkeletonCards />
                     ) : feedIsError ? (
-                        "=== ERROR ==="
+                        <ErrorAlert message={feedError?.message} />
                     ) : feed?.length == 0 ? (
                         <Alert variant="default">
                             <MessageCircleQuestion />
@@ -79,7 +80,7 @@ export default function DashboardPage() {
                         {tasksLoading ? (
                             <LoadingSkeletonCards />
                         ) : tasksIsError ? (
-                            "=== ERROR ==="
+                            <ErrorAlert message={tasksError?.message} />
                         ) : tasks?.length == 0 ? (
                             <Alert variant="default">
                                 <MessageCircleQuestion />
@@ -101,8 +102,8 @@ export default function DashboardPage() {
                         <TypographyH2>Recently Updated Projects</TypographyH2>
                         {projectsLoading ? (
                             <LoadingSkeletonCards />
-                        ) : projectIsError ? (
-                            "=== ERROR ==="
+                        ) : projectsIsError ? (
+                            <ErrorAlert message={projectsError?.message} />
                         ) : projects?.length == 0 ? (
                             <Alert variant="default">
                                 <MessageCircleQuestion />

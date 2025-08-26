@@ -20,9 +20,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { ListFilter, MessageCircleQuestion } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import ErrorAlert from "@/components/ErrorAlert";
 
 export default function ProjectsPage() {
-    const { projects, isLoading, isError } = useProjects();
+    const { projects, isLoading, isError, error } = useProjects();
 
     const [searchQuery, setSearchQuery] = useState("");
     const [sortCriteria, setSortCriteria] = useState("updatedAt");
@@ -65,7 +66,7 @@ export default function ProjectsPage() {
     }
 
     if (!projects || isError) {
-        return "=== ERROR ===";
+        return <ErrorAlert message={error?.message} />;
     }
 
     return (

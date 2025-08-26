@@ -19,6 +19,7 @@ import {
     DropdownMenuLabel,
 } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
+import ErrorAlert from "./ErrorAlert";
 
 interface TeamProjectsTabProps {
     projects?: FetchProject[] | null;
@@ -29,7 +30,7 @@ const TeamProjectsTab: React.FC<TeamProjectsTabProps> = ({
     projects,
     teamDetails: teamDetails,
 }) => {
-    if (!projects) return "=== ERROR ===";
+    if (!projects) return <ErrorAlert />;
 
     const { permitted: permittedCreate } = useAuthRoleByTeam(
         teamDetails.slug,

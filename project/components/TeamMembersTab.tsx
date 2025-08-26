@@ -8,6 +8,7 @@ import { TeamMemberColumns } from "./columns/TeamMemberColumns";
 import { useTeamMembers } from "@/hooks/useTeamMembers";
 import { DataTableSkeleton } from "./DataTableSkeleton";
 import { FetchTeamMember } from "@/types/ServerResponses";
+import ErrorAlert from "./ErrorAlert";
 
 interface TeamMembersTabProps {
     members?: FetchTeamMember[] | null;
@@ -18,7 +19,7 @@ const TeamMembersTab: React.FC<TeamMembersTabProps> = ({
     members,
     teamSlug,
 }) => {
-    if (!members) return "=== ERROR ===";
+    if (!members) return <ErrorAlert />;
     const { permitted: permittedInvite } = useAuthRoleByTeam(
         teamSlug,
         "invite_members"
