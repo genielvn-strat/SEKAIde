@@ -69,5 +69,8 @@ export const fetchFeed = async () => {
 export const fetchAssignedTasks = async () => {
     const userId = await getUserDbId();
 
-    return await queries.dashboard.getAssignedTasks(userId)
-}
+    const tasks = await queries.dashboard.getAssignedTasks(userId);
+    if (!tasks.success) throw new Error(tasks.message);
+    
+    return tasks;
+};

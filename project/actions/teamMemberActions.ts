@@ -6,11 +6,18 @@ import { CreateTeamMemberInput } from "@/lib/validations";
 
 export const fetchTeamMembersByTeamSlug = async (teamSlug: string) => {
     const userId = await getUserDbId();
-    return await queries.teamMembers.getByTeamSlug(teamSlug, userId);
+    const members = await queries.teamMembers.getByTeamSlug(teamSlug, userId);
+    if (!members.success) throw new Error(members.message);
+    return members;
 };
 export const fetchTeamMembersByProjectSlug = async (projectSlug: string) => {
     const userId = await getUserDbId();
-    return await queries.teamMembers.getByProjectSlug(projectSlug, userId);
+    const members = await queries.teamMembers.getByProjectSlug(
+        projectSlug,
+        userId
+    );
+    if (!members.success) throw new Error(members.message);
+    return members;
 };
 export const createMember = async (
     teamSlug: string,

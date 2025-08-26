@@ -20,7 +20,7 @@ export function useComments(
         isError,
         error,
     } = useQuery({
-        queryKey: [`comments-${taskSlug}`, projectSlug],
+        queryKey: [`comments-${taskSlug}`],
         queryFn: () => fetchCommentList(taskSlug, projectSlug),
         enabled: !!projectSlug && !!taskSlug && options.enabled,
     });

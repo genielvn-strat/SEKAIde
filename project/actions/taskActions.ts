@@ -17,11 +17,13 @@ import { ZodError } from "zod";
 export const fetchTasks = async (projectSlug: string) => {
     const userId = await getUserDbId();
     const tasks = await queries.tasks.getByProjectSlug(projectSlug, userId);
+    if (!tasks.success && tasks.status >= 500) throw new Error(tasks.message);
     return tasks;
 };
 export const fetchTeamTasks = async (teamSlug: string) => {
     const userId = await getUserDbId();
     const tasks = await queries.tasks.getByTeamSlug(teamSlug, userId);
+    if (!tasks.success && tasks.status >= 500) throw new Error(tasks.message);
     return tasks;
 };
 
@@ -30,7 +32,14 @@ export const fetchTaskBySlug = async (
     projectSlug: string
 ) => {
     const userId = await getUserDbId();
-    return await queries.tasks.getByTaskSlug(taskSlug, projectSlug, userId);
+
+    const task = await queries.tasks.getByTaskSlug(
+        taskSlug,
+        projectSlug,
+        userId
+    );
+    if (!task.success && task.status >= 500) throw new Error(task.message);
+    return task;
 };
 
 export const createTask = async (

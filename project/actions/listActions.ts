@@ -15,6 +15,7 @@ import { failure } from "@/types/Response";
 export const fetchProjectLists = async (projectSlug: string) => {
     const userId = await getUserDbId();
     const lists = await queries.lists.getByProjectSlug(projectSlug, userId);
+    if (!lists.success) throw new Error(lists.message)
     return lists;
 };
 
