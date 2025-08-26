@@ -5,22 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1756005023445,
-      "tag": "0000_broken_morg",
+      "when": 1756182311817,
+      "tag": "0000_init",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1756088603378,
-      "tag": "0001_striped_dragon_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1756090109207,
-      "tag": "0002_cool_power_man",
+      "when": 1756182420327,
+      "tag": "0001_seed",
       "breakpoints": true
     }
   ]

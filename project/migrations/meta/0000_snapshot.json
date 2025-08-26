@@ -1,5 +1,5 @@
 {
-  "id": "a3653014-151e-4bc6-8ec0-5e61085eb81c",
+  "id": "6e319781-8882-49ea-9921-852e69604d6c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -402,6 +402,12 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
+        },
+        "priority": {
+          "name": "priority",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
         }
       },
       "indexes": {},

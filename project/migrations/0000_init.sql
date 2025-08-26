@@ -52,6 +52,7 @@ CREATE TABLE "roles" (
 	"name" text NOT NULL,
 	"nameId" text NOT NULL,
 	"color" "color",
+	"priority" integer NOT NULL,
 	CONSTRAINT "roles_nameId_unique" UNIQUE("nameId")
 );
 --> statement-breakpoint
