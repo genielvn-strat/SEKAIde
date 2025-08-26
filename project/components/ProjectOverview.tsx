@@ -1,7 +1,7 @@
 import { FetchTask } from "@/types/ServerResponses";
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle2, Circle, CalendarCheck2 } from "lucide-react";
+import { CheckCircle2, Circle, CalendarCheck2, Percent } from "lucide-react";
 import { TypographyH2 } from "./typography/TypographyH2";
 import { getWeekNumber } from "@/lib/utils";
 
@@ -12,6 +12,7 @@ interface ProjectOverviewProps {
 const ProjectOverview: React.FC<ProjectOverviewProps> = ({ tasks }) => {
     const totalFinished = tasks.filter((t) => t.finished).length;
     const totalUnfinished = tasks.filter((t) => !t.finished).length;
+    const total = tasks.length;
 
     const finishedPerWeek: Record<string, number> = {};
     tasks.forEach((t) => {
@@ -27,10 +28,25 @@ const ProjectOverview: React.FC<ProjectOverviewProps> = ({ tasks }) => {
     const latestWeek = Object.entries(finishedPerWeek).sort().pop();
     const latestWeekCount = latestWeek ? latestWeek[1] : 0;
 
+    const completionRate =
+        total > 0 ? ((totalFinished / total) * 100).toFixed(1) : "0";
+
     return (
         <div className="flex flex-col gap-2">
             <TypographyH2>Project Summary</TypographyH2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
+                {/* Completion rate */}
+                <Card className="rounded-2xl shadow-sm">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-lg">
+                            Completion Rate
+                        </CardTitle>
+                        <Percent className="text-purple-500 w-6 h-6" />
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-2xl font-bold">{completionRate}%</p>
+                    </CardContent>
+                </Card>
                 {/* Finished tasks per latest week */}
                 <Card className="rounded-2xl shadow-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -67,6 +83,5 @@ const ProjectOverview: React.FC<ProjectOverviewProps> = ({ tasks }) => {
         </div>
     );
 };
-
 
 export default ProjectOverview;
