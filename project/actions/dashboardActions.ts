@@ -4,27 +4,33 @@ import { getUserDbId } from "./sessionActions";
 import { success } from "@/types/Response";
 import { DashboardRecent } from "@/types/Dashboard";
 
-export const fetchDashboard = async () => {
+export const fetchFeed = async () => {
     const userId = await getUserDbId();
     const teams = await queries.teams
         .getJoinedTeamsNoDetails(userId)
         .then((res) => res.data ?? []);
 
-    const [recentProjects, recentTasks, recentComments, recentTeamMembers] =
-        await Promise.all([
-            queries.dashboard
-                .getRecentProjects(teams)
-                .then((res) => res.data ?? []),
-            queries.dashboard
-                .getRecentTasks(teams)
-                .then((res) => res.data ?? []),
-            queries.dashboard
-                .getRecentComments(teams)
-                .then((res) => res.data ?? []),
-            queries.dashboard
-                .getRecentTeamMembers(teams)
-                .then((res) => res.data ?? []),
-        ]);
+    const [
+        recentProjects,
+        recentTasks,
+        recentFinishedTasks,
+        recentComments,
+        recentTeamMembers,
+    ] = await Promise.all([
+        queries.dashboard
+            .getRecentProjects(teams)
+            .then((res) => res.data ?? []),
+        queries.dashboard.getRecentTasks(teams).then((res) => res.data ?? []),
+        queries.dashboard
+            .getRecentlyFinishedTasks(teams)
+            .then((res) => res.data ?? []),
+        queries.dashboard
+            .getRecentComments(teams)
+            .then((res) => res.data ?? []),
+        queries.dashboard
+            .getRecentTeamMembers(teams)
+            .then((res) => res.data ?? []),
+    ]);
     const merged: DashboardRecent[] = [
         ...recentProjects.map((p) => ({
             data: { ...p },
@@ -35,6 +41,11 @@ export const fetchDashboard = async () => {
             data: { ...t },
             type: "task" as const,
             date: t.createdAt,
+        })),
+        ...recentFinishedTasks.map((t) => ({
+            data: { ...t },
+            type: "finished" as const,
+            date: t.finishedAt,
         })),
         ...recentComments.map((c) => ({
             data: { ...c },
@@ -53,4 +64,13 @@ export const fetchDashboard = async () => {
             new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime()
     );
     return success(200, "Dashboard fetched successfully", merged);
+};
+
+export const fetchAssignedTasks = async () => {
+    const userId = await getUserDbId();
+
+    const tasks = await queries.dashboard.getAssignedTasks(userId);
+    if (!tasks.success) throw new Error(tasks.message);
+    
+    return tasks;
 };

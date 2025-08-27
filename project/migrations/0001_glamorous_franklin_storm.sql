@@ -1,1 +1,0 @@
-ALTER TABLE "roles" ALTER COLUMN "color" SET NOT NULL;

@@ -1,1 +1,0 @@
-ALTER TABLE "projects" ALTER COLUMN "due_date" DROP DEFAULT;

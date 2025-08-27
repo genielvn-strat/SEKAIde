@@ -18,6 +18,7 @@ export function useLists(
     const {
         data: res,
         isLoading,
+        isError,
         error,
     } = useQuery({
         queryKey: [`lists-${projectSlug}`],
@@ -26,9 +27,10 @@ export function useLists(
     });
 
     return {
-        lists: res?.success ? (res?.data as FetchList[]) : null,
+        lists: res?.success ? res?.data : null,
         isLoading,
-        error: !res?.success ? res?.message : error,
+        isError,
+        error,
     };
 }
 

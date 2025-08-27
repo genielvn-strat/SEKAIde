@@ -9,18 +9,22 @@ export interface Task {
     finished: boolean;
     priority: "low" | "medium" | "high";
     dueDate?: Date;
-    position: number;
+    position?: number;
     createdAt: Date;
     updatedAt: Date;
+    finishedAt: Date | null;
 }
 
 export type CreateTask = Omit<
     Task,
-    "id" | "createdAt" | "updatedAt" | "projectId"
+    "id" | "createdAt" | "updatedAt" | "finishedAt" | "projectId"
 >;
 
 export type UpdateTask = Partial<
-    Omit<Task, "id" | "createdAt" | "updatedAt" | "projectId" | "slug">
+    Omit<
+        Task,
+        "id" | "createdAt" | "updatedAt" | "finishedAt" | "projectId" | "slug"
+    >
 >;
 
-export type ArrangeTask = Pick<Task, "id" | "listId" | "position">
+export type ArrangeTask = Pick<Task, "id" | "listId" | "position">;

@@ -21,6 +21,7 @@ export const fetchCommentList = async (
         projectSlug,
         userId
     );
+    if (!comments.success) throw new Error(comments.message);
     return comments;
 };
 

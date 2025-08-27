@@ -6,7 +6,7 @@ import { TypographyMuted } from "@/components/typography/TypographyMuted";
 import { Separator } from "@/components/ui/separator";
 import CreateTeam from "@/components/buttons/CreateTeam";
 import TeamCard from "@/components/TeamCard";
-import { useState, useMemo } from "react"; 
+import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import {
     DropdownMenu,
@@ -21,9 +21,10 @@ import { Button } from "@/components/ui/button";
 import { ListFilter, MessageCircleQuestion } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
+import ErrorAlert from "@/components/ErrorAlert";
 
 export default function TeamPage() {
-    const { teams, isLoading, isError } = useTeams();
+    const { teams, isLoading, isError, error } = useTeams();
 
     const [searchQuery, setSearchQuery] = useState("");
     const [sortCriteria, setSortCriteria] = useState("createdAt");
@@ -56,7 +57,7 @@ export default function TeamPage() {
     }
 
     if (!teams || isError) {
-        return "Error loading teams";
+        return <ErrorAlert message={error?.message} />;
     }
 
     return (

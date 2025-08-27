@@ -19,6 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { CheckCircle2, Circle } from "lucide-react";
 import TaskDropDown from "../dropdown/TaskDropDown";
 import Priority from "../badge/Priority";
+import ListBadge from "../badge/ListBadge";
 
 interface TaskDetailsProps {
     task: FetchTask;
@@ -30,9 +31,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, children }) => {
 
     return (
         <Drawer>
-            <DrawerTrigger className="underline text-left p-0">
-                {children}
-            </DrawerTrigger>
+            <DrawerTrigger className="text-left p-0">{children}</DrawerTrigger>
             <DrawerContent>
                 <div className="mx-auto w-full max-w-3xl">
                     <DrawerHeader className="text-left">
@@ -46,15 +45,10 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, children }) => {
                             <div className="flex justify-between items-center">
                                 <div className="flex flex-row gap-2">
                                     {task.listName && (
-                                        <Badge
-                                            className={`capitalize border ${
-                                                task.listColor
-                                                    ? `bg-${task.listColor}-100 text-${task.listColor}-700`
-                                                    : ""
-                                            }`}
-                                        >
-                                            {task.listName}
-                                        </Badge>
+                                        <ListBadge
+                                            listColor={task.listColor}
+                                            listName={task.listName}
+                                        />
                                     )}
                                     <Priority priority={task.priority} />
 
@@ -70,7 +64,15 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, children }) => {
                                     </div>
                                 </div>
                                 {task.dueDate && (
-                                    <span className="text-sm text-muted-foreground">
+                                    <span
+                                        className={`text-sm text-muted-foreground ${
+                                            task.dueDate &&
+                                            !task.finished &&
+                                            new Date(task.dueDate) < new Date()
+                                                ? "text-red-600 font-semibold"
+                                                : ""
+                                        }`}
+                                    >
                                         Due{" "}
                                         {new Date(
                                             task.dueDate

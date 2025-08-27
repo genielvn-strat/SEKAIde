@@ -1,5 +1,6 @@
 import {
     comments,
+    lists,
     projects,
     tasks,
     teamMembers,
@@ -7,14 +8,17 @@ import {
     users,
 } from "@/migrations/schema";
 import { db } from "../db";
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNotNull, ne, sql } from "drizzle-orm";
 import { failure, success } from "@/types/Response";
 import {
     DashboardRecentComment,
+    DashboardRecentFinishedTask,
     DashboardRecentProject,
     DashboardRecentTask,
     DashboardRecentTeamMembers,
 } from "@/types/Dashboard";
+import { authorization } from "./authorizationQueries";
+import { FetchTask } from "@/types/ServerResponses";
 
 export const dashboardQueries = {
     getRecentProjects: async (teamIds: string[]) => {
@@ -69,6 +73,43 @@ export const dashboardQueries = {
                 .leftJoin(users, eq(tasks.assigneeId, users.id))
                 .where(inArray(teamMembers.teamId, teamIds))
                 .orderBy(desc(tasks.createdAt))
+                .limit(10);
+            return success(
+                200,
+                "Dashboard Tasks fetched successfully",
+                results
+            );
+        } catch {
+            return failure(500, "Failed to fetch Dashboard Tasks");
+        }
+    },
+    getRecentlyFinishedTasks: async (teamIds: string[]) => {
+        try {
+            const results: DashboardRecentFinishedTask[] = await db
+                .selectDistinct({
+                    id: tasks.id,
+                    title: tasks.title,
+                    description: tasks.description,
+                    priority: tasks.priority,
+                    projectName: projects.name,
+                    projectSlug: projects.slug,
+                    assigneeName: users.name,
+                    assigneeUsername: users.username,
+                    assigneeDisplayPicture: users.displayPictureLink,
+                    slug: tasks.slug,
+                    finishedAt: tasks.finishedAt,
+                })
+                .from(tasks)
+                .innerJoin(projects, eq(tasks.projectId, projects.id))
+                .innerJoin(teamMembers, eq(teamMembers.teamId, projects.teamId))
+                .leftJoin(users, eq(tasks.assigneeId, users.id))
+                .where(
+                    and(
+                        inArray(teamMembers.teamId, teamIds),
+                        eq(tasks.finished, true)
+                    )
+                )
+                .orderBy(desc(tasks.finishedAt))
                 .limit(10);
             return success(
                 200,
@@ -144,6 +185,48 @@ export const dashboardQueries = {
             );
         } catch {
             return failure(500, "Failed to fetch Dashboard Team Members");
+        }
+    },
+    getAssignedTasks: async (userId: string) => {
+        try {
+            
+            const result: FetchTask[] = await db
+                .select({
+                    id: tasks.id,
+                    title: tasks.title,
+                    description: tasks.description,
+                    priority: tasks.priority,
+                    dueDate: tasks.dueDate,
+                    position: tasks.position,
+                    slug: tasks.slug,
+                    assigneeId: users.id,
+                    assigneeName: users.name,
+                    assigneeUsername: users.username,
+                    assigneeDisplayPicture: users.displayPictureLink,
+                    projectName: projects.name,
+                    projectSlug: projects.slug,
+                    listId: lists.id,
+                    listName: lists.name,
+                    listColor: lists.color,
+                    finished: tasks.finished,
+                    finishedAt: tasks.finishedAt,
+                })
+                .from(tasks)
+                .innerJoin(projects, eq(tasks.projectId, projects.id))
+                .innerJoin(users, eq(tasks.assigneeId, users.id))
+                .leftJoin(lists, eq(tasks.listId, lists.id))
+                .where(
+                    and(
+                        eq(tasks.assigneeId, userId),
+                        eq(tasks.finished, false),
+                        isNotNull(tasks.dueDate)
+                    )
+                )
+                .orderBy(asc(tasks.dueDate));
+
+            return success(200, "Dashboard Tasks fetched successfully", result);
+        } catch {
+            return failure(500, "Failed to fetch Dashboard Tasks");
         }
     },
 };

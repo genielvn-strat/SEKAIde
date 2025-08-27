@@ -21,6 +21,13 @@ export type FetchTeamDetails = {
     updatedAt: string | null;
 };
 
+export type FetchInvitedTeams = {
+    teamMemberId: string;
+    teamName: string;
+    teamId: string;
+    roleName: string;
+};
+
 // Projects
 
 export type FetchProject = {
@@ -49,6 +56,7 @@ export type FetchTeamMember = {
     roleName: string;
     roleColor?: string | null;
     inviteConfirmed: boolean;
+    allowKick?: boolean;
 };
 
 // Tasks
@@ -77,7 +85,8 @@ export type FetchTask = {
         | "violet"
         | null;
     finished: boolean;
-    allowUpdate: boolean;
+    allowUpdate?: boolean;
+    finishedAt: string | null;
 };
 
 // Lists

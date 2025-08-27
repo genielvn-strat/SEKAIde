@@ -74,7 +74,6 @@ const CreateTask: React.FC<CreateTaskProps> = ({ projectSlug }) => {
             priority: "medium",
             listId: undefined,
             finished: false,
-            position: 0,
             assigneeId: undefined,
         },
     });

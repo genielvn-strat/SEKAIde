@@ -23,6 +23,10 @@ import {
 import ProjectSettingsTab from "@/components/ProjectSettingsTab";
 import { SlashIcon } from "lucide-react";
 import Link from "next/link";
+import ProjectOverview from "@/components/ProjectOverview";
+import { TypographyH2 } from "@/components/typography/TypographyH2";
+import AssignedTasks from "@/components/AssignedTasks";
+import ErrorAlert from "@/components/ErrorAlert";
 interface ProjectProps {
     params: Promise<{
         projectSlug: string;
@@ -48,11 +52,7 @@ export default function ProjectDetails({ params }: ProjectProps) {
     }
 
     if (isError || !tasks) {
-        return (
-            <div className="error">
-                Error loading project. Please try again later.
-            </div>
-        );
+        return <ErrorAlert message={error?.message} />;
     }
 
     return (
@@ -62,11 +62,9 @@ export default function ProjectDetails({ params }: ProjectProps) {
                     <Breadcrumb>
                         <BreadcrumbList>
                             <BreadcrumbItem>
-                            <BreadcrumbLink asChild>
-                                <Link href="/projects">
-                                    Projects
-                                </Link>
-                            </BreadcrumbLink>
+                                <BreadcrumbLink asChild>
+                                    <Link href="/projects">Projects</Link>
+                                </BreadcrumbLink>
                             </BreadcrumbItem>
                             <BreadcrumbSeparator>
                                 <SlashIcon />
@@ -89,7 +87,10 @@ export default function ProjectDetails({ params }: ProjectProps) {
                     <TabsTrigger value="tasks">Task List</TabsTrigger>
                     <TabsTrigger value="settings">Settings</TabsTrigger>
                 </TabsList>
-                <TabsContent value="overview"></TabsContent>
+                <TabsContent value="overview" className="flex flex-col gap-4">
+                    <ProjectOverview tasks={tasks} />
+                    <AssignedTasks tasks={tasks} />
+                </TabsContent>
                 <TabsContent value="board">
                     <KanbanBoardInterface project={project} tasks={tasks} />
                 </TabsContent>

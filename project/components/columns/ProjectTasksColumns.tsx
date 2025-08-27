@@ -6,25 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { FetchTask, FetchTeamMember } from "@/types/ServerResponses";
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal, CheckSquare, Square } from "lucide-react";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import KickMember from "@/components/dialog/KickMember";
-import { useState } from "react";
-import { useAuthRoleByProject, useAuthRoleByTask } from "@/hooks/useRoles";
-import Link from "next/link";
-import { ro } from "date-fns/locale";
-import { Checkbox } from "../ui/checkbox";
-import DeleteTask from "../dialog/DeleteTask";
-import EditTask from "../dialog/EditTask";
 import TaskDetails from "../dialog/TaskDetails";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import TaskDropDown from "../dropdown/TaskDropDown";
 import Priority from "../badge/Priority";
+import ListBadge from "../badge/ListBadge";
 
 export const ProjectTasksColumn: (
     projectSlug: string
@@ -91,14 +77,12 @@ export const ProjectTasksColumn: (
         header: () => <span className="hidden md:table-cell">List</span>,
         cell: ({ row }) => {
             const task = row.original;
-            if (!task.listId) return "Unlisted";
+            if (!task.listId || !task.listName) return "Unlisted";
             return (
-                <Badge
-                    variant="default"
-                    className={`bg-${task.listColor}-100  text-${task.listColor}-700 capitalize border hidden md:table-cell`}
-                >
-                    {task.listName}
-                </Badge>
+                <ListBadge
+                    listColor={task.listColor}
+                    listName={task.listName}
+                />
             );
         },
     },

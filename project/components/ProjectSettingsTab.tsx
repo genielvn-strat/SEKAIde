@@ -1,32 +1,15 @@
 "use client";
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import React from "react";
 import {
     Card,
-    CardContent,
     CardDescription,
     CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { useAuthRoleByProject } from "@/hooks/useRoles";
 import { FetchProject } from "@/types/ServerResponses";
 import { TypographyH2 } from "./typography/TypographyH2";
-import UpdateTeam from "./UpdateTeam";
-import DeleteTeam from "./buttons/DeleteTeam";
-import LeaveTeam from "./buttons/LeaveTeam";
 import LoadingSkeletonCards from "./LoadingSkeletonCards";
 import UpdateProject from "./UpdateProject";
 import DeleteProject from "./buttons/DeleteProject";
@@ -41,8 +24,10 @@ const ProjectSettingsTab: React.FC<ProjectSettingsTabProps> = ({ project }) => {
         useAuthRoleByProject(project.slug, "update_project");
     const { permitted: permittedDelete, isLoading: deleteLoading } =
         useAuthRoleByProject(project.slug, "delete_project");
-    const { permitted: permittedReset } =
-        useAuthRoleByProject(project.slug, "reset_project");
+    const { permitted: permittedReset } = useAuthRoleByProject(
+        project.slug,
+        "reset_project"
+    );
 
     if (updateLoading || deleteLoading) return <LoadingSkeletonCards />;
 

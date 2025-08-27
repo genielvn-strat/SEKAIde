@@ -3,37 +3,42 @@ import {
     createPermissions,
     createRolePermissions,
 } from "@/actions/createActions";
-import Feed from "@/components/Feed";
+import FeedCard from "@/components/Feed";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import { TypographyH1 } from "@/components/typography/TypographyH1";
 import { TypographyH2 } from "@/components/typography/TypographyH2";
 import { TypographyMuted } from "@/components/typography/TypographyMuted";
 import { Separator } from "@/components/ui/separator";
-import { useDashboard } from "@/hooks/useDashboard";
+import { useAssignedTasks, useFeed } from "@/hooks/useDashboard";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { MessageCircleQuestion } from "lucide-react";
 import LoadingSkeletonCards from "@/components/LoadingSkeletonCards";
 import { useProjects } from "@/hooks/useProjects";
 import ProjectCard from "@/components/ProjectCard";
+import TaskCard from "@/components/TaskCard";
+import ErrorAlert from "@/components/ErrorAlert";
 
 export default function DashboardPage() {
     const {
-        overview,
-        isLoading: overviewLoading,
-        error,
-        isError,
-    } = useDashboard();
+        feed,
+        isLoading: feedLoading,
+        isError: feedIsError,
+        error: feedError,
+    } = useFeed();
+
+    const {
+        tasks,
+        isLoading: tasksLoading,
+        isError: tasksIsError,
+        error: tasksError,
+    } = useAssignedTasks();
 
     const {
         projects,
         isLoading: projectsLoading,
-        error: projectError,
-        isError: projectIsError,
+        isError: projectsIsError,
+        error: projectsError,
     } = useProjects();
-
-    if (overviewLoading) return <LoadingSkeleton />;
-
-    if (!overview || isError) return "An error has occured";
 
     return (
         <>
@@ -51,13 +56,11 @@ export default function DashboardPage() {
             <div className="flex gap-8 flex-col-reverse md:flex-row">
                 <div className="space-y-4 w-full">
                     <TypographyH2>Feed</TypographyH2>
-                    {/* <div className="flex flex-row gap-2">
-                        <CreateProject />
-                        <CreateTeam />
-                    </div> */}
-                    {overviewLoading ? (
+                    {feedLoading ? (
                         <LoadingSkeletonCards />
-                    ) : overview.length == 0 ? (
+                    ) : feedIsError ? (
+                        <ErrorAlert message={feedError?.message} />
+                    ) : feed?.length == 0 ? (
                         <Alert variant="default">
                             <MessageCircleQuestion />
                             <AlertTitle>No recent activity</AlertTitle>
@@ -67,16 +70,40 @@ export default function DashboardPage() {
                             </AlertDescription>
                         </Alert>
                     ) : (
-                        overview.map((m, idx) => <Feed feed={m} key={idx} />)
+                        feed?.map((m, idx) => <FeedCard feed={m} key={idx} />)
                     )}
                 </div>
-                <div className="w-full">
+
+                <div className="w-full flex flex-col gap-4">
+                    <div className="space-y-4 w-full">
+                        <TypographyH2>Assigned Tasks</TypographyH2>
+                        {tasksLoading ? (
+                            <LoadingSkeletonCards />
+                        ) : tasksIsError ? (
+                            <ErrorAlert message={tasksError?.message} />
+                        ) : tasks?.length == 0 ? (
+                            <Alert variant="default">
+                                <MessageCircleQuestion />
+                                <AlertTitle>No tasks assigned</AlertTitle>
+                                <AlertDescription>
+                                    Horray! Let's wait for more tasks to get
+                                    assigned for you.
+                                </AlertDescription>
+                            </Alert>
+                        ) : (
+                            tasks
+                                ?.slice(0, 7)
+                                .map((task) => (
+                                    <TaskCard key={task.id} task={task} />
+                                ))
+                        )}
+                    </div>
                     <div className="space-y-4 w-full">
                         <TypographyH2>Recently Updated Projects</TypographyH2>
                         {projectsLoading ? (
                             <LoadingSkeletonCards />
-                        ) : projectError ? (
-                            "Error loading projects"
+                        ) : projectsIsError ? (
+                            <ErrorAlert message={projectsError?.message} />
                         ) : projects?.length == 0 ? (
                             <Alert variant="default">
                                 <MessageCircleQuestion />

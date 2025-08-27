@@ -12,25 +12,34 @@ import {
 import slugify from "slugify";
 import { nanoid } from "nanoid";
 import { ZodError } from "zod";
-import { failure, success } from "@/types/Response";
+import { failure } from "@/types/Response";
 
 export const fetchTeams = async () => {
     const userId = await getUserDbId();
-    const result = await queries.teams.getUserTeamsWithDetail(userId);
-
-    return result;
+    const teams = await queries.teams.getUserTeamsWithDetail(userId);
+    if (!teams.success) throw new Error(teams.message);
+    return teams;
 };
 
 export const fetchTeamBySlug = async (slug: string) => {
     const userId = await getUserDbId();
-    return await queries.teams.getBySlug(slug, userId);
+    const team = await queries.teams.getBySlug(slug, userId);
+    if (!team.success && team.status >= 500) throw new Error(team.message);
+    return team;
 };
 
 export const fetchTeamWithCreateProject = async () => {
     const userId = await getUserDbId();
-    return await queries.teams.getTeamsWithCreateProject(userId);
+    const teams = await queries.teams.getTeamsWithCreateProject(userId);
+    if (!teams.success) throw new Error(teams.message);
+    return teams;
 };
-
+export const fetchInvitedTeams = async () => {
+    const userId = await getUserDbId();
+    const teams = await queries.teams.getInvitedTeams(userId);
+    if (!teams.success) throw new Error(teams.message);
+    return teams;
+};
 export const createTeam = async (data: CreateTeamInput) => {
     const userId = await getUserDbId();
     try {

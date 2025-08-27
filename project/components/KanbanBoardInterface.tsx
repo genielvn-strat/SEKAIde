@@ -23,6 +23,7 @@ import { ArrangeTask, UpdateTask } from "@/types/Task";
 import { arrangeTask } from "@/actions/taskActions";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import ErrorAlert from "./ErrorAlert";
 
 interface KanbanBoardProps {
     project: FetchProject;
@@ -34,7 +35,12 @@ export function KanbanBoardInterface({
     tasks: initialTasks,
 }: KanbanBoardProps) {
     const queryClient = useQueryClient();
-    const { lists, isLoading: listLoading } = useLists(project.slug, {
+    const {
+        lists,
+        isLoading: listLoading,
+        isError: listIsError,
+        error: listError,
+    } = useLists(project.slug, {
         enabled: !!project,
     });
 
@@ -59,7 +65,8 @@ export function KanbanBoardInterface({
         })
     );
     if (listLoading) return <LoadingSkeletonCards />;
-    if (!lists || !initialTasks || !tasks) return "An error has occured";
+    if (!lists || listIsError)
+        return <ErrorAlert message={listError?.message} />;
 
     const handleArrange = async (
         updatedTasks: FetchTask[],

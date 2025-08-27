@@ -2,8 +2,6 @@
 
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import { TypographyH1 } from "@/components/typography/TypographyH1";
-import { TypographyMuted } from "@/components/typography/TypographyMuted";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useComments } from "@/hooks/useComments";
 import { useTaskDetails } from "@/hooks/useTasks";
@@ -26,6 +24,9 @@ import {
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import Link from "next/link";
+import ListBadge from "@/components/badge/ListBadge";
+import LoadingSkeletonCards from "@/components/LoadingSkeletonCards";
+import ErrorAlert from "@/components/ErrorAlert";
 interface TaskProps {
     params: Promise<{
         projectSlug: string;
@@ -41,7 +42,12 @@ export default function TaskDetails({ params }: TaskProps) {
         projectSlug
     );
 
-    const { comments } = useComments(taskSlug, projectSlug, {
+    const {
+        comments,
+        isLoading: commentsLoading,
+        isError: commentsIsError,
+        error: commentsError,
+    } = useComments(taskSlug, projectSlug, {
         enabled: !!task,
     });
 
@@ -49,16 +55,12 @@ export default function TaskDetails({ params }: TaskProps) {
         return <LoadingSkeleton />;
     }
 
-    if (isError) {
-        return (
-            <div className="error">
-                Error loading task. Please try again later.
-            </div>
-        );
-    }
-
     if (!task) {
         return notFound();
+    }
+
+    if (isError) {
+        return <ErrorAlert message={error?.message} />;
     }
 
     return (
@@ -102,15 +104,10 @@ export default function TaskDetails({ params }: TaskProps) {
                     <div className="flex justify-between items-center">
                         <div className="flex flex-row gap-2">
                             {task.listName && (
-                                <Badge
-                                    className={`capitalize border ${
-                                        task.listColor
-                                            ? `bg-${task.listColor}-100 text-${task.listColor}-700`
-                                            : ""
-                                    }`}
-                                >
-                                    {task.listName}
-                                </Badge>
+                                <ListBadge
+                                    listColor={task.listColor}
+                                    listName={task.listName}
+                                />
                             )}
                             <Priority priority={task.priority} />
 
@@ -126,7 +123,16 @@ export default function TaskDetails({ params }: TaskProps) {
                             </div>
                         </div>
                         {task.dueDate && (
-                            <span className="text-sm text-muted-foreground">
+                            <span
+                                className={`text-sm text-muted-foreground ${
+                                    task.dueDate &&
+                                    !task.finished &&
+                                    new Date(task.dueDate) < new Date()
+                                        ? "text-red-600 font-semibold"
+                                        : ""
+                                }
+                            `}
+                            >
                                 Due{" "}
                                 {new Date(task.dueDate).toLocaleDateString(
                                     "en-US",
@@ -183,7 +189,11 @@ export default function TaskDetails({ params }: TaskProps) {
                 </Button>
             </div>
             <div className="space-y-4 my-2">
-                {comments && comments.length > 0 ? (
+                {commentsLoading ? (
+                    <LoadingSkeletonCards />
+                ) : commentsIsError ? (
+                    <ErrorAlert message={commentsError?.message} />
+                ) : comments && comments.length > 0 ? (
                     comments.map((comment) => (
                         <CommentCard
                             comment={comment}

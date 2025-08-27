@@ -17,18 +17,22 @@ import { failure } from "@/types/Response";
 export const fetchUserProjects = async () => {
     const userId = await getUserDbId();
     const projects = await queries.projects.getByUserTeams(userId);
+    if (!projects.success) throw new Error(projects.message);
     return projects;
 };
 
 export const fetchTeamProjects = async (teamSlug: string) => {
     const userId = await getUserDbId();
     const projects = await queries.projects.getByTeamSlug(teamSlug, userId);
+    if (!projects.success) throw new Error(projects.message);
     return projects;
 };
 
 export const fetchProjectBySlug = async (slug: string) => {
     const userId = await getUserDbId();
     const project = await queries.projects.getBySlug(slug, userId);
+    if (!project.success && project.status >= 500)
+        throw new Error(project.message);
     return project;
 };
 

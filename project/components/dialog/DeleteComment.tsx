@@ -62,7 +62,9 @@ const DeleteComment: React.FC<DeleteCommentProps> = ({
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel onClick={() => setOpen(false)}>
+                        Cancel
+                    </AlertDialogCancel>
                     <AlertDialogAction
                         className="bg-destructive dark:bg-destructive"
                         onClick={handleDelete}
