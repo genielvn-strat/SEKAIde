@@ -13,7 +13,7 @@ import {
     SidebarMenuItem,
     SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { FolderOpen, Home, Users, User, ChevronDown, Bell } from "lucide-react";
+import { FolderOpen, Home, Users, User, ChevronDown, Bell, Calendar } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
 import { Button } from "./ui/button";
@@ -39,6 +39,11 @@ const items = [
         title: "Notifications",
         url: "/notifications",
         icon: Bell,
+    },
+    {
+        title: "Calendar",
+        url: "/calendar",
+        icon: Calendar,
     },
     {
         title: "Teams",
