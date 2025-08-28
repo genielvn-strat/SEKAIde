@@ -18,6 +18,9 @@ import { Circle, FolderOpen, LayoutList } from "lucide-react";
 import { FetchProject, FetchTask } from "@/types/ServerResponses";
 import TaskDetails from "@/components/dialog/TaskDetails";
 import Link from "next/link";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { useUser } from "@/hooks/useUser";
 
 const locales = {
     "en-US": enUS,
@@ -33,6 +36,7 @@ const localizer = dateFnsLocalizer({
 export default function CalendarPage() {
     const [selectedTask, setSelectedTask] = useState<FetchTask | null>(null);
     const [showTask, setShowTask] = useState<boolean>(false);
+    const [userTask, setUserTask] = useState<boolean>(false);
     const {
         tasks,
         isLoading: tasksIsLoading,
@@ -45,8 +49,13 @@ export default function CalendarPage() {
         isError: projectsIsError,
         error: projectsError,
     } = useProjects();
+    const { id } = useUser();
     const tasksEvents = useMemo(() => {
-        const filteredTask = tasks?.filter((task) => task.dueDate);
+        let filteredTask = tasks?.filter((task) => task.dueDate);
+        // .filter((task) => task.assigneeId == user.id);
+
+        if (userTask && id)
+            filteredTask = filteredTask?.filter((task) => task.assigneeId == id);
 
         return filteredTask
             ? filteredTask.map((task) => {
@@ -62,7 +71,7 @@ export default function CalendarPage() {
                   };
               })
             : [];
-    }, [tasks]);
+    }, [tasks, userTask]);
     const projectsEvents = useMemo(() => {
         const filteredProjects = projects?.filter((project) => project.dueDate);
 
@@ -143,7 +152,16 @@ export default function CalendarPage() {
                         View team project and task deadlines
                     </TypographyMuted>
                 </div>
-                <div className="right"></div>
+                <div className="right">
+                    <div className="flex items-center space-x-2">
+                        <Switch
+                            id="my-task"
+                            onCheckedChange={setUserTask}
+                            checked={userTask}
+                        />
+                        <Label htmlFor="my-task">Show my tasks</Label>
+                    </div>
+                </div>
             </div>
             <Separator className="my-4" />
 
