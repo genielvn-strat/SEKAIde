@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import { DataTable } from "@/components/DataTable";
 import { ProjectTasksColumn } from "@/components/columns/ProjectTasksColumns";
-import { useTasks } from "@/hooks/useTasks";
+import { useProjectTasks } from "@/hooks/useTasks";
 import CreateTask from "@/components/buttons/CreateTask";
 import {
     Breadcrumb,
@@ -39,7 +39,12 @@ export default function ProjectDetails({ params }: ProjectProps) {
     const { project, isLoading, isError, error } =
         useProjectDetails(projectSlug);
 
-    const { tasks, isLoading: taskLoading } = useTasks(projectSlug, {
+    const {
+        tasks,
+        isLoading: taskLoading,
+        isError: taskIsError,
+        error: taskError,
+    } = useProjectTasks(projectSlug, {
         enabled: !!project,
     });
 
@@ -51,7 +56,7 @@ export default function ProjectDetails({ params }: ProjectProps) {
         return notFound();
     }
 
-    if (isError || !tasks) {
+    if (isError || taskError || !tasks) {
         return <ErrorAlert message={error?.message} />;
     }
 
