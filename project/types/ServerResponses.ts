@@ -53,10 +53,12 @@ export type FetchTeamMember = {
     username: string;
     email: string;
     displayPictureLink: string;
+    roleId: string;
     roleName: string;
     roleColor?: string | null;
     inviteConfirmed: boolean;
     allowKick?: boolean;
+    allowUpdate?: boolean;
 };
 
 // Tasks

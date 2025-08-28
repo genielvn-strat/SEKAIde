@@ -8,8 +8,12 @@ import {
     fetchTeamMembersByTeamSlug,
     leaveMember,
     rejectMembership,
+    updateMember,
 } from "@/actions/teamMemberActions";
-import { CreateTeamMemberInput } from "@/lib/validations";
+import {
+    CreateTeamMemberInput,
+    UpdateTeamMemberInput,
+} from "@/lib/validations";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function useTeamMembers(
@@ -70,6 +74,20 @@ export function useTeamMemberActions() {
             queryClient.invalidateQueries({ queryKey: [`teamMembers`] });
         },
     });
+    const update = useMutation({
+        mutationFn: ({
+            teamSlug,
+            teamMemberUserId,
+            data,
+        }: {
+            teamSlug: string;
+            teamMemberUserId: string;
+            data: UpdateTeamMemberInput;
+        }) => updateMember(teamSlug, teamMemberUserId, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`teamMembers`] });
+        },
+    });
     const accept = useMutation({
         mutationFn: ({ teamMemberId }: { teamMemberId: string }) =>
             acceptMembership(teamMemberId),
@@ -108,6 +126,7 @@ export function useTeamMemberActions() {
 
     return {
         invite: invite.mutateAsync,
+        update: update.mutateAsync,
         accept: accept.mutateAsync,
         reject: reject.mutateAsync,
         kick: kick.mutateAsync,
