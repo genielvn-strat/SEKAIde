@@ -13,7 +13,7 @@ import { useCalendarTasks } from "@/hooks/useTasks";
 import LoadingSkeletonCards from "@/components/LoadingSkeletonCards";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import ErrorAlert from "@/components/ErrorAlert";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     createPermissions,
@@ -22,6 +22,10 @@ import {
 } from "@/actions/createActions";
 import { useProjects } from "@/hooks/useProjects";
 import { Circle, FolderOpen, LayoutList } from "lucide-react";
+import { TypographyP } from "@/components/typography/TypographyP";
+import { FetchProject, FetchTask } from "@/types/ServerResponses";
+import TaskDetails from "@/components/dialog/TaskDetails";
+import Link from "next/link";
 
 const locales = {
     "en-US": enUS,
@@ -35,6 +39,8 @@ const localizer = dateFnsLocalizer({
     locales,
 });
 export default function CalendarPage() {
+    const [selectedTask, setSelectedTask] = useState<FetchTask | null>(null);
+    const [showTask, setShowTask] = useState<boolean>(false);
     const {
         tasks,
         isLoading: tasksIsLoading,
@@ -59,6 +65,8 @@ export default function CalendarPage() {
                       start: new Date(task.dueDate!),
                       end: new Date(task.dueDate!),
                       allDay: true,
+                      finished: task.finished,
+                      data: task,
                   };
               })
             : [];
@@ -75,6 +83,11 @@ export default function CalendarPage() {
                       start: new Date(project.dueDate!),
                       end: new Date(project.dueDate!),
                       allDay: true,
+                      finished:
+                          project.finishedTaskCount! /
+                              project.totalTaskCount! ==
+                          1,
+                      data: project,
                   };
               })
             : [];
@@ -85,6 +98,8 @@ export default function CalendarPage() {
             (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
         );
     }, [tasksEvents, projectsEvents]);
+
+    const unfinishedEvents = events.filter((e) => !e.finished);
 
     if (tasksIsLoading || projectsIsLoading) return <LoadingSkeleton />;
     if (tasksIsError || projectsIsError)
@@ -158,6 +173,12 @@ export default function CalendarPage() {
                                     timeGutterFormat: () => "",
                                     eventTimeRangeFormat: () => "",
                                 }}
+                                onSelectEvent={(e) => {
+                                    if (e.type == "task") {
+                                        setSelectedTask(e.data as FetchTask);
+                                        setShowTask(true);
+                                    }
+                                }}
                             />
                         </div>
                     </CardContent>
@@ -168,35 +189,90 @@ export default function CalendarPage() {
                         <CardTitle>Upcoming Deadlines</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                        {events.map((event, index) => (
-                            <div
-                                key={index}
-                                className="flex items-center justify-between p-3 border rounded-md"
-                            >
-                                <div className="flex flex-row items-center gap-4">
-                                    {event.type == "task" ? (
-                                        <LayoutList />
-                                    ) : event.type == "project" ? (
-                                        <FolderOpen />
-                                    ) : (
-                                        <Circle />
-                                    )}
-                                    <div>
-                                        <div className="font-medium">
-                                            {event.title}
+                        {unfinishedEvents.length == 0 ? (
+                            <div className="flex items-center justify-center">
+                                <TypographyMuted>
+                                    No due tasks and projects across your whole
+                                    team.
+                                </TypographyMuted>
+                            </div>
+                        ) : (
+                            unfinishedEvents.map((event, index) => {
+                                if (event.finished) return;
+                                return (
+                                    <div
+                                        key={index}
+                                        className="flex items-center justify-between p-3 border rounded-md"
+                                    >
+                                        <div className="flex flex-row items-center gap-4">
+                                            {event.type == "task" ? (
+                                                <LayoutList />
+                                            ) : event.type == "project" ? (
+                                                <FolderOpen />
+                                            ) : (
+                                                <Circle />
+                                            )}
+                                            <div>
+                                                {event.type == "task" ? (
+                                                    <TaskDetails
+                                                        task={
+                                                            event.data as FetchTask
+                                                        }
+                                                    >
+                                                        <div className="font-medium">
+                                                            {event.title}
+                                                        </div>
+                                                    </TaskDetails>
+                                                ) : (
+                                                    event.type == "project" && (
+                                                        <Link
+                                                            href={`/projects/${
+                                                                (
+                                                                    event.data as FetchProject
+                                                                ).slug
+                                                            }`}
+                                                        >
+                                                            <div className="font-medium">
+                                                                {event.title}
+                                                            </div>
+                                                        </Link>
+                                                    )
+                                                )}
+                                                <div className="text-sm text-muted-foreground">
+                                                    {event.description}
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="text-sm text-muted-foreground">
-                                            {event.description}
+                                        <div
+                                            className={`flex flex-row items-center gap-4 ${
+                                                event.start &&
+                                                !event.finished &&
+                                                new Date(event.start) <
+                                                    new Date()
+                                                    ? "text-red-600 font-semibold"
+                                                    : ""
+                                            }`}
+                                        >
+                                            <div>
+                                                {!event.start
+                                                    ? "No due date"
+                                                    : `${new Date(
+                                                          event.start
+                                                      ).toLocaleDateString()}`}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div className="text-sm text-muted-foreground">
-                                    {event.start.toLocaleDateString()}
-                                </div>
-                            </div>
-                        ))}
+                                );
+                            })
+                        )}
                     </CardContent>
                 </Card>
+                {showTask && selectedTask && (
+                    <TaskDetails
+                        task={selectedTask}
+                        onOpenChange={setShowTask}
+                    />
+                )}
             </div>
         </>
     );

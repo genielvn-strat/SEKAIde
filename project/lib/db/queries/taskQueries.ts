@@ -227,7 +227,6 @@ export const taskQueries = {
                 .where(
                     and(
                         eq(tasks.assigneeId, userId),
-                        eq(tasks.finished, false),
                         isNotNull(tasks.dueDate)
                     )
                 )
