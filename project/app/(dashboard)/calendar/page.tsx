@@ -1,43 +1,134 @@
 "use client";
 
-import { useState } from "react";
-import {
-    Calendar as CalendarIcon,
-    ChevronLeft,
-    ChevronRight,
-    Plus,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { dateFnsLocalizer } from "react-big-calendar";
+import { format, parse, startOfWeek, getDay } from "date-fns";
+import { enUS } from "date-fns/locale/en-US";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import "react-big-calendar/lib/css/react-big-calendar.css";
 import { TypographyH1 } from "@/components/typography/TypographyH1";
 import { TypographyMuted } from "@/components/typography/TypographyMuted";
+import { Separator } from "@/components/ui/separator";
+import ShadcnBigCalendar from "@/components/shadcn-big-calendar/ShadcnBigCalendar";
+import { useCalendarTasks } from "@/hooks/useTasks";
+import LoadingSkeletonCards from "@/components/LoadingSkeletonCards";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
+import ErrorAlert from "@/components/ErrorAlert";
+import { useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import {
+    createPermissions,
+    createRolePermissions,
+    createRoles,
+} from "@/actions/createActions";
+import { useProjects } from "@/hooks/useProjects";
+import { Circle, FolderOpen, LayoutList } from "lucide-react";
 
+const locales = {
+    "en-US": enUS,
+};
+
+const localizer = dateFnsLocalizer({
+    format,
+    parse,
+    startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 0 }),
+    getDay,
+    locales,
+});
 export default function CalendarPage() {
-    const [currentMonth, setCurrentMonth] = useState("December 2024");
-    const [view, setView] = useState("month");
+    const {
+        tasks,
+        isLoading: tasksIsLoading,
+        isError: tasksIsError,
+        error: tasksError,
+    } = useCalendarTasks();
+    const {
+        projects,
+        isLoading: projectsIsLoading,
+        isError: projectsIsError,
+        error: projectsError,
+    } = useProjects();
+    const tasksEvents = useMemo(() => {
+        const filteredTask = tasks?.filter((task) => task.dueDate);
 
-    // Sample events
-    const events = [
-        {
-            title: "Website Redesign",
-            date: "2024-12-15",
-            type: "Project Deadline",
-        },
-        { title: "Team Meeting", date: "2024-12-18", type: "Meeting" },
-        { title: "Mobile App Launch", date: "2024-12-22", type: "Milestone" },
-    ];
+        return filteredTask
+            ? filteredTask.map((task) => {
+                  return {
+                      type: "task",
+                      title: task.title,
+                      description: task.description,
+                      start: new Date(task.dueDate!),
+                      end: new Date(task.dueDate!),
+                      allDay: true,
+                  };
+              })
+            : [];
+    }, [tasks]);
+    const projectsEvents = useMemo(() => {
+        const projectTasks = projects?.filter((project) => project.dueDate);
+
+        return projectTasks
+            ? projectTasks.map((project) => {
+                  return {
+                      type: "project",
+                      title: project.name,
+                      description: project.description,
+                      start: new Date(project.dueDate!),
+                      end: new Date(project.dueDate!),
+                      allDay: true,
+                  };
+              })
+            : [];
+    }, [projects]);
+
+    const events = useMemo(() => {
+        return [...tasksEvents, ...projectsEvents].sort(
+            (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
+        );
+    }, [tasksEvents, projectsEvents]);
+
+    if (tasksIsLoading || projectsIsLoading) return <LoadingSkeleton />;
+    if (tasksIsError || projectsIsError)
+        return (
+            <ErrorAlert
+                message={tasksError?.message || projectsError?.message}
+            />
+        );
+
+    // const sampleEvents = [
+    //     {
+    //         title: "Website Redesign",
+    //         start: new Date("2025-12-15"),
+    //         end: new Date("2025-12-15"),
+    //         allDay: true,
+    //     },
+    //     {
+    //         title: "Website Redesign",
+    //         start: new Date("2025-12-15"),
+    //         end: new Date("2025-12-15"),
+    //         allDay: true,
+    //     },
+    //     {
+    //         title: "Website Redesign",
+    //         start: new Date("2025-12-15"),
+    //         end: new Date("2025-12-15"),
+    //         allDay: true,
+    //     },
+    //     {
+    //         title: "Team Meeting",
+    //         start: new Date("2025-12-18"),
+    //         end: new Date("2025-12-18"),
+    //         allDay: true,
+    //     },
+    //     {
+    //         title: "Mobile App Launch",
+    //         start: new Date("2025-12-22"),
+    //         end: new Date("2025-12-22"),
+    //         allDay: true,
+    //     },
+    // ];
 
     return (
         <>
-            {/* Header */}
             <div className="doc-header flex flex-row justify-between items-center">
                 <div className="left">
                     <TypographyH1>Calendar</TypographyH1>
@@ -49,39 +140,29 @@ export default function CalendarPage() {
             </div>
             <Separator className="my-4" />
 
-            {/* Calendar Controls */}
             <div className="flex flex-col gap-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                            <Button variant="ghost" size="icon">
-                                <ChevronLeft className="h-4 w-4" />
-                            </Button>
-                            <CardTitle>{currentMonth}</CardTitle>
-                            <Button variant="ghost" size="icon">
-                                <ChevronRight className="h-4 w-4" />
-                            </Button>
-                        </div>
-                        <Select value={view} onValueChange={setView}>
-                            <SelectTrigger className="w-[120px]">
-                                <SelectValue placeholder="View" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="month">Month</SelectItem>
-                                <SelectItem value="week">Week</SelectItem>
-                                <SelectItem value="day">Day</SelectItem>
-                            </SelectContent>
-                        </Select>
+                        <CardTitle>Calendar</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="h-72 flex flex-col items-center justify-center text-muted-foreground border rounded-md">
-                            <CalendarIcon className="h-10 w-10 mb-2" />
-                            <p>Calendar grid placeholder ({view} view)</p>
+                        <div className="h-[600px]">
+                            <ShadcnBigCalendar
+                                localizer={localizer}
+                                events={events}
+                                style={{ height: "100%" }}
+                                views={["month", "agenda"]}
+                                step={60}
+                                showMultiDayTimes={false}
+                                formats={{
+                                    timeGutterFormat: () => "",
+                                    eventTimeRangeFormat: () => "",
+                                }}
+                            />
                         </div>
                     </CardContent>
                 </Card>
 
-                {/* Agenda / Upcoming Events */}
                 <Card>
                     <CardHeader>
                         <CardTitle>Upcoming Deadlines</CardTitle>
@@ -92,23 +173,25 @@ export default function CalendarPage() {
                                 key={index}
                                 className="flex items-center justify-between p-3 border rounded-md"
                             >
-                                <div>
-                                    <div className="font-medium">
-                                        {event.title}
-                                    </div>
-                                    <div className="text-sm text-muted-foreground">
-                                        {event.type}
+                                <div className="flex flex-row items-center gap-4">
+                                    {event.type == "task" ? (
+                                        <LayoutList />
+                                    ) : event.type == "project" ? (
+                                        <FolderOpen />
+                                    ) : (
+                                        <Circle />
+                                    )}
+                                    <div>
+                                        <div className="font-medium">
+                                            {event.title}
+                                        </div>
+                                        <div className="text-sm text-muted-foreground">
+                                            {event.description}
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="text-sm text-muted-foreground">
-                                    {new Date(event.date).toLocaleDateString(
-                                        "en-US",
-                                        {
-                                            month: "short",
-                                            day: "numeric",
-                                            year: "numeric",
-                                        }
-                                    )}
+                                    {event.start.toLocaleDateString()}
                                 </div>
                             </div>
                         ))}
@@ -117,4 +200,14 @@ export default function CalendarPage() {
             </div>
         </>
     );
+}
+
+{
+    /* <Button
+                onClick={async () => {
+                    await createRoles();
+                    await createPermissions();
+                    await createRolePermissions();
+                }}
+            ></Button> */
 }

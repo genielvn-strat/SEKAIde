@@ -1,13 +1,14 @@
 "use client";
 
 import {
-    fetchTasks,
+    fetchProjectTasks,
     createTask,
     deleteTask,
     updateTask,
     fetchTaskBySlug,
     arrangeTask,
     fetchTeamTasks,
+    fetchCalendarTask,
 } from "@/actions/taskActions";
 import { CreateTaskInput, UpdateTaskInput } from "@/lib/validations";
 import { FetchTask } from "@/types/ServerResponses";
@@ -80,7 +81,7 @@ export function useTaskActions() {
         isDeleting: del.isPending,
     };
 }
-export function useTasks(
+export function useProjectTasks(
     projectSlug: string,
     options: { enabled?: boolean } = { enabled: true }
 ) {
@@ -91,8 +92,27 @@ export function useTasks(
         error,
     } = useQuery({
         queryKey: [`tasks`],
-        queryFn: () => fetchTasks(projectSlug),
+        queryFn: () => fetchProjectTasks(projectSlug),
         enabled: !!projectSlug && options.enabled,
+        refetchInterval: 30000,
+    });
+
+    return {
+        tasks: res?.success ? res.data : null,
+        isError,
+        isLoading,
+        error,
+    };
+}
+export function useCalendarTasks() {
+    const {
+        data: res,
+        isError,
+        isLoading,
+        error,
+    } = useQuery({
+        queryKey: [`tasks`],
+        queryFn: () => fetchCalendarTask(),
         refetchInterval: 30000,
     });
 
