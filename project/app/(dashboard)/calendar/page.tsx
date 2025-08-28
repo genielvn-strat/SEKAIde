@@ -10,19 +10,11 @@ import { TypographyMuted } from "@/components/typography/TypographyMuted";
 import { Separator } from "@/components/ui/separator";
 import ShadcnBigCalendar from "@/components/shadcn-big-calendar/ShadcnBigCalendar";
 import { useCalendarTasks } from "@/hooks/useTasks";
-import LoadingSkeletonCards from "@/components/LoadingSkeletonCards";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import ErrorAlert from "@/components/ErrorAlert";
 import { useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-    createPermissions,
-    createRolePermissions,
-    createRoles,
-} from "@/actions/createActions";
 import { useProjects } from "@/hooks/useProjects";
 import { Circle, FolderOpen, LayoutList } from "lucide-react";
-import { TypographyP } from "@/components/typography/TypographyP";
 import { FetchProject, FetchTask } from "@/types/ServerResponses";
 import TaskDetails from "@/components/dialog/TaskDetails";
 import Link from "next/link";
@@ -72,10 +64,10 @@ export default function CalendarPage() {
             : [];
     }, [tasks]);
     const projectsEvents = useMemo(() => {
-        const projectTasks = projects?.filter((project) => project.dueDate);
+        const filteredProjects = projects?.filter((project) => project.dueDate);
 
-        return projectTasks
-            ? projectTasks.map((project) => {
+        return filteredProjects
+            ? filteredProjects.map((project) => {
                   return {
                       type: "project",
                       title: project.name,
