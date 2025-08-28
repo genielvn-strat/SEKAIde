@@ -13,7 +13,14 @@ import {
     SidebarMenuItem,
     SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { FolderOpen, Home, Users, User, ChevronDown, Bell, Calendar } from "lucide-react";
+import {
+    FolderOpen,
+    Home,
+    Users,
+    Bell,
+    Calendar,
+    BellDotIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
 import { Button } from "./ui/button";
@@ -28,38 +35,50 @@ import { TypographyP } from "./typography/TypographyP";
 import { TypographyMuted } from "./typography/TypographyMuted";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { redirect } from "next/navigation";
-
-const items = [
-    {
-        title: "Dashboard",
-        url: "/dashboard",
-        icon: Home,
-    },
-    {
-        title: "Notifications",
-        url: "/notifications",
-        icon: Bell,
-    },
-    {
-        title: "Calendar",
-        url: "/calendar",
-        icon: Calendar,
-    },
-    {
-        title: "Teams",
-        url: "/teams",
-        icon: Users,
-    },
-    {
-        title: "Projects",
-        url: "/projects",
-        icon: FolderOpen,
-    },
-];
+import { useInvitedTeams } from "@/hooks/useTeams";
+import { useEffect, useMemo } from "react";
+import { toast } from "sonner";
 
 export function AppSidebar() {
     const session = useSession();
     const { signOut } = useAuth();
+    const { teams } = useInvitedTeams();
+    const items = useMemo(
+        () => [
+            {
+                title: "Dashboard",
+                url: "/dashboard",
+                icon: Home,
+            },
+            {
+                title: "Notifications",
+                url: "/notifications",
+                icon: teams && teams.length > 0 ? BellDotIcon : Bell,
+            },
+            {
+                title: "Calendar",
+                url: "/calendar",
+                icon: Calendar,
+            },
+            {
+                title: "Teams",
+                url: "/teams",
+                icon: Users,
+            },
+            {
+                title: "Projects",
+                url: "/projects",
+                icon: FolderOpen,
+            },
+        ],
+        [teams]
+    );
+
+    useEffect(() => {
+        if (teams && teams?.length > 0) {
+            toast.info("You have a new team invitation.");
+        }
+    }, [teams]);
 
     return (
         <Sidebar>
@@ -122,10 +141,18 @@ export function AppSidebar() {
                                 side="top"
                                 className="w-[--radix-popper-anchor-width]"
                             >
-                                <DropdownMenuItem onClick={() => {redirect("/settings")}}>
+                                <DropdownMenuItem
+                                    onClick={() => {
+                                        redirect("/settings");
+                                    }}
+                                >
                                     Settings
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => {signOut({redirectUrl: "/"})}}>
+                                <DropdownMenuItem
+                                    onClick={() => {
+                                        signOut({ redirectUrl: "/" });
+                                    }}
+                                >
                                     Sign Out
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
