@@ -142,7 +142,7 @@ export const projectQueries = {
                 .from(teamMembers)
                 .innerJoin(projects, eq(teamMembers.teamId, projects.teamId))
                 .innerJoin(teams, eq(teamMembers.teamId, teams.id))
-                .leftJoin(tasks, eq(tasks.projectId, projects.id)) // join tasks to projects
+                .leftJoin(tasks, eq(tasks.projectId, projects.id)) 
                 .where(
                     and(
                         eq(teamMembers.userId, userId),
@@ -150,7 +150,7 @@ export const projectQueries = {
                     )
                 )
                 .groupBy(projects.id, teams.name)
-                .orderBy(desc(projects.updatedAt)); // group to aggregate per project
+                .orderBy(desc(projects.updatedAt));
             return success(200, "Projects successfully fetched", result);
         } catch {
             return failure(500, "Failed to fetch projects");

@@ -13,7 +13,7 @@ import { arrayMove, SortableContext } from "@dnd-kit/sortable";
 import { useEffect, useState } from "react";
 import { KanbanColumn } from "./KanbanColumn";
 import { KanbanTask } from "./KanbanTask";
-import { useTaskActions, useTasks } from "@/hooks/useTasks";
+import { useTaskActions, useProjectTasks } from "@/hooks/useTasks";
 import { useLists } from "@/hooks/useLists";
 import LoadingSkeletonCards from "./LoadingSkeletonCards";
 import { Card, CardContent } from "@/components/ui/card";

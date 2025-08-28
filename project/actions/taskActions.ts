@@ -14,7 +14,7 @@ import { nanoid } from "nanoid";
 import { failure } from "@/types/Response";
 import { ZodError } from "zod";
 
-export const fetchTasks = async (projectSlug: string) => {
+export const fetchProjectTasks = async (projectSlug: string) => {
     const userId = await getUserDbId();
     const tasks = await queries.tasks.getByProjectSlug(projectSlug, userId);
     if (!tasks.success && tasks.status >= 500) throw new Error(tasks.message);
@@ -26,7 +26,12 @@ export const fetchTeamTasks = async (teamSlug: string) => {
     if (!tasks.success && tasks.status >= 500) throw new Error(tasks.message);
     return tasks;
 };
-
+export const fetchCalendarTask = async () => {
+    const userId = await getUserDbId();
+    const tasks = await queries.tasks.getCalendarTasks(userId);
+    if (!tasks.success && tasks.status >= 500) throw new Error(tasks.message);
+    return tasks;
+};
 export const fetchTaskBySlug = async (
     taskSlug: string,
     projectSlug: string

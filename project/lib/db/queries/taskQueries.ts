@@ -1,5 +1,5 @@
-import { users, tasks, projects, lists, teams } from "@/migrations/schema";
-import { and, asc, eq, sql } from "drizzle-orm";
+import { users, tasks, projects, lists, teams, teamMembers } from "@/migrations/schema";
+import { and, asc, eq, isNotNull, sql } from "drizzle-orm";
 import { ArrangeTask, CreateTask, UpdateTask } from "@/types/Task";
 import { failure, success } from "@/types/Response";
 import { authorization } from "./authorizationQueries";
@@ -195,7 +195,48 @@ export const taskQueries = {
             return failure(500, "Failed to fetch task");
         }
     },
+    getCalendarTasks: async (userId: string) => {
+        try {
+            const result: FetchTask[] = await db
+                .select({
+                    id: tasks.id,
+                    title: tasks.title,
+                    description: tasks.description,
+                    priority: tasks.priority,
+                    dueDate: tasks.dueDate,
+                    position: tasks.position,
+                    slug: tasks.slug,
+                    assigneeId: users.id,
+                    assigneeName: users.name,
+                    assigneeUsername: users.username,
+                    assigneeDisplayPicture: users.displayPictureLink,
+                    projectName: projects.name,
+                    projectSlug: projects.slug,
+                    listId: lists.id,
+                    listName: lists.name,
+                    listColor: lists.color,
+                    finished: tasks.finished,
+                    finishedAt: tasks.finishedAt,
+                })
+                .from(tasks)
+                .innerJoin(projects, eq(tasks.projectId, projects.id))
+                .innerJoin(teams, eq(projects.teamId, teams.id))
+                .innerJoin(teamMembers, eq(teamMembers.teamId, teams.id))
+                .innerJoin(users, eq(tasks.assigneeId, users.id))
+                .leftJoin(lists, eq(tasks.listId, lists.id))
+                .where(
+                    and(
+                        eq(tasks.assigneeId, userId),
+                        isNotNull(tasks.dueDate)
+                    )
+                )
+                .orderBy(asc(tasks.dueDate));
 
+            return success(200, "Calendar Tasks fetched successfully", result);
+        } catch {
+            return failure(500, "Failed to fetch Calendar Tasks");
+        }
+    },
     create: async (projectSlug: string, data: CreateTask, userId: string) => {
         if (!data.title || !data.listId) {
             return failure(400, "Missing required fields");

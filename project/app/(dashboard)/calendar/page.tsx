@@ -1,89 +1,289 @@
-import { Calendar, ChevronLeft, ChevronRight, Plus } from "lucide-react"
+"use client";
 
+import { dateFnsLocalizer } from "react-big-calendar";
+import { format, parse, startOfWeek, getDay } from "date-fns";
+import { enUS } from "date-fns/locale/en-US";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import { TypographyH1 } from "@/components/typography/TypographyH1";
+import { TypographyMuted } from "@/components/typography/TypographyMuted";
+import { Separator } from "@/components/ui/separator";
+import ShadcnBigCalendar from "@/components/shadcn-big-calendar/ShadcnBigCalendar";
+import { useCalendarTasks } from "@/hooks/useTasks";
+import LoadingSkeletonCards from "@/components/LoadingSkeletonCards";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
+import ErrorAlert from "@/components/ErrorAlert";
+import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+    createPermissions,
+    createRolePermissions,
+    createRoles,
+} from "@/actions/createActions";
+import { useProjects } from "@/hooks/useProjects";
+import { Circle, FolderOpen, LayoutList } from "lucide-react";
+import { TypographyP } from "@/components/typography/TypographyP";
+import { FetchProject, FetchTask } from "@/types/ServerResponses";
+import TaskDetails from "@/components/dialog/TaskDetails";
+import Link from "next/link";
+
+const locales = {
+    "en-US": enUS,
+};
+
+const localizer = dateFnsLocalizer({
+    format,
+    parse,
+    startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 0 }),
+    getDay,
+    locales,
+});
 export default function CalendarPage() {
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-outer_space-500 dark:text-platinum-500">Calendar</h1>
-          <p className="text-payne's_gray-500 dark:text-french_gray-500 mt-2">
-            View project deadlines and team schedules
-          </p>
-        </div>
-        <button className="inline-flex items-center px-4 py-2 bg-blue_munsell-500 text-white rounded-lg hover:bg-blue_munsell-600 transition-colors">
-          <Plus size={20} className="mr-2" />
-          Add Event
-        </button>
-      </div>
+    const [selectedTask, setSelectedTask] = useState<FetchTask | null>(null);
+    const [showTask, setShowTask] = useState<boolean>(false);
+    const {
+        tasks,
+        isLoading: tasksIsLoading,
+        isError: tasksIsError,
+        error: tasksError,
+    } = useCalendarTasks();
+    const {
+        projects,
+        isLoading: projectsIsLoading,
+        isError: projectsIsError,
+        error: projectsError,
+    } = useProjects();
+    const tasksEvents = useMemo(() => {
+        const filteredTask = tasks?.filter((task) => task.dueDate);
 
-      {/* Implementation Tasks Banner */}
-      <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-        <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">
-          📅 Calendar Implementation Tasks
-        </h3>
-        <ul className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1">
-          <li>• Task 6.2: Add task due dates, priorities, and labels</li>
-          <li>• Task 6.6: Add bulk task operations and keyboard shortcuts</li>
-        </ul>
-      </div>
+        return filteredTask
+            ? filteredTask.map((task) => {
+                  return {
+                      type: "task",
+                      title: task.title,
+                      description: task.description,
+                      start: new Date(task.dueDate!),
+                      end: new Date(task.dueDate!),
+                      allDay: true,
+                      finished: task.finished,
+                      data: task,
+                  };
+              })
+            : [];
+    }, [tasks]);
+    const projectsEvents = useMemo(() => {
+        const projectTasks = projects?.filter((project) => project.dueDate);
 
-      {/* Calendar Header */}
-      <div className="bg-white dark:bg-outer_space-500 rounded-lg border border-french_gray-300 dark:border-payne's_gray-400 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-4">
-            <button className="p-2 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded-lg">
-              <ChevronLeft size={20} />
-            </button>
-            <h2 className="text-xl font-semibold text-outer_space-500 dark:text-platinum-500">December 2024</h2>
-            <button className="p-2 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded-lg">
-              <ChevronRight size={20} />
-            </button>
-          </div>
-          <div className="flex space-x-2">
-            <button className="px-3 py-1 text-sm bg-blue_munsell-100 text-blue_munsell-700 dark:bg-blue_munsell-900 dark:text-blue_munsell-300 rounded">
-              Month
-            </button>
-            <button className="px-3 py-1 text-sm text-payne's_gray-500 dark:text-french_gray-400 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded">
-              Week
-            </button>
-            <button className="px-3 py-1 text-sm text-payne's_gray-500 dark:text-french_gray-400 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded">
-              Day
-            </button>
-          </div>
-        </div>
+        return projectTasks
+            ? projectTasks.map((project) => {
+                  return {
+                      type: "project",
+                      title: project.name,
+                      description: project.description,
+                      start: new Date(project.dueDate!),
+                      end: new Date(project.dueDate!),
+                      allDay: true,
+                      finished:
+                          project.finishedTaskCount! /
+                              project.totalTaskCount! ==
+                          1,
+                      data: project,
+                  };
+              })
+            : [];
+    }, [projects]);
 
-        {/* Calendar Grid Placeholder */}
-        <div className="h-96 bg-platinum-800 dark:bg-outer_space-400 rounded-lg flex items-center justify-center">
-          <div className="text-center text-payne's_gray-500 dark:text-french_gray-400">
-            <Calendar size={48} className="mx-auto mb-2" />
-            <p>Calendar Component Placeholder</p>
-            <p className="text-sm">TODO: Implement with react-big-calendar or similar</p>
-          </div>
-        </div>
-      </div>
+    const events = useMemo(() => {
+        return [...tasksEvents, ...projectsEvents].sort(
+            (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
+        );
+    }, [tasksEvents, projectsEvents]);
 
-      {/* Upcoming Events */}
-      <div className="bg-white dark:bg-outer_space-500 rounded-lg border border-french_gray-300 dark:border-payne's_gray-400 p-6">
-        <h3 className="text-lg font-semibold text-outer_space-500 dark:text-platinum-500 mb-4">Upcoming Deadlines</h3>
-        <div className="space-y-3">
-          {[
-            { title: "Website Redesign", date: "Dec 15, 2024", type: "Project Deadline" },
-            { title: "Team Meeting", date: "Dec 18, 2024", type: "Meeting" },
-            { title: "Mobile App Launch", date: "Dec 22, 2024", type: "Milestone" },
-          ].map((event, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between p-3 bg-platinum-800 dark:bg-outer_space-400 rounded-lg"
-            >
-              <div>
-                <div className="font-medium text-outer_space-500 dark:text-platinum-500">{event.title}</div>
-                <div className="text-sm text-payne's_gray-500 dark:text-french_gray-400">{event.type}</div>
-              </div>
-              <div className="text-sm text-payne's_gray-500 dark:text-french_gray-400">{event.date}</div>
+    const unfinishedEvents = events.filter((e) => !e.finished);
+
+    if (tasksIsLoading || projectsIsLoading) return <LoadingSkeleton />;
+    if (tasksIsError || projectsIsError)
+        return (
+            <ErrorAlert
+                message={tasksError?.message || projectsError?.message}
+            />
+        );
+
+    // const sampleEvents = [
+    //     {
+    //         title: "Website Redesign",
+    //         start: new Date("2025-12-15"),
+    //         end: new Date("2025-12-15"),
+    //         allDay: true,
+    //     },
+    //     {
+    //         title: "Website Redesign",
+    //         start: new Date("2025-12-15"),
+    //         end: new Date("2025-12-15"),
+    //         allDay: true,
+    //     },
+    //     {
+    //         title: "Website Redesign",
+    //         start: new Date("2025-12-15"),
+    //         end: new Date("2025-12-15"),
+    //         allDay: true,
+    //     },
+    //     {
+    //         title: "Team Meeting",
+    //         start: new Date("2025-12-18"),
+    //         end: new Date("2025-12-18"),
+    //         allDay: true,
+    //     },
+    //     {
+    //         title: "Mobile App Launch",
+    //         start: new Date("2025-12-22"),
+    //         end: new Date("2025-12-22"),
+    //         allDay: true,
+    //     },
+    // ];
+
+    return (
+        <>
+            <div className="doc-header flex flex-row justify-between items-center">
+                <div className="left">
+                    <TypographyH1>Calendar</TypographyH1>
+                    <TypographyMuted>
+                        View team project and task deadlines
+                    </TypographyMuted>
+                </div>
+                <div className="right"></div>
             </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
+            <Separator className="my-4" />
+
+            <div className="flex flex-col gap-4">
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <CardTitle>Calendar</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="h-[600px]">
+                            <ShadcnBigCalendar
+                                localizer={localizer}
+                                events={events}
+                                style={{ height: "100%" }}
+                                views={["month", "agenda"]}
+                                step={60}
+                                showMultiDayTimes={false}
+                                formats={{
+                                    timeGutterFormat: () => "",
+                                    eventTimeRangeFormat: () => "",
+                                }}
+                                onSelectEvent={(e) => {
+                                    if (e.type == "task") {
+                                        setSelectedTask(e.data as FetchTask);
+                                        setShowTask(true);
+                                    }
+                                }}
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Upcoming Deadlines</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                        {unfinishedEvents.length == 0 ? (
+                            <div className="flex items-center justify-center">
+                                <TypographyMuted>
+                                    No due tasks and projects across your whole
+                                    team.
+                                </TypographyMuted>
+                            </div>
+                        ) : (
+                            unfinishedEvents.map((event, index) => {
+                                if (event.finished) return;
+                                return (
+                                    <div
+                                        key={index}
+                                        className="flex items-center justify-between p-3 border rounded-md"
+                                    >
+                                        <div className="flex flex-row items-center gap-4">
+                                            {event.type == "task" ? (
+                                                <LayoutList />
+                                            ) : event.type == "project" ? (
+                                                <FolderOpen />
+                                            ) : (
+                                                <Circle />
+                                            )}
+                                            <div>
+                                                {event.type == "task" ? (
+                                                    <TaskDetails
+                                                        task={
+                                                            event.data as FetchTask
+                                                        }
+                                                    >
+                                                        <div className="font-medium">
+                                                            {event.title}
+                                                        </div>
+                                                    </TaskDetails>
+                                                ) : (
+                                                    event.type == "project" && (
+                                                        <Link
+                                                            href={`/projects/${
+                                                                (
+                                                                    event.data as FetchProject
+                                                                ).slug
+                                                            }`}
+                                                        >
+                                                            <div className="font-medium">
+                                                                {event.title}
+                                                            </div>
+                                                        </Link>
+                                                    )
+                                                )}
+                                                <div className="text-sm text-muted-foreground">
+                                                    {event.description}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div
+                                            className={`flex flex-row items-center gap-4 ${
+                                                event.start &&
+                                                !event.finished &&
+                                                new Date(event.start) <
+                                                    new Date()
+                                                    ? "text-red-600 font-semibold"
+                                                    : ""
+                                            }`}
+                                        >
+                                            <div>
+                                                {!event.start
+                                                    ? "No due date"
+                                                    : `${new Date(
+                                                          event.start
+                                                      ).toLocaleDateString()}`}
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </CardContent>
+                </Card>
+                {showTask && selectedTask && (
+                    <TaskDetails
+                        task={selectedTask}
+                        onOpenChange={setShowTask}
+                    />
+                )}
+            </div>
+        </>
+    );
+}
+
+{
+    /* <Button
+                onClick={async () => {
+                    await createRoles();
+                    await createPermissions();
+                    await createRolePermissions();
+                }}
+            ></Button> */
 }

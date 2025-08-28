@@ -1,5 +1,5 @@
 import { FetchTask } from "@/types/ServerResponses";
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import {
     Drawer,
     DrawerClose,
@@ -23,14 +23,19 @@ import ListBadge from "../badge/ListBadge";
 
 interface TaskDetailsProps {
     task: FetchTask;
-    children: React.ReactNode;
+    children?: React.ReactNode;
+    onOpenChange?: Dispatch<SetStateAction<boolean>>;
 }
 
-const TaskDetails: React.FC<TaskDetailsProps> = ({ task, children }) => {
+const TaskDetails: React.FC<TaskDetailsProps> = ({
+    task,
+    children,
+    onOpenChange,
+}) => {
     const router = useRouter();
 
     return (
-        <Drawer>
+        <Drawer open={children ? undefined : true} onOpenChange={onOpenChange}>
             <DrawerTrigger className="text-left p-0">{children}</DrawerTrigger>
             <DrawerContent>
                 <div className="mx-auto w-full max-w-3xl">
