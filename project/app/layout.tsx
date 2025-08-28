@@ -22,7 +22,6 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        // TODO: Task 2.1 - Wrap with ClerkProvider once Clerk is set up
         <SidebarProvider>
             <ClerkProvider>
                 <TanstackProvider>
@@ -38,5 +37,3 @@ export default function RootLayout({
     );
 }
 
-// TODO: Task 2.1 - Set up Clerk authentication service
-// import { ClerkProvider } from "@clerk/nextjs"
