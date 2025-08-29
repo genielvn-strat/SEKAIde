@@ -189,7 +189,6 @@ export const dashboardQueries = {
     },
     getAssignedTasks: async (userId: string) => {
         try {
-            
             const result: FetchTask[] = await db
                 .select({
                     id: tasks.id,
@@ -216,11 +215,7 @@ export const dashboardQueries = {
                 .innerJoin(users, eq(tasks.assigneeId, users.id))
                 .leftJoin(lists, eq(tasks.listId, lists.id))
                 .where(
-                    and(
-                        eq(tasks.assigneeId, userId),
-                        eq(tasks.finished, false),
-                        isNotNull(tasks.dueDate)
-                    )
+                    and(eq(tasks.assigneeId, userId), eq(tasks.finished, false))
                 )
                 .orderBy(asc(tasks.dueDate));
 
