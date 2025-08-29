@@ -34,6 +34,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
                 <div className="flex flex-row align-center gap-4">
                     <Avatar>
                         <AvatarImage
+                            className="object-cover"
                             src={comment.authorDisplayPicture}
                             alt={comment.authorName}
                         />

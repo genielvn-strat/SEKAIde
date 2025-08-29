@@ -154,6 +154,7 @@ export default function TaskDetails({ params }: TaskProps) {
                         <div className="flex items-center gap-3">
                             <Avatar className="h-8 w-8">
                                 <AvatarImage
+                                    className="object-cover"
                                     src={task.assigneeDisplayPicture}
                                     alt={task.assigneeName}
                                 />

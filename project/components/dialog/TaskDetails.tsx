@@ -104,6 +104,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({
                                         <AvatarImage
                                             src={task.assigneeDisplayPicture}
                                             alt={task.assigneeName}
+                                            className="object-cover"
                                         />
                                         <AvatarFallback>
                                             {task.assigneeName

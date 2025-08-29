@@ -32,6 +32,7 @@ export const TeamMemberColumns: (
                     <Avatar>
                         <AvatarImage
                             src={member.displayPictureLink}
+                            className="object-cover"
                         ></AvatarImage>
                         <AvatarFallback>
                             {member.name?.charAt(0)?.toUpperCase()}

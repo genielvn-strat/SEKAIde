@@ -123,6 +123,7 @@ export function AppSidebar() {
                                     <div className="flex flex-row items-center gap-2 ">
                                         <Avatar>
                                             <AvatarImage
+                                                className="object-cover"
                                                 src={
                                                     session.session?.user
                                                         .imageUrl

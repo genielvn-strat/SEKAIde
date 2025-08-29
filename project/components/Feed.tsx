@@ -153,6 +153,7 @@ const FeedCard: React.FC<FeedProp> = ({ feed }) => {
                             <CardTitle className="flex flex-row items-center gap-4">
                                 <Avatar className="w-8 h-8">
                                     <AvatarImage
+                                        className="object-cover"
                                         src={comment.authorDisplayPicture}
                                     />
                                     <AvatarFallback>
@@ -200,6 +201,7 @@ const FeedCard: React.FC<FeedProp> = ({ feed }) => {
                             <CardTitle className="flex flex-row items-center gap-4">
                                 <Avatar className="w-8 h-8">
                                     <AvatarImage
+                                        className="object-cover"
                                         src={member.userDisplayPicture}
                                     />
                                     <AvatarFallback>
