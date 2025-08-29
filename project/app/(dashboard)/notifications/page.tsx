@@ -1,6 +1,6 @@
 "use client";
 
-import TeamInvitationCard from "@/components/TeamInvitationCard";
+import TeamInvitationCard from "@/components/cards/TeamInvitationCard";
 import { TypographyH1 } from "@/components/typography/TypographyH1";
 import { TypographyH2 } from "@/components/typography/TypographyH2";
 import { TypographyMuted } from "@/components/typography/TypographyMuted";

@@ -2,7 +2,7 @@
 import { FetchTask } from "@/types/ServerResponses";
 import React, { useMemo } from "react";
 import { TypographyH2 } from "./typography/TypographyH2";
-import TaskCard from "./TaskCard";
+import TaskCard from "./cards/TaskCard";
 import { useUser } from "@/hooks/useUser";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { MessageCircleQuestion } from "lucide-react";

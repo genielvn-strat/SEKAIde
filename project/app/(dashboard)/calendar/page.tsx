@@ -16,7 +16,7 @@ import { useMemo, useState } from "react";
 import { useProjects } from "@/hooks/useProjects";
 import { Circle, FolderOpen, LayoutList } from "lucide-react";
 import { FetchProject, FetchTask } from "@/types/ServerResponses";
-import TaskDetails from "@/components/dialog/TaskDetails";
+import TaskDetails from "@/components/modals/TaskDetails";
 import Link from "next/link";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -55,7 +55,9 @@ export default function CalendarPage() {
         // .filter((task) => task.assigneeId == user.id);
 
         if (userTask && id)
-            filteredTask = filteredTask?.filter((task) => task.assigneeId == id);
+            filteredTask = filteredTask?.filter(
+                (task) => task.assigneeId == id
+            );
 
         return filteredTask
             ? filteredTask.map((task) => {

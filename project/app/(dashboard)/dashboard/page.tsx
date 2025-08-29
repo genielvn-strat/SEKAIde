@@ -14,8 +14,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { MessageCircleQuestion } from "lucide-react";
 import LoadingSkeletonCards from "@/components/LoadingSkeletonCards";
 import { useProjects } from "@/hooks/useProjects";
-import ProjectCard from "@/components/ProjectCard";
-import TaskCard from "@/components/TaskCard";
+import ProjectCard from "@/components/cards/ProjectCard";
+import TaskCard from "@/components/cards/TaskCard";
 import ErrorAlert from "@/components/ErrorAlert";
 
 export default function DashboardPage() {

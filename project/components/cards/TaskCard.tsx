@@ -18,11 +18,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { FetchProject, FetchTask } from "@/types/ServerResponses";
-import { Progress } from "./ui/progress";
-import { Badge } from "./ui/badge";
-import Priority from "./badge/Priority";
-import TaskDetails from "./dialog/TaskDetails";
-import ListBadge from "./badge/ListBadge";
+import { Progress } from "../ui/progress";
+import { Badge } from "../ui/badge";
+import Priority from "../badge/Priority";
+import TaskDetails from "../modals/TaskDetails";
+import ListBadge from "../badge/ListBadge";
 
 interface TaskCardProps {
     task: FetchTask;
@@ -49,7 +49,10 @@ const TaskCard: React.FC<TaskCardProps> = ({
                 </CardDescription>
                 <div className="flex flex-row gap-2">
                     {task.listName && (
-                        <ListBadge listColor={task.listColor} listName={task.listName} />
+                        <ListBadge
+                            listColor={task.listColor}
+                            listName={task.listName}
+                        />
                     )}
                     <Priority priority={task.priority} />
 
@@ -84,9 +87,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
                 </div>
                 <div className={`flex flex-row items-center gap-4`}>
                     <FolderOpen />
-                    <TypographyP>
-                        {task.projectName}
-                    </TypographyP>
+                    <TypographyP>{task.projectName}</TypographyP>
                 </div>
             </CardContent>
         </Card>

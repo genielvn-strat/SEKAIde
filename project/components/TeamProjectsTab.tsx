@@ -2,7 +2,7 @@
 import { useTeamProjects } from "@/hooks/useProjects";
 import React, { useState, useMemo } from "react";
 import LoadingSkeletonCards from "./LoadingSkeletonCards";
-import ProjectCard from "./ProjectCard";
+import ProjectCard from "./cards/ProjectCard";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { MessageCircleQuestion, ListFilter } from "lucide-react";
 import { useAuthRoleByTeam } from "@/hooks/useRoles";

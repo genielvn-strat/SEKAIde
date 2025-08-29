@@ -11,17 +11,14 @@ import {
 import { FolderClock, FolderOpen, LayoutList, Users } from "lucide-react";
 import Link from "next/link";
 import { FetchProject } from "@/types/ServerResponses";
-import { Progress } from "./ui/progress";
+import { Progress } from "../ui/progress";
 
 interface ProjectCardProps {
     project: FetchProject;
     small?: boolean;
 }
 
-const ProjectCard: React.FC<ProjectCardProps> = ({
-    project,
-    small,
-}) => {
+const ProjectCard: React.FC<ProjectCardProps> = ({ project, small }) => {
     return (
         <Card className={small ? "w-full max-w-sm" : "w-full"} key={project.id}>
             <CardHeader>

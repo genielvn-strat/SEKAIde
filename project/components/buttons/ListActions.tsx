@@ -11,8 +11,8 @@ import { useListActions } from "@/hooks/useLists";
 import { toast } from "sonner";
 import { FetchList } from "@/types/ServerResponses";
 import { useAuthRoleByProject } from "@/hooks/useRoles";
-import DeleteList from "../dialog/DeleteList";
-import EditList from "../dialog/EditList";
+import DeleteList from "../modals/DeleteList";
+import EditList from "../modals/EditList";
 
 interface ListActionsProps {
     list: FetchList;

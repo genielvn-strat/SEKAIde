@@ -1,7 +1,7 @@
 import { FetchInvitedTeams } from "@/types/ServerResponses";
 import React from "react";
-import { Card, CardHeader } from "./ui/card";
-import { Button } from "./ui/button";
+import { Card, CardHeader } from "../ui/card";
+import { Button } from "../ui/button";
 import { useTeamMemberActions } from "@/hooks/useTeamMembers";
 import { toast } from "sonner";
 

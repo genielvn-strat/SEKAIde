@@ -5,7 +5,7 @@ import { TypographyH1 } from "@/components/typography/TypographyH1";
 import { TypographyMuted } from "@/components/typography/TypographyMuted";
 import { Separator } from "@/components/ui/separator";
 import CreateTeam from "@/components/buttons/CreateTeam";
-import TeamCard from "@/components/TeamCard";
+import TeamCard from "@/components/cards/TeamCard";
 import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import {

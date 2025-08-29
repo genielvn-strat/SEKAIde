@@ -5,7 +5,7 @@ import { TypographyH1 } from "@/components/typography/TypographyH1";
 import { TypographyMuted } from "@/components/typography/TypographyMuted";
 import { Separator } from "@/components/ui/separator";
 import CreateProject from "@/components/buttons/CreateProject";
-import ProjectCard from "@/components/ProjectCard";
+import ProjectCard from "@/components/cards/ProjectCard";
 import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import {

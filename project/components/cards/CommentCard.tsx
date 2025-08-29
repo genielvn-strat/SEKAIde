@@ -12,8 +12,8 @@ import {
 import { MoreHorizontal } from "lucide-react";
 import { TypographyMuted } from "@/components/typography/TypographyMuted";
 import { TypographyP } from "@/components/typography/TypographyP";
-import EditComment from "./dialog/EditComment";
-import DeleteComment from "./dialog/DeleteComment";
+import EditComment from "../modals/EditComment";
+import DeleteComment from "../modals/DeleteComment";
 interface CommentCardProps {
     comment: FetchComment;
     projectSlug: string;

@@ -7,8 +7,8 @@ import {
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
-import DeleteTask from "../dialog/DeleteTask";
-import EditTask from "../dialog/EditTask";
+import DeleteTask from "../modals/DeleteTask";
+import EditTask from "../modals/EditTask";
 import { FetchTask } from "@/types/ServerResponses";
 
 interface TaskDropDownProps {

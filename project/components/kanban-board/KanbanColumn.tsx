@@ -13,8 +13,8 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 
-import CreateTaskToList from "./buttons/CreateTaskToList";
-import ListActions from "./buttons/ListActions";
+import CreateTaskToList from "../buttons/CreateTaskToList";
+import ListActions from "../buttons/ListActions";
 import { CircleCheck } from "lucide-react";
 
 export function KanbanColumn({
