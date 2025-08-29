@@ -14,18 +14,15 @@ import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { useListActions } from "@/hooks/useLists";
 import { FetchList } from "@/types/ServerResponses";
+import useModalStore from "@/stores/modalStores";
 
 interface DeleteListProps {
     list: FetchList;
     projectSlug: string;
-    setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-const DeleteList: React.FC<DeleteListProps> = ({
-    list,
-    projectSlug,
-    setOpen,
-}) => {
+const DeleteList: React.FC<DeleteListProps> = ({ list, projectSlug }) => {
+    const { modals, setOpen } = useModalStore();
     const { deleteList } = useListActions(projectSlug);
 
     const handleDelete = async () => {
@@ -44,12 +41,15 @@ const DeleteList: React.FC<DeleteListProps> = ({
                 return;
             }
         } finally {
-            setOpen(false);
+            setOpen("deleteList", false);
         }
     };
 
     return (
-        <AlertDialog open onOpenChange={setOpen}>
+        <AlertDialog
+            open={modals.deleteList}
+            onOpenChange={(e: boolean) => setOpen("deleteList", e)}
+        >
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>Delete {list.name}?</AlertDialogTitle>

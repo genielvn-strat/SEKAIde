@@ -49,14 +49,16 @@ import { useTeamMembersByProject } from "@/hooks/useTeamMembers";
 import { TypographyMuted } from "../typography/TypographyMuted";
 import { TypographyP } from "../typography/TypographyP";
 import { useLists } from "@/hooks/useLists";
+import useModalStore from "@/stores/modalStores";
 
 interface EditTaskProps {
     task: FetchTask;
     projectSlug: string;
-    setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-const EditTask: React.FC<EditTaskProps> = ({ task, projectSlug, setOpen }) => {
+const EditTask: React.FC<EditTaskProps> = ({ task, projectSlug }) => {
+    const { modals, setOpen } = useModalStore();
+
     const { updateTask } = useTaskActions();
     const { permitted: permittedAssign } = useAuthRoleByProject(
         projectSlug,
@@ -107,10 +109,8 @@ const EditTask: React.FC<EditTaskProps> = ({ task, projectSlug, setOpen }) => {
 
     return (
         <Dialog
-            open
-            onOpenChange={() => {
-                setOpen(false);
-            }}
+            open={modals.editTask}
+            onOpenChange={(e: boolean) => setOpen("editTask", e)}
         >
             <Form {...form}>
                 <form

@@ -18,6 +18,7 @@ import { useState } from "react";
 import { useAuthRoleByTeam } from "@/hooks/useRoles";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import UpdateMember from "../modals/UpdateMember";
+import useModalStore from "@/stores/modalStores";
 
 export const TeamMemberColumns: (
     teamSlug: string
@@ -79,7 +80,8 @@ export const TeamMemberColumns: (
     {
         id: "actions",
         cell: ({ row }) => {
-            const [kickDialog, showKickDialog] = useState(false);
+            const { setOpen } = useModalStore();
+
             const [updateDialog, showUpdateDialog] = useState(false);
             const permittedKick = row.original.allowKick;
             const permittedUpdate = row.original.allowUpdate;
@@ -98,7 +100,9 @@ export const TeamMemberColumns: (
                             <DropdownMenuContent align="end">
                                 {permittedUpdate && (
                                     <DropdownMenuItem
-                                        onClick={() => showUpdateDialog(true)}
+                                        onClick={() =>
+                                            setOpen("updateMember", true)
+                                        }
                                     >
                                         Update
                                     </DropdownMenuItem>
@@ -106,28 +110,26 @@ export const TeamMemberColumns: (
                                 {permittedKick && (
                                     <DropdownMenuItem
                                         className="text-destructive"
-                                        onClick={() => showKickDialog(true)}
+                                        onClick={() =>
+                                            setOpen("kickMember", true)
+                                        }
                                     >
                                         Kick
                                     </DropdownMenuItem>
                                 )}
                             </DropdownMenuContent>
                         </DropdownMenu>
-                        {kickDialog && (
-                            <KickMember
-                                teamSlug={teamSlug}
-                                memberUserId={memberId}
-                                memberName={memberName}
-                                setOpen={showKickDialog}
-                            />
-                        )}
-                        {updateDialog && (
-                            <UpdateMember
-                                teamMember={row.original}
-                                teamSlug={teamSlug}
-                                setOpen={showUpdateDialog}
-                            />
-                        )}
+
+                        <KickMember
+                            teamSlug={teamSlug}
+                            memberUserId={memberId}
+                            memberName={memberName}
+                        />
+
+                        <UpdateMember
+                            teamMember={row.original}
+                            teamSlug={teamSlug}
+                        />
                     </>
                 )
             );

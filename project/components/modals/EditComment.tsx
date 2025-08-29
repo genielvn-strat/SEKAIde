@@ -43,19 +43,20 @@ import { Checkbox } from "../ui/checkbox";
 import { toast } from "sonner";
 import { useCommentActions } from "@/hooks/useComments";
 import { Textarea } from "../ui/textarea";
+import useModalStore from "@/stores/modalStores";
 interface EditCommentProps {
     comment: FetchComment;
     taskSlug: string;
     projectSlug: string;
-    setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 const EditComment: React.FC<EditCommentProps> = ({
     comment,
     taskSlug,
     projectSlug,
-    setOpen,
 }) => {
+    const { modals, setOpen } = useModalStore();
+
     const { updateComment } = useCommentActions(taskSlug);
     const form = useForm<UpdateCommentInput>({
         resolver: zodResolver(updateCommentSchema),
@@ -90,7 +91,10 @@ const EditComment: React.FC<EditCommentProps> = ({
     };
 
     return (
-        <Dialog open onOpenChange={setOpen}>
+        <Dialog
+            open={modals.editComment}
+            onOpenChange={(e: boolean) => setOpen("editComment", e)}
+        >
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} id="edit-comment">
                     <DialogContent className="sm:max-w-[425px]">

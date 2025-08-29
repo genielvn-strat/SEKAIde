@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/card";
 
 import CreateTaskToList from "../buttons/CreateTaskToList";
-import ListActions from "../buttons/ListActions";
+import ListDropDown from "../dropdown/ListDropDown";
 import { CircleCheck } from "lucide-react";
 
 export function KanbanColumn({
@@ -49,7 +49,7 @@ export function KanbanColumn({
                     <CardDescription>{list.description}</CardDescription>
                 </div>
                 <div className="right">
-                    <ListActions list={list} projectSlug={projectSlug} />
+                    <ListDropDown list={list} projectSlug={projectSlug} />
                 </div>
             </CardHeader>
 

@@ -16,18 +16,15 @@ import { useListActions } from "@/hooks/useLists";
 import { FetchList, FetchTask } from "@/types/ServerResponses";
 import { useTaskActions } from "@/hooks/useTasks";
 import { useRouter } from "next/navigation";
+import useModalStore from "@/stores/modalStores";
 
 interface DeleteTaskProps {
     task: FetchTask;
     projectSlug: string;
-    setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-const DeleteTask: React.FC<DeleteTaskProps> = ({
-    task,
-    projectSlug,
-    setOpen,
-}) => {
+const DeleteTask: React.FC<DeleteTaskProps> = ({ task, projectSlug }) => {
+    const { modals, setOpen } = useModalStore();
     const router = useRouter();
     const { deleteTask, isDeleting } = useTaskActions();
 
@@ -48,12 +45,15 @@ const DeleteTask: React.FC<DeleteTaskProps> = ({
                 return;
             }
         } finally {
-            setOpen(false);
+            setOpen("deleteTask", false);
         }
     };
 
     return (
-        <AlertDialog open onOpenChange={setOpen}>
+        <AlertDialog
+            open={modals.deleteTask}
+            onOpenChange={(e: boolean) => setOpen("deleteTask", e)}
+        >
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>Delete {task.title}?</AlertDialogTitle>

@@ -15,20 +15,20 @@ import { Button } from "../ui/button";
 import { useListActions } from "@/hooks/useLists";
 import { FetchComment, FetchList } from "@/types/ServerResponses";
 import { useCommentActions } from "@/hooks/useComments";
+import useModalStore from "@/stores/modalStores";
 
 interface DeleteCommentProps {
     comment: FetchComment;
     taskSlug: string;
     projectSlug: string;
-    setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 const DeleteComment: React.FC<DeleteCommentProps> = ({
     comment,
     projectSlug,
     taskSlug,
-    setOpen,
 }) => {
+    const { modals, setOpen } = useModalStore();
     const { deleteComment } = useCommentActions(taskSlug);
 
     const handleDelete = async () => {
@@ -48,12 +48,15 @@ const DeleteComment: React.FC<DeleteCommentProps> = ({
                 return;
             }
         } finally {
-            setOpen(false);
+            setOpen("deleteComment", false);
         }
     };
 
     return (
-        <AlertDialog open onOpenChange={setOpen}>
+        <AlertDialog
+            open={modals.deleteComment}
+            onOpenChange={(e: boolean) => setOpen("deleteComment", e)}
+        >
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>Delete Comment?</AlertDialogTitle>
@@ -62,7 +65,9 @@ const DeleteComment: React.FC<DeleteCommentProps> = ({
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel onClick={() => setOpen(false)}>
+                    <AlertDialogCancel
+                        onClick={() => setOpen("deleteComment", false)}
+                    >
                         Cancel
                     </AlertDialogCancel>
                     <AlertDialogAction

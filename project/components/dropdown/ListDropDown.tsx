@@ -13,16 +13,16 @@ import { FetchList } from "@/types/ServerResponses";
 import { useAuthRoleByProject } from "@/hooks/useRoles";
 import DeleteList from "../modals/DeleteList";
 import EditList from "../modals/EditList";
+import useModalStore from "@/stores/modalStores";
 
-interface ListActionsProps {
+interface ListDropDownProps {
     list: FetchList;
     projectSlug: string;
 }
 
-const ListActions: React.FC<ListActionsProps> = ({ list, projectSlug }) => {
+const ListDropDown: React.FC<ListDropDownProps> = ({ list, projectSlug }) => {
     const { moveList } = useListActions(projectSlug);
-    const [editDialog, showEditDialog] = useState(false);
-    const [deleteDialog, showDeleteDialog] = useState(false);
+    const { setOpen } = useModalStore();
 
     const { permitted: permittedUpdate } = useAuthRoleByProject(
         projectSlug,
@@ -80,7 +80,7 @@ const ListActions: React.FC<ListActionsProps> = ({ list, projectSlug }) => {
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 onClick={() => {
-                                    showEditDialog(true);
+                                    setOpen("editList", true);
                                 }}
                             >
                                 Edit
@@ -91,7 +91,7 @@ const ListActions: React.FC<ListActionsProps> = ({ list, projectSlug }) => {
                         <DropdownMenuItem
                             className="text-destructive"
                             onClick={() => {
-                                showDeleteDialog(true);
+                                setOpen("deleteList", true);
                             }}
                         >
                             Delete
@@ -99,22 +99,11 @@ const ListActions: React.FC<ListActionsProps> = ({ list, projectSlug }) => {
                     )}
                 </DropdownMenuContent>
             </DropdownMenu>
-            {deleteDialog && (
-                <DeleteList
-                    list={list}
-                    projectSlug={projectSlug}
-                    setOpen={showDeleteDialog}
-                />
-            )}
-            {editDialog && (
-                <EditList
-                    list={list}
-                    projectSlug={projectSlug}
-                    setOpen={showEditDialog}
-                />
-            )}
+
+            <DeleteList list={list} projectSlug={projectSlug} />
+            <EditList list={list} projectSlug={projectSlug} />
         </>
     );
 };
 
-export default ListActions;
+export default ListDropDown;

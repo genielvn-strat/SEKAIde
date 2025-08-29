@@ -10,17 +10,19 @@ import { MoreHorizontal } from "lucide-react";
 import DeleteTask from "../modals/DeleteTask";
 import EditTask from "../modals/EditTask";
 import { FetchTask } from "@/types/ServerResponses";
+import useModalStore from "@/stores/modalStores";
 
 interface TaskDropDownProps {
     task: FetchTask;
 }
 
 const TaskDropDown: React.FC<TaskDropDownProps> = ({ task }) => {
-    const [editDialog, showEditDialog] = useState(false);
-    const [deleteDialog, showDeleteDialog] = useState(false);
+    const { setOpen } = useModalStore();
 
     return (
         <>
+            <DeleteTask task={task} projectSlug={task.projectSlug} />
+            <EditTask task={task} projectSlug={task.projectSlug} />
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-8 p-0">
@@ -29,31 +31,17 @@ const TaskDropDown: React.FC<TaskDropDownProps> = ({ task }) => {
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => showEditDialog(true)}>
+                    <DropdownMenuItem onClick={() => setOpen("editTask", true)}>
                         Edit
                     </DropdownMenuItem>
                     <DropdownMenuItem
                         className="text-destructive"
-                        onClick={() => showDeleteDialog(true)}
+                        onClick={() => setOpen("deleteTask", true)}
                     >
                         Delete
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
-            {deleteDialog && (
-                <DeleteTask
-                    task={task}
-                    projectSlug={task.projectSlug}
-                    setOpen={showDeleteDialog}
-                />
-            )}
-            {editDialog && (
-                <EditTask
-                    task={task}
-                    projectSlug={task.projectSlug}
-                    setOpen={showEditDialog}
-                />
-            )}
         </>
     );
 };
