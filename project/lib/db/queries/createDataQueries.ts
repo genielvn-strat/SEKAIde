@@ -2,45 +2,91 @@ import { permissions, rolePermissions, roles } from "@/migrations/schema";
 import { db } from "../db";
 
 export const createData = {
+    roles: async () => {
+        await db
+            .insert(roles)
+            .values([
+                {
+                    name: "Owner",
+                    nameId: "owner",
+                    priority: 0,
+                    color: "red",
+                },
+                {
+                    name: "Project Manager",
+                    nameId: "project_manager",
+                    priority: 1,
+                    color: "orange",
+                },
+                {
+                    name: "Member",
+                    nameId: "member",
+                    priority: 2,
+                    color: "blue",
+                },
+                {
+                    name: "Guest",
+                    nameId: "guest",
+                    priority: 3,
+                    color: "green",
+                },
+            ])
+            .onConflictDoNothing();
+    },
     permissions: async () => {
-        await db.insert(permissions).values([
-            {
-                name: "kick_members",
-                description: "Remove a member from the team",
-            },
-            {
-                name: "invite_members",
-                description: "Invite new members to the team",
-            },
-            {
-                name: "update_members",
-                description: "Update roles or details of team members",
-            },
+        await db
+            .insert(permissions)
+            .values([
+                {
+                    name: "kick_members",
+                    description: "Remove a member from the team",
+                },
+                {
+                    name: "invite_members",
+                    description: "Invite new members to the team",
+                },
+                {
+                    name: "update_members",
+                    description: "Update roles or details of team members",
+                },
 
-            { name: "update_team", description: "Update team information" },
-            { name: "delete_team", description: "Delete the team permanently" },
+                { name: "update_team", description: "Update team information" },
+                {
+                    name: "delete_team",
+                    description: "Delete the team permanently",
+                },
 
-            { name: "create_project", description: "Create new projects" },
-            { name: "update_project", description: "Update existing projects" },
-            { name: "delete_project", description: "Delete projects" },
-            { name: "reset_project", description: "Reset project back to default state" },
+                { name: "create_project", description: "Create new projects" },
+                {
+                    name: "update_project",
+                    description: "Update existing projects",
+                },
+                { name: "delete_project", description: "Delete projects" },
+                {
+                    name: "reset_project",
+                    description: "Reset project back to default state",
+                },
 
-            { name: "create_list", description: "Create new lists" },
-            { name: "update_list", description: "Update existing lists" },
-            { name: "delete_list", description: "Delete lists" },
+                { name: "create_list", description: "Create new lists" },
+                { name: "update_list", description: "Update existing lists" },
+                { name: "delete_list", description: "Delete lists" },
 
-            { name: "create_task", description: "Create new tasks" },
-            { name: "update_task", description: "Update existing tasks" },
-            { name: "delete_task", description: "Delete tasks" },
-            {
-                name: "assign_others",
-                description: "Assign tasks to other members",
-            },
+                { name: "create_task", description: "Create new tasks" },
+                { name: "update_task", description: "Update existing tasks" },
+                { name: "delete_task", description: "Delete tasks" },
+                {
+                    name: "assign_others",
+                    description: "Assign tasks to other members",
+                },
 
-            { name: "create_comment", description: "Add comments to tasks" },
-            { name: "update_comment", description: "Update your comments" },
-            { name: "delete_comment", description: "Delete comments" },
-        ]).onConflictDoNothing();
+                {
+                    name: "create_comment",
+                    description: "Add comments to tasks",
+                },
+                { name: "update_comment", description: "Update your comments" },
+                { name: "delete_comment", description: "Delete comments" },
+            ])
+            .onConflictDoNothing();
     },
     rolePermissions: async () => {
         const rolePermissionMap: Record<string, string[]> = {

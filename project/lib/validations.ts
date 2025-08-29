@@ -1,4 +1,49 @@
 import { z } from "zod";
+
+export const accountSchema = z.object({
+    email: z.string().email(),
+    currentPassword: z.string(),
+    password: z
+        .string()
+        .min(8, "Password must be at least 8 characters long.")
+        .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+        .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+        .regex(/\d/, "Password must contain at least one number")
+        .regex(/[^a-zA-Z0-9]/, "Password must contain at least one symbol"),
+    confirmPassword: z.string(),
+    firstName: z.string().max(50),
+    lastName: z.string().max(50),
+    avatar: z
+        .any() // Use .any() to handle the File type
+        .refine((file) => !file || file.size <= 1000000, {
+            message: "Max size is 1MB",
+        })
+        .refine((file) => !file || file.type.startsWith("image/"), {
+            message: "Only images are allowed",
+        })
+        .optional(),
+});
+
+export const updateEmailSchema = accountSchema.pick({ email: true });
+export const updatePasswordSchema = accountSchema
+    .pick({
+        currentPassword: true,
+        password: true,
+        confirmPassword: true,
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+        path: ["confirmPassword"],
+        message: "Passwords do not match",
+    });
+export const updateDetailsSchema = accountSchema.pick({
+    firstName: true,
+    lastName: true,
+    avatar: true,
+});
+export type UpdateEmailInput = z.infer<typeof updateEmailSchema>;
+export type UpdatePasswordInput = z.infer<typeof updatePasswordSchema>;
+export type UpdateDetailsSchema = z.infer<typeof updateDetailsSchema>;
+
 export const userSchema = z.object({
     clerkId: z.string().min(1),
     email: z.string().email(),

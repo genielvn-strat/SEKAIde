@@ -114,3 +114,20 @@ export type FetchComment = {
     updatedAt: string | null;
     allowUpdate: boolean;
 };
+
+export type FetchUserSession = {
+    id: string;
+    status: string;
+    lastActiveAt: string | null;
+    createdAt?: string;
+    updatedAt?: string;
+    latestActivity?: {
+        isMobile: boolean;
+        ipAddress: string;
+        city: string;
+        country: string;
+        browserVersion: string;
+        browserName: string;
+        deviceType: string;
+    };
+};
