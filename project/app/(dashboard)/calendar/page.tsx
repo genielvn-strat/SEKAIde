@@ -110,39 +110,6 @@ export default function CalendarPage() {
             />
         );
 
-    // const sampleEvents = [
-    //     {
-    //         title: "Website Redesign",
-    //         start: new Date("2025-12-15"),
-    //         end: new Date("2025-12-15"),
-    //         allDay: true,
-    //     },
-    //     {
-    //         title: "Website Redesign",
-    //         start: new Date("2025-12-15"),
-    //         end: new Date("2025-12-15"),
-    //         allDay: true,
-    //     },
-    //     {
-    //         title: "Website Redesign",
-    //         start: new Date("2025-12-15"),
-    //         end: new Date("2025-12-15"),
-    //         allDay: true,
-    //     },
-    //     {
-    //         title: "Team Meeting",
-    //         start: new Date("2025-12-18"),
-    //         end: new Date("2025-12-18"),
-    //         allDay: true,
-    //     },
-    //     {
-    //         title: "Mobile App Launch",
-    //         start: new Date("2025-12-22"),
-    //         end: new Date("2025-12-22"),
-    //         allDay: true,
-    //     },
-    // ];
-
     return (
         <>
             <div className="doc-header flex flex-row justify-between items-center">

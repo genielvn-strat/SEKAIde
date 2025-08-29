@@ -150,7 +150,6 @@ const TeamOverviewTab: React.FC<TeamOverviewTabProps> = ({
             : []),
     ];
 
-    console.log(listData);
     // Generate config dynamically from listData
     const listConfig: ChartConfig = Object.fromEntries(
         listData.map((d, i) => [
@@ -161,7 +160,6 @@ const TeamOverviewTab: React.FC<TeamOverviewTabProps> = ({
             },
         ])
     );
-    console.log(listConfig);
 
     return (
         <div className="flex flex-col gap-4">

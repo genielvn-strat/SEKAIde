@@ -72,7 +72,6 @@ export function KanbanBoardInterface({
         updatedTasks: FetchTask[],
         selectedTaskId: string
     ) => {
-        console.log("=== Current Task State by List ===");
         const arranged =
             lists?.flatMap((list) =>
                 updatedTasks

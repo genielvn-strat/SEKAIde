@@ -391,7 +391,6 @@ export const taskQueries = {
             member.roleId,
             "update_task"
         );
-        console.log(assigned, permission);
         if (!permission && !assigned)
             return failure(400, "Not authorized to arrange this task");
         try {
