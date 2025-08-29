@@ -1,4 +1,11 @@
-import { users, tasks, projects, lists, teams, teamMembers } from "@/migrations/schema";
+import {
+    users,
+    tasks,
+    projects,
+    lists,
+    teams,
+    teamMembers,
+} from "@/migrations/schema";
 import { and, asc, eq, isNotNull, sql } from "drizzle-orm";
 import { ArrangeTask, CreateTask, UpdateTask } from "@/types/Task";
 import { failure, success } from "@/types/Response";
@@ -198,7 +205,7 @@ export const taskQueries = {
     getCalendarTasks: async (userId: string) => {
         try {
             const result: FetchTask[] = await db
-                .select({
+                .selectDistinct({
                     id: tasks.id,
                     title: tasks.title,
                     description: tasks.description,
@@ -224,12 +231,7 @@ export const taskQueries = {
                 .innerJoin(teamMembers, eq(teamMembers.teamId, teams.id))
                 .innerJoin(users, eq(tasks.assigneeId, users.id))
                 .leftJoin(lists, eq(tasks.listId, lists.id))
-                .where(
-                    and(
-                        eq(tasks.assigneeId, userId),
-                        isNotNull(tasks.dueDate)
-                    )
-                )
+                .where(isNotNull(tasks.dueDate))
                 .orderBy(asc(tasks.dueDate));
 
             return success(200, "Calendar Tasks fetched successfully", result);
@@ -389,7 +391,6 @@ export const taskQueries = {
             member.roleId,
             "update_task"
         );
-        console.log(assigned, permission);
         if (!permission && !assigned)
             return failure(400, "Not authorized to arrange this task");
         try {

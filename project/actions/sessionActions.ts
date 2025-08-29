@@ -10,8 +10,15 @@ export const getSession = async () => {
 };
 
 export const getUserDbId = async (userId?: string) => {
-    if (!userId) userId = (await getSession()).userId;
-    const user = await queries.users.getByClerkId(userId);
-    if (!user) throw new Error("User not found in DB");
-    return user.id;
+    try {
+        if (!userId) userId = (await getSession()).userId;
+        const user = await queries.users.getByClerkId(userId);
+        if (!user) throw new Error("User not found in DB");
+        return user.id;
+    } catch (e) {
+        if (e instanceof Error) {
+            throw e;
+        }
+        throw new Error("Cannot connect to the Clerk Service");
+    }
 };

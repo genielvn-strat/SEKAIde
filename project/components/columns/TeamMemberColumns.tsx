@@ -17,6 +17,7 @@ import KickMember from "@/components/dialog/KickMember";
 import { useState } from "react";
 import { useAuthRoleByTeam } from "@/hooks/useRoles";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import UpdateMember from "../dialog/UpdateMember";
 
 export const TeamMemberColumns: (
     teamSlug: string
@@ -31,6 +32,7 @@ export const TeamMemberColumns: (
                     <Avatar>
                         <AvatarImage
                             src={member.displayPictureLink}
+                            className="object-cover"
                         ></AvatarImage>
                         <AvatarFallback>
                             {member.name?.charAt(0)?.toUpperCase()}
@@ -78,12 +80,13 @@ export const TeamMemberColumns: (
         id: "actions",
         cell: ({ row }) => {
             const [kickDialog, showKickDialog] = useState(false);
+            const [updateDialog, showUpdateDialog] = useState(false);
             const permittedKick = row.original.allowKick;
+            const permittedUpdate = row.original.allowUpdate;
             const memberId = row.original.userId;
             const memberName = row.original.name;
-            const memberRoleName = row.original.roleName;
             return (
-                permittedKick && (
+                (permittedKick || permittedUpdate) && (
                     <>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -93,12 +96,21 @@ export const TeamMemberColumns: (
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                    className="text-destructive"
-                                    onClick={() => showKickDialog(true)}
-                                >
-                                    Kick
-                                </DropdownMenuItem>
+                                {permittedUpdate && (
+                                    <DropdownMenuItem
+                                        onClick={() => showUpdateDialog(true)}
+                                    >
+                                        Update
+                                    </DropdownMenuItem>
+                                )}
+                                {permittedKick && (
+                                    <DropdownMenuItem
+                                        className="text-destructive"
+                                        onClick={() => showKickDialog(true)}
+                                    >
+                                        Kick
+                                    </DropdownMenuItem>
+                                )}
                             </DropdownMenuContent>
                         </DropdownMenu>
                         {kickDialog && (
@@ -107,6 +119,13 @@ export const TeamMemberColumns: (
                                 memberUserId={memberId}
                                 memberName={memberName}
                                 setOpen={showKickDialog}
+                            />
+                        )}
+                        {updateDialog && (
+                            <UpdateMember
+                                teamMember={row.original}
+                                teamSlug={teamSlug}
+                                setOpen={showUpdateDialog}
                             />
                         )}
                     </>

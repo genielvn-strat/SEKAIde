@@ -68,7 +68,6 @@ const CreateProject: React.FC = () => {
     const form = useForm<CreateProjectInput>({
         resolver: zodResolver(projectSchema),
     });
-    console.log(teams, teamsError);
 
     const onSubmit = async (data: CreateProjectInput) => {
         try {

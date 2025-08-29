@@ -33,6 +33,7 @@ export const ProjectTasksColumn: (
                 <div className="flex items-center gap-2">
                     <Avatar>
                         <AvatarImage
+                            className="object-cover"
                             src={task.assigneeDisplayPicture}
                         ></AvatarImage>
                         <AvatarFallback>

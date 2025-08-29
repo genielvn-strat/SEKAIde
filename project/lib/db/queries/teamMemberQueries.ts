@@ -4,7 +4,10 @@ import { db } from "../db";
 import { authorization } from "./authorizationQueries";
 import { failure, success } from "@/types/Response";
 import { FetchTeamMember } from "@/types/ServerResponses";
-import { CreateTeamMemberInput } from "@/lib/validations";
+import {
+    CreateTeamMemberInput,
+    UpdateTeamMemberInput,
+} from "@/lib/validations";
 
 export const teamMemberQueries = {
     getByTeamSlug: async (teamSlug: string, userId: string) => {
@@ -27,6 +30,14 @@ export const teamMemberQueries = {
                     "kick_members"
                 )
                 .then((res) => (res ? true : false))) ?? false;
+        const canUpdate =
+            (await authorization
+                .checkIfRoleHasPermissionByTeamSlug(
+                    userId,
+                    teamSlug,
+                    "update_members"
+                )
+                .then((res) => (res ? true : false))) ?? false;
 
         try {
             const result: FetchTeamMember[] = await db
@@ -36,6 +47,7 @@ export const teamMemberQueries = {
                     username: users.username,
                     email: users.email,
                     displayPictureLink: users.displayPictureLink,
+                    roleId: roles.id,
                     roleName: roles.name,
                     roleColor: roles.color,
                     inviteConfirmed: teamMembers.inviteConfirmed,
@@ -43,6 +55,13 @@ export const teamMemberQueries = {
                         CASE
                             WHEN ${teamMembers.userId} = ${member.userId} THEN FALSE
                             WHEN ${canKick} = TRUE AND roles.priority >= ${member.rolePriority} THEN TRUE
+                            ELSE FALSE
+                        END
+                    `,
+                    allowUpdate: sql<boolean>`
+                        CASE
+                            WHEN ${teamMembers.userId} = ${member.userId} THEN FALSE
+                            WHEN ${canUpdate} = TRUE AND roles.priority >= ${member.rolePriority} THEN TRUE
                             ELSE FALSE
                         END
                     `,
@@ -76,6 +95,7 @@ export const teamMemberQueries = {
                     username: users.username,
                     email: users.email,
                     displayPictureLink: users.displayPictureLink,
+                    roleId: roles.id,
                     roleName: roles.name,
                     roleColor: roles.color,
                     inviteConfirmed: teamMembers.inviteConfirmed,
@@ -132,6 +152,58 @@ export const teamMemberQueries = {
             return success(200, "Team invitation rejected.", result);
         } catch {
             return failure(500, "Failed to reject team invitation");
+        }
+    },
+    update: async (
+        teamSlug: string,
+        teamMemberUserId: string,
+        data: UpdateTeamMemberInput,
+        userId: string
+    ) => {
+        try {
+            const member = await authorization.checkIfTeamMemberByTeamSlug(
+                teamSlug,
+                userId
+            );
+
+            if (!member) {
+                return failure(400, "Cannot update this member (not a member)");
+            }
+            const permission = await authorization.checkIfRoleHasPermission(
+                member.roleId,
+                "update_members"
+            );
+            if (!permission) {
+                return failure(400, "Cannot update this member (unauthorized)");
+            }
+            const teamMember = await db
+                .select({ id: teamMembers.id })
+                .from(teamMembers)
+                .innerJoin(teams, eq(teamMembers.teamId, teams.id))
+                .where(
+                    and(
+                        eq(teamMembers.userId, teamMemberUserId),
+                        eq(teams.slug, teamSlug)
+                    )
+                )
+                .then((res) => res[0] ?? null);
+            if (!teamMember) return failure(404, "User not found");
+            if (teamMember.id === userId)
+                return failure(
+                    400,
+                    "Only the higher priority can update your own role."
+                );
+
+            const newMember = await db
+                .update(teamMembers)
+                .set({
+                    roleId: data.roleId,
+                })
+                .where(eq(teamMembers.id, teamMember.id))
+                .returning();
+            return success(200, "Team Member updated successfully", newMember);
+        } catch {
+            return failure(500, "Failed to updated member");
         }
     },
     invite: async (

@@ -22,7 +22,6 @@ export async function POST(req: NextRequest) {
         console.log(
             `Received webhook with ID ${id} and event type of ${eventType}`
         );
-        console.log("Webhook payload:", evt.data);
         if (eventType === "user.created") {
             const {
                 id,
@@ -47,7 +46,6 @@ export async function POST(req: NextRequest) {
                 console.log(
                     `User created: ${id} - ${email_addresses[0]?.email_address}`
                 );
-                console.log(evt.data);
             } catch (dbError) {
                 console.error("Error saving user to database:", dbError);
                 return new Response("Database error", { status: 500 });

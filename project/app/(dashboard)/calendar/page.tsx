@@ -10,22 +10,17 @@ import { TypographyMuted } from "@/components/typography/TypographyMuted";
 import { Separator } from "@/components/ui/separator";
 import ShadcnBigCalendar from "@/components/shadcn-big-calendar/ShadcnBigCalendar";
 import { useCalendarTasks } from "@/hooks/useTasks";
-import LoadingSkeletonCards from "@/components/LoadingSkeletonCards";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import ErrorAlert from "@/components/ErrorAlert";
 import { useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-    createPermissions,
-    createRolePermissions,
-    createRoles,
-} from "@/actions/createActions";
 import { useProjects } from "@/hooks/useProjects";
 import { Circle, FolderOpen, LayoutList } from "lucide-react";
-import { TypographyP } from "@/components/typography/TypographyP";
 import { FetchProject, FetchTask } from "@/types/ServerResponses";
 import TaskDetails from "@/components/dialog/TaskDetails";
 import Link from "next/link";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { useUser } from "@/hooks/useUser";
 
 const locales = {
     "en-US": enUS,
@@ -41,6 +36,7 @@ const localizer = dateFnsLocalizer({
 export default function CalendarPage() {
     const [selectedTask, setSelectedTask] = useState<FetchTask | null>(null);
     const [showTask, setShowTask] = useState<boolean>(false);
+    const [userTask, setUserTask] = useState<boolean>(false);
     const {
         tasks,
         isLoading: tasksIsLoading,
@@ -53,8 +49,13 @@ export default function CalendarPage() {
         isError: projectsIsError,
         error: projectsError,
     } = useProjects();
+    const { id } = useUser();
     const tasksEvents = useMemo(() => {
-        const filteredTask = tasks?.filter((task) => task.dueDate);
+        let filteredTask = tasks?.filter((task) => task.dueDate);
+        // .filter((task) => task.assigneeId == user.id);
+
+        if (userTask && id)
+            filteredTask = filteredTask?.filter((task) => task.assigneeId == id);
 
         return filteredTask
             ? filteredTask.map((task) => {
@@ -70,12 +71,12 @@ export default function CalendarPage() {
                   };
               })
             : [];
-    }, [tasks]);
+    }, [tasks, userTask]);
     const projectsEvents = useMemo(() => {
-        const projectTasks = projects?.filter((project) => project.dueDate);
+        const filteredProjects = projects?.filter((project) => project.dueDate);
 
-        return projectTasks
-            ? projectTasks.map((project) => {
+        return filteredProjects
+            ? filteredProjects.map((project) => {
                   return {
                       type: "project",
                       title: project.name,
@@ -109,39 +110,6 @@ export default function CalendarPage() {
             />
         );
 
-    // const sampleEvents = [
-    //     {
-    //         title: "Website Redesign",
-    //         start: new Date("2025-12-15"),
-    //         end: new Date("2025-12-15"),
-    //         allDay: true,
-    //     },
-    //     {
-    //         title: "Website Redesign",
-    //         start: new Date("2025-12-15"),
-    //         end: new Date("2025-12-15"),
-    //         allDay: true,
-    //     },
-    //     {
-    //         title: "Website Redesign",
-    //         start: new Date("2025-12-15"),
-    //         end: new Date("2025-12-15"),
-    //         allDay: true,
-    //     },
-    //     {
-    //         title: "Team Meeting",
-    //         start: new Date("2025-12-18"),
-    //         end: new Date("2025-12-18"),
-    //         allDay: true,
-    //     },
-    //     {
-    //         title: "Mobile App Launch",
-    //         start: new Date("2025-12-22"),
-    //         end: new Date("2025-12-22"),
-    //         allDay: true,
-    //     },
-    // ];
-
     return (
         <>
             <div className="doc-header flex flex-row justify-between items-center">
@@ -151,7 +119,16 @@ export default function CalendarPage() {
                         View team project and task deadlines
                     </TypographyMuted>
                 </div>
-                <div className="right"></div>
+                <div className="right">
+                    <div className="flex items-center space-x-2">
+                        <Switch
+                            id="my-task"
+                            onCheckedChange={setUserTask}
+                            checked={userTask}
+                        />
+                        <Label htmlFor="my-task">Show my tasks</Label>
+                    </div>
+                </div>
             </div>
             <Separator className="my-4" />
 

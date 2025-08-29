@@ -53,10 +53,12 @@ export type FetchTeamMember = {
     username: string;
     email: string;
     displayPictureLink: string;
+    roleId: string;
     roleName: string;
     roleColor?: string | null;
     inviteConfirmed: boolean;
     allowKick?: boolean;
+    allowUpdate?: boolean;
 };
 
 // Tasks
@@ -111,4 +113,21 @@ export type FetchComment = {
     createdAt: string | null;
     updatedAt: string | null;
     allowUpdate: boolean;
+};
+
+export type FetchUserSession = {
+    id: string;
+    status: string;
+    lastActiveAt: string | null;
+    createdAt?: string;
+    updatedAt?: string;
+    latestActivity?: {
+        isMobile: boolean;
+        ipAddress: string;
+        city: string;
+        country: string;
+        browserVersion: string;
+        browserName: string;
+        deviceType: string;
+    };
 };

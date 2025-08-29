@@ -40,6 +40,7 @@ export function useInvitedTeams() {
     } = useQuery({
         queryKey: ["invited"],
         queryFn: () => fetchInvitedTeams(),
+        refetchInterval: 20000,
     });
 
     return {
