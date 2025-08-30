@@ -189,3 +189,10 @@ export const lists = pgTable("lists", {
 			name: "lists_project_id_projects_id_fk"
 		}).onDelete("cascade"),
 ]);
+
+export const activityLogs = pgTable("activity_logs", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	teamId: uuid("team_id").notNull().references(() => teams.id),
+	permissionId: uuid("permission_id").notNull().references(() => permissions.id),
+	userId: uuid("user_id")
+})

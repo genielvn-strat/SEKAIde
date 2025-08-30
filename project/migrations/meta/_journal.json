@@ -15,6 +15,13 @@
       "when": 1756182420327,
       "tag": "0001_seed",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1756513854849,
+      "tag": "0002_fancy_dormammu",
+      "breakpoints": true
     }
   ]
 }
