@@ -19,7 +19,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { useAccountSettingsActions } from "@/hooks/useAccountSettings";
 import { toast } from "sonner";
 interface SessionCardProps {
@@ -84,7 +84,6 @@ const SessionCard: React.FC<SessionCardProps> = ({ session }) => {
                                 className="bg-destructive dark:bg-destructive"
                                 onClick={handleRevoke}
                             >
-                                
                                 Revoke
                             </AlertDialogAction>
                         </AlertDialogFooter>

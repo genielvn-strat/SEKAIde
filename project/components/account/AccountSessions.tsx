@@ -12,7 +12,7 @@ import { TypographyH2 } from "../typography/TypographyH2";
 import { useAccountSessions } from "@/hooks/useAccountSettings"; // assume revokeSession exists
 import { Separator } from "@/components/ui/separator";
 import ErrorAlert from "../ErrorAlert";
-import SessionCard from "../SessionCard";
+import SessionCard from "../cards/SessionCard";
 
 const AccountSessions: React.FC = () => {
     const { sessions, isError, isLoading, error } = useAccountSessions();

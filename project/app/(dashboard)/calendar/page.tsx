@@ -16,11 +16,12 @@ import { useMemo, useState } from "react";
 import { useProjects } from "@/hooks/useProjects";
 import { Circle, FolderOpen, LayoutList } from "lucide-react";
 import { FetchProject, FetchTask } from "@/types/ServerResponses";
-import TaskDetails from "@/components/dialog/TaskDetails";
+import TaskDetails from "@/components/modals/TaskDetails";
 import Link from "next/link";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useUser } from "@/hooks/useUser";
+import useModalStore from "@/stores/modalStores";
 
 const locales = {
     "en-US": enUS,
@@ -34,6 +35,7 @@ const localizer = dateFnsLocalizer({
     locales,
 });
 export default function CalendarPage() {
+    const { setOpen } = useModalStore();
     const [selectedTask, setSelectedTask] = useState<FetchTask | null>(null);
     const [showTask, setShowTask] = useState<boolean>(false);
     const [userTask, setUserTask] = useState<boolean>(false);
@@ -55,7 +57,9 @@ export default function CalendarPage() {
         // .filter((task) => task.assigneeId == user.id);
 
         if (userTask && id)
-            filteredTask = filteredTask?.filter((task) => task.assigneeId == id);
+            filteredTask = filteredTask?.filter(
+                (task) => task.assigneeId == id
+            );
 
         return filteredTask
             ? filteredTask.map((task) => {
@@ -153,7 +157,7 @@ export default function CalendarPage() {
                                 onSelectEvent={(e) => {
                                     if (e.type == "task") {
                                         setSelectedTask(e.data as FetchTask);
-                                        setShowTask(true);
+                                        setOpen("taskDetails", true);
                                     }
                                 }}
                             />
@@ -244,12 +248,7 @@ export default function CalendarPage() {
                         )}
                     </CardContent>
                 </Card>
-                {showTask && selectedTask && (
-                    <TaskDetails
-                        task={selectedTask}
-                        onOpenChange={setShowTask}
-                    />
-                )}
+                {selectedTask && <TaskDetails task={selectedTask} />}
             </div>
         </>
     );

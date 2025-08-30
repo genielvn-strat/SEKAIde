@@ -8,10 +8,10 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "./ui/badge";
-import TaskDetails from "./dialog/TaskDetails";
+import { Badge } from "../ui/badge";
+import TaskDetails from "../modals/TaskDetails";
 import { Grip } from "lucide-react";
-import Priority from "./badge/Priority";
+import Priority from "../badge/Priority";
 
 export function KanbanTask({
     task,

@@ -20,22 +20,27 @@ import { CheckCircle2, Circle } from "lucide-react";
 import TaskDropDown from "../dropdown/TaskDropDown";
 import Priority from "../badge/Priority";
 import ListBadge from "../badge/ListBadge";
+import useModalStore from "@/stores/modalStores";
 
 interface TaskDetailsProps {
     task: FetchTask;
     children?: React.ReactNode;
-    onOpenChange?: Dispatch<SetStateAction<boolean>>;
+    
 }
 
 const TaskDetails: React.FC<TaskDetailsProps> = ({
     task,
     children,
-    onOpenChange,
+ 
 }) => {
     const router = useRouter();
+    const { modals, setOpen } = useModalStore();
 
     return (
-        <Drawer open={children ? undefined : true} onOpenChange={onOpenChange}>
+        <Drawer
+            open={children ? undefined : modals.taskDetails}
+            onOpenChange={children ? undefined : (e: boolean) => setOpen("taskDetails", e)}
+        >
             <DrawerTrigger className="text-left p-0">{children}</DrawerTrigger>
             <DrawerContent>
                 <div className="mx-auto w-full max-w-3xl">

@@ -13,20 +13,20 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
+import useModalStore from "@/stores/modalStores";
 
 interface KickMemberProps {
     teamSlug: string;
     memberUserId: string;
     memberName: string;
-    setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 const KickMember: React.FC<KickMemberProps> = ({
     teamSlug,
     memberUserId,
     memberName,
-    setOpen,
 }) => {
+    const { modals, setOpen } = useModalStore();
     const { kick } = useTeamMemberActions();
 
     const handleKick = async () => {
@@ -42,12 +42,15 @@ const KickMember: React.FC<KickMemberProps> = ({
                 return;
             }
         } finally {
-            setOpen(false);
+            setOpen("kickMember", false);
         }
     };
 
     return (
-        <AlertDialog open onOpenChange={setOpen}>
+        <AlertDialog
+            open={modals.kickMember}
+            onOpenChange={(e: boolean) => setOpen("kickMember", e)}
+        >
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>Kick {memberName}?</AlertDialogTitle>

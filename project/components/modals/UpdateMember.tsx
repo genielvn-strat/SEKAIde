@@ -39,18 +39,18 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { FetchTeamMember } from "@/types/ServerResponses";
+import useModalStore from "@/stores/modalStores";
 
 interface InviteMemberProps {
     teamSlug: string;
     teamMember: FetchTeamMember;
-    setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 const UpdateMember: React.FC<InviteMemberProps> = ({
     teamSlug,
     teamMember,
-    setOpen,
 }) => {
+    const { modals, setOpen } = useModalStore();
     const { update } = useTeamMemberActions();
     const {
         roles,
@@ -91,7 +91,10 @@ const UpdateMember: React.FC<InviteMemberProps> = ({
     };
 
     return (
-        <Dialog open onOpenChange={setOpen}>
+        <Dialog
+            open={modals.updateMember}
+            onOpenChange={(e: boolean) => setOpen("updateMember", e)}
+        >
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} id="update-member">
                     <DialogContent className="sm:max-w-[425px]">

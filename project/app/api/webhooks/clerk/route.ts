@@ -63,13 +63,20 @@ export async function POST(req: NextRequest) {
         }
 
         if (eventType === "user.updated") {
-            const { id, email_addresses, first_name, last_name, username } =
-                evt.data;
+            const {
+                id,
+                email_addresses,
+                first_name,
+                last_name,
+                username,
+                image_url,
+            } = evt.data;
 
             const data: UpdateUser = {
                 username: String(username),
                 name: `${first_name} ${last_name}`,
                 email: email_addresses[0].email_address,
+                displayPictureLink: image_url,
             };
 
             await queries.users.update(data, id);

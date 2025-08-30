@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { useProjectDetails } from "@/hooks/useProjects";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { KanbanBoardInterface } from "@/components/KanbanBoardInterface";
+import { KanbanBoardInterface } from "@/components/kanban-board/KanbanBoardInterface";
 import { use } from "react";
 import { TypographyH1 } from "@/components/typography/TypographyH1";
 import { TypographyMuted } from "@/components/typography/TypographyMuted";

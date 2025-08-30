@@ -28,7 +28,7 @@ export function useAssignedTasks() {
         error,
         isError,
     } = useQuery({
-        queryKey: [`tasks`],
+        queryKey: [`dashboard-tasks`],
         queryFn: () => fetchAssignedTasks(),
         refetchInterval: 30000,
     });

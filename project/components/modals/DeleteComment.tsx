@@ -13,68 +13,73 @@ import {
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { useListActions } from "@/hooks/useLists";
-import { FetchList, FetchTask } from "@/types/ServerResponses";
-import { useTaskActions } from "@/hooks/useTasks";
-import { useRouter } from "next/navigation";
+import { FetchComment, FetchList } from "@/types/ServerResponses";
+import { useCommentActions } from "@/hooks/useComments";
+import useModalStore from "@/stores/modalStores";
 
-interface DeleteTaskProps {
-    task: FetchTask;
+interface DeleteCommentProps {
+    comment: FetchComment;
+    taskSlug: string;
     projectSlug: string;
-    setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-const DeleteTask: React.FC<DeleteTaskProps> = ({
-    task,
+const DeleteComment: React.FC<DeleteCommentProps> = ({
+    comment,
     projectSlug,
-    setOpen,
+    taskSlug,
 }) => {
-    const router = useRouter();
-    const { deleteTask, isDeleting } = useTaskActions();
+    const { modals, setOpen } = useModalStore();
+    const { deleteComment } = useCommentActions(taskSlug);
 
     const handleDelete = async () => {
         try {
-            const result = await deleteTask({
-                taskSlug: task.slug,
+            const result = await deleteComment({
+                commentId: comment.id,
+                taskSlug,
                 projectSlug,
             });
             if (!result.success) {
                 throw new Error(result.message);
             }
-            toast.success(`${task.title} has been deleted.`);
-            router.push(`/projects/${task.projectSlug}`);
+            toast.success(`Comment has been deleted.`);
         } catch (e) {
             if (e instanceof Error) {
                 toast.error(e.message);
                 return;
             }
         } finally {
-            setOpen(false);
+            setOpen("deleteComment", false);
         }
     };
 
     return (
-        <AlertDialog open onOpenChange={setOpen}>
+        <AlertDialog
+            open={modals.deleteComment}
+            onOpenChange={(e: boolean) => setOpen("deleteComment", e)}
+        >
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Delete {task.title}?</AlertDialogTitle>
+                    <AlertDialogTitle>Delete Comment?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Are you sure you want to remove {task.title} from this
-                        project?
+                        This cannot be undone.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <Button
-                        variant="destructive"
+                    <AlertDialogCancel
+                        onClick={() => setOpen("deleteComment", false)}
+                    >
+                        Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                        className="bg-destructive dark:bg-destructive"
                         onClick={handleDelete}
-                        disabled={isDeleting}
                     >
                         Delete
-                    </Button>
+                    </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
     );
 };
 
-export default DeleteTask;
+export default DeleteComment;

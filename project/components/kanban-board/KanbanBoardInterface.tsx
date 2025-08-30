@@ -15,15 +15,15 @@ import { KanbanColumn } from "./KanbanColumn";
 import { KanbanTask } from "./KanbanTask";
 import { useTaskActions, useProjectTasks } from "@/hooks/useTasks";
 import { useLists } from "@/hooks/useLists";
-import LoadingSkeletonCards from "./LoadingSkeletonCards";
+import LoadingSkeletonCards from "../LoadingSkeletonCards";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuthRoleByProject } from "@/hooks/useRoles";
-import CreateList from "./buttons/CreateList";
+import CreateList from "../buttons/CreateList";
 import { ArrangeTask, UpdateTask } from "@/types/Task";
 import { arrangeTask } from "@/actions/taskActions";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import ErrorAlert from "./ErrorAlert";
+import ErrorAlert from "../ErrorAlert";
 
 interface KanbanBoardProps {
     project: FetchProject;

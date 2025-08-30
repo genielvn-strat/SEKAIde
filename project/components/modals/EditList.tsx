@@ -35,17 +35,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "../ui/checkbox";
 import { toast } from "sonner";
+import useModalStore from "@/stores/modalStores";
 interface UpdateListProps {
     list: FetchList;
     projectSlug: string;
-    setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-const EditList: React.FC<UpdateListProps> = ({
-    list,
-    projectSlug,
-    setOpen,
-}) => {
+const EditList: React.FC<UpdateListProps> = ({ list, projectSlug }) => {
+    const { modals, setOpen } = useModalStore();
     const { updateList } = useListActions(projectSlug);
     const form = useForm<CreateListInput>({
         resolver: zodResolver(listSchema),
@@ -83,7 +80,10 @@ const EditList: React.FC<UpdateListProps> = ({
     };
 
     return (
-        <Dialog open onOpenChange={setOpen}>
+        <Dialog
+            open={modals.editList}
+            onOpenChange={(e: boolean) => setOpen("editList", e)}
+        >
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} id="edit-list">
                     <DialogContent className="sm:max-w-[425px]">

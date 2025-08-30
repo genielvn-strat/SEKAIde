@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TypographyP } from "@/components/typography/TypographyP";
 import { TypographyH2 } from "@/components/typography/TypographyH2";
 import CreateComment from "@/components/CreateComment";
-import CommentCard from "@/components/CommentCard";
+import CommentCard from "@/components/cards/CommentCard";
 import { Button } from "@/components/ui/button";
 import TaskDropDown from "@/components/dropdown/TaskDropDown";
 import Priority from "@/components/badge/Priority";

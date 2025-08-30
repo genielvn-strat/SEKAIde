@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { FetchTask, FetchTeamMember } from "@/types/ServerResponses";
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal, CheckSquare, Square } from "lucide-react";
-import TaskDetails from "../dialog/TaskDetails";
+import TaskDetails from "../modals/TaskDetails";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import TaskDropDown from "../dropdown/TaskDropDown";
 import Priority from "../badge/Priority";
