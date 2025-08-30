@@ -126,7 +126,7 @@ export const commentQueries = {
             await db.insert(activityLogs).values({
                 teamId: member.teamId,
                 permissionId: permitted.id,
-                userId: member.id,
+                userId: member.userId,
                 description: `${member.userFullName} commented on a task titled ${task.title} on ${member.projectName}.`,
             });
             return success(200, "Comment created successfully", result[0]);
@@ -199,7 +199,7 @@ export const commentQueries = {
             await db.insert(activityLogs).values({
                 teamId: member.teamId,
                 permissionId: permitted.id,
-                userId: member.id,
+                userId: member.userId,
                 description: `${member.userFullName} updated a comment on a task titled ${task.title} on ${member.projectName}.`,
             });
             return success(200, "Comment updated successfully", result[0]);
@@ -260,7 +260,7 @@ export const commentQueries = {
             await db.insert(activityLogs).values({
                 teamId: member.teamId,
                 permissionId: permitted.id,
-                userId: member.id,
+                userId: member.userId,
                 description: `${member.userFullName} deleted a comment on a task titled ${task.title} on ${member.projectName}.`,
             });
             return success(200, "Comment successfully deleted", result);

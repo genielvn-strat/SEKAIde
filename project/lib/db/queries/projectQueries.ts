@@ -209,7 +209,7 @@ export const projectQueries = {
                 await tx.insert(activityLogs).values({
                     teamId: member.teamId,
                     permissionId: permitted.id,
-                    userId: member.id,
+                    userId: member.userId,
                     description: `A project named ${inserted[0].name} has been created by ${member.userFullName}.`,
                 });
 
@@ -261,7 +261,7 @@ export const projectQueries = {
             await db.insert(activityLogs).values({
                 teamId: member.teamId,
                 permissionId: permitted.id,
-                userId: member.id,
+                userId: member.userId,
                 description: `${member.userFullName} has made changes to ${member.projectName}.`,
             });
             return success(200, "Project successfully updated", result);
@@ -304,7 +304,7 @@ export const projectQueries = {
             await db.insert(activityLogs).values({
                 teamId: member.teamId,
                 permissionId: permitted.id,
-                userId: member.id,
+                userId: member.userId,
                 description: ` ${member.projectName} has been deleted by ${member.userFullName}.`,
             });
             return success(200, "Project successfully deleted", result);
@@ -366,7 +366,7 @@ export const projectQueries = {
             await db.insert(activityLogs).values({
                 teamId: member.teamId,
                 permissionId: permitted.id,
-                userId: member.id,
+                userId: member.userId,
                 description: ` ${member.projectName} has been reset by ${member.userFullName}.`,
             });
             return success(200, "Project successfully reset to default", {

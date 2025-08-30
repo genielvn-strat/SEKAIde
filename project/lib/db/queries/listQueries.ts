@@ -80,7 +80,7 @@ export const listQueries = {
             await db.insert(activityLogs).values({
                 teamId: member.teamId,
                 permissionId: permitted.id,
-                userId: member.id,
+                userId: member.userId,
                 description: `A list named ${result[0].name} has been created on ${member.projectName} by ${member.userFullName}.`,
             });
             return success(200, "List created successfully", result[0]);
@@ -141,7 +141,7 @@ export const listQueries = {
             await db.insert(activityLogs).values({
                 teamId: member.teamId,
                 permissionId: permitted.id,
-                userId: member.id,
+                userId: member.userId,
                 description: `${member.userFullName} has made changes to the list named ${list.name} on ${list.projectName}.`,
             });
             return success(200, "List updated successfully", result[0]);
@@ -182,7 +182,7 @@ export const listQueries = {
             await db.insert(activityLogs).values({
                 teamId: member.teamId,
                 permissionId: permitted.id,
-                userId: member.id,
+                userId: member.userId,
                 description: `A list named ${list.name} on ${list.projectName} has been deleted by ${member.userFullName}.`,
             });
             return success(200, "List deleted successfully", result);
@@ -269,7 +269,7 @@ export const listQueries = {
             await db.insert(activityLogs).values({
                 teamId: member.teamId,
                 permissionId: permitted.id,
-                userId: member.id,
+                userId: member.userId,
                 description: `${member.userFullName} has made changes to the list named ${list.name} on ${list.projectName}.`,
             });
             return success(200, "List moved successfully", {

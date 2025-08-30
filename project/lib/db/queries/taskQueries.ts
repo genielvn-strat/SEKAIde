@@ -6,6 +6,8 @@ import {
     teams,
     teamMembers,
     activityLogs,
+    roles,
+    permissions,
 } from "@/migrations/schema";
 import { and, asc, eq, isNotNull, sql } from "drizzle-orm";
 import { ArrangeTask, CreateTask, UpdateTask } from "@/types/Task";
@@ -299,7 +301,7 @@ export const taskQueries = {
             await db.insert(activityLogs).values({
                 teamId: member.teamId,
                 permissionId: permitted.id,
-                userId: member.id,
+                userId: member.userId,
                 description: `${member.userFullName} has created a task named ${result[0].title} on ${member.projectName}.`,
             });
             return success(200, "Task created successfully", result[0]);
@@ -344,17 +346,24 @@ export const taskQueries = {
         );
         if (!permitted && !assigned)
             return failure(400, "Not authorized to update this task");
-        try {
-            let list;
-            if (data.listId) {
-                list = await db
-                    .select({ isFinal: lists.isFinal, name: lists.name })
-                    .from(lists)
-                    .where(eq(lists.id, data.listId))
-                    .then((res) => res[0] ?? null);
-            }
+        let list;
+        if (data.listId) {
+            list = await db
+                .select({ isFinal: lists.isFinal, name: lists.name })
+                .from(lists)
+                .where(eq(lists.id, data.listId))
+                .then((res) => res[0] ?? null);
+        }
+        let role;
+        if (!permitted)
+            role = await db
+                .select()
+                .from(permissions)
+                .where(eq(permissions.name, "delete_task"))
+                .then((res) => res[0] ?? null);
 
-            const isFinished = data.finished ?? list?.isFinal;
+        const isFinished = data.finished ?? list?.isFinal;
+        try {
             const result = await db
                 .update(tasks)
                 .set({
@@ -382,8 +391,8 @@ export const taskQueries = {
                 .where(eq(projects.id, task.projectId));
             await db.insert(activityLogs).values({
                 teamId: member.teamId,
-                permissionId: permitted.id,
-                userId: member.id,
+                permissionId: permitted?.id ?? role?.id,
+                userId: member.userId,
                 description: `${member.userFullName} has created a task named ${result[0].title} on ${task.projectName}.`,
             });
             return success(200, "Task updated successfully", result[0]);
@@ -417,6 +426,13 @@ export const taskQueries = {
         );
         if (!permitted && !assigned)
             return failure(400, "Not authorized to arrange this task");
+        let role;
+        if (!permitted)
+            role = await db
+                .select()
+                .from(permissions)
+                .where(eq(permissions.name, "delete_task"))
+                .then((res) => res[0] ?? null);
         try {
             const updatedTasks = [];
             for (const task of arrangedTasks) {
@@ -438,8 +454,8 @@ export const taskQueries = {
                 .where(eq(projects.id, member.projectId));
             await db.insert(activityLogs).values({
                 teamId: member.teamId,
-                permissionId: permitted.id,
-                userId: member.id,
+                permissionId: permitted?.id ?? role?.id,
+                userId: member.userId,
                 description: `${member.userFullName} has arranged a task on ${member.projectName}.`,
             });
             return success(200, "Task arranged successfully", updatedTasks);
@@ -476,7 +492,13 @@ export const taskQueries = {
         );
         if (!permitted && !assigned)
             return failure(400, "Not authorized to delete this task");
-
+        let role;
+        if (!permitted)
+            role = await db
+                .select()
+                .from(permissions)
+                .where(eq(permissions.name, "delete_task"))
+                .then((res) => res[0] ?? null);
         try {
             const result = await db
                 .delete(tasks)
@@ -484,8 +506,8 @@ export const taskQueries = {
                 .returning();
             await db.insert(activityLogs).values({
                 teamId: member.teamId,
-                permissionId: permitted.id,
-                userId: member.id,
+                permissionId: permitted?.id ?? role?.id,
+                userId: member.userId,
                 description: `${member.userFullName} deleted a task titled ${result[0].title} on ${task.projectName}.`,
             });
             return success(200, "Task deleted successfully", result);

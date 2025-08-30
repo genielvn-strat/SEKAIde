@@ -299,7 +299,7 @@ export const teamQueries = {
             await db.insert(activityLogs).values({
                 teamId: member.teamId,
                 permissionId: permitted.id,
-                userId: member.id,
+                userId: member.userId,
                 description: `Team has been renamed from ${member.teamName} to ${result[0].name} by ${member.userFullName}.`,
             });
             return success(200, "Team updated successfully", result[0]);
