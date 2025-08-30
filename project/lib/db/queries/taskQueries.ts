@@ -257,6 +257,18 @@ export const taskQueries = {
             );
         }
 
+        const permission = await authorization.checkIfRoleHasPermission(
+            member.roleId,
+            "create_task"
+        );
+
+        if (!permission) {
+            return failure(
+                400,
+                "Not authorized to create task in this project"
+            );
+        }
+
         const project = await db
             .select()
             .from(projects)

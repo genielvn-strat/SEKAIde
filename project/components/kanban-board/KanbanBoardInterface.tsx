@@ -28,11 +28,13 @@ import ErrorAlert from "../ErrorAlert";
 interface KanbanBoardProps {
     project: FetchProject;
     tasks: FetchTask[];
+    permittedCreateTask?: boolean;
 }
 
 export function KanbanBoardInterface({
     project,
     tasks: initialTasks,
+    permittedCreateTask,
 }: KanbanBoardProps) {
     const queryClient = useQueryClient();
     const {
@@ -235,6 +237,7 @@ export function KanbanBoardInterface({
                                     activeId={activeTask?.id ?? null}
                                     overId={overId}
                                     projectSlug={project.slug}
+                                    permittedCreateTask={permittedCreateTask}
                                 />
                             </SortableContext>
                         );

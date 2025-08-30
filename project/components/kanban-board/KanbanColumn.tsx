@@ -23,12 +23,14 @@ export function KanbanColumn({
     overId,
     activeId,
     projectSlug,
+    permittedCreateTask,
 }: {
     list: FetchList;
     tasks: FetchTask[];
     overId: string | null;
     activeId: string | null;
     projectSlug: string;
+    permittedCreateTask?: boolean;
 }) {
     const { setNodeRef } = useDroppable({
         id: list.id,
@@ -78,9 +80,11 @@ export function KanbanColumn({
                     </div>
                 )}
             </CardContent>
-            <CardFooter className="flex-col gap-2">
-                <CreateTaskToList projectSlug={projectSlug} list={list} />
-            </CardFooter>
+            {permittedCreateTask && (
+                <CardFooter className="flex-col gap-2">
+                    <CreateTaskToList projectSlug={projectSlug} list={list} />
+                </CardFooter>
+            )}
         </Card>
     );
 }

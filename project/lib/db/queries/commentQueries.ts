@@ -75,12 +75,24 @@ export const commentQueries = {
         userId: string,
         data: CreateComment
     ) => {
-        const isAuthorized = await authorization.checkIfTeamMemberByProjectSlug(
+        const member = await authorization.checkIfTeamMemberByProjectSlug(
             projectSlug,
             userId
         );
 
-        if (!isAuthorized) {
+        if (!member) {
+            return failure(
+                400,
+                "Not authorized to create comment in this task."
+            );
+        }
+
+        const permission = await authorization.checkIfRoleHasPermission(
+            member.roleId,
+            "create_comment"
+        );
+
+        if (!permission) {
             return failure(
                 400,
                 "Not authorized to create comment in this task."

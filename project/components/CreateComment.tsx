@@ -26,10 +26,11 @@ const CreateComment: React.FC<CreateCommentProps> = ({ task }) => {
     const form = useForm<CreateCommentInput>({
         resolver: zodResolver(commentSchema),
         defaultValues: {
-            content: ""
-        }
+            content: "",
+        },
     });
 
+   
     const onSubmit: SubmitHandler<CreateCommentInput> = async (data) => {
         try {
             const response = await createComment({
@@ -67,7 +68,7 @@ const CreateComment: React.FC<CreateCommentProps> = ({ task }) => {
                     render={({ field }) => (
                         <FormItem>
                             <FormControl>
-                                <Textarea {...field} placeholder="" rows={5}/>
+                                <Textarea {...field} placeholder="" rows={5} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
