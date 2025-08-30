@@ -61,6 +61,15 @@ export type FetchTeamMember = {
     allowUpdate?: boolean;
 };
 
+export type FetchTeamActivity = {
+    userFullName: string | null;
+    userName: string | null;
+    userDisplayPicture: string | null;
+    permissionName: string;
+    description: string | null;
+    createdAt: string | null;
+};
+
 // Tasks
 export type FetchTask = {
     id: string;

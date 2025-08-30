@@ -26,6 +26,8 @@ import { useTeamTasks } from "@/hooks/useTasks";
 import TeamOverviewTab from "@/components/TeamOverviewTab";
 import LoadingSkeletonCards from "@/components/LoadingSkeletonCards";
 import ErrorAlert from "@/components/ErrorAlert";
+import TeamActivityTab from "@/components/TeamActivityTab";
+import { useTeamActivity } from "@/hooks/useTeamActivity";
 
 interface ProjectProps {
     params: Promise<{
@@ -63,6 +65,14 @@ export default function TeamDetails({ params }: ProjectProps) {
         isError: tasksIsError,
         error: tasksError,
     } = useTeamTasks(teamSlug, { enabled: !!teamDetails });
+    const {
+        teamActivty: activity,
+        isLoading: activityIsLoading,
+        isError: activityIsError,
+        error: activityError,
+    } = useTeamActivity(teamSlug, {
+        enabled: !!teamDetails,
+    });
 
     if (teamsLoading) {
         return <LoadingSkeleton />;
@@ -103,6 +113,7 @@ export default function TeamDetails({ params }: ProjectProps) {
                     <TabsTrigger value="overview">Overview</TabsTrigger>
                     <TabsTrigger value="members">Members</TabsTrigger>
                     <TabsTrigger value="projects">Projects</TabsTrigger>
+                    <TabsTrigger value="activity">Activity</TabsTrigger>
                     <TabsTrigger value="settings">Settings</TabsTrigger>
                 </TabsList>
                 <TabsContent value="overview">
@@ -143,6 +154,18 @@ export default function TeamDetails({ params }: ProjectProps) {
                         <TeamProjectsTab
                             projects={projects}
                             teamDetails={teamDetails}
+                        />
+                    )}
+                </TabsContent>
+                <TabsContent value="activity">
+                    {activityIsLoading ? (
+                        <LoadingSkeletonCards />
+                    ) : activityIsError ? (
+                        <ErrorAlert message={activityError?.message} />
+                    ) : (
+                        <TeamActivityTab
+                            teamSlug={teamSlug}
+                            activity={activity}
                         />
                     )}
                 </TabsContent>
