@@ -14,12 +14,8 @@ import {
     Bar,
     XAxis,
     YAxis,
-    Tooltip,
-    ResponsiveContainer,
     PieChart,
     Pie,
-    Cell,
-    Legend,
 } from "recharts";
 import {
     ChartConfig,
@@ -29,7 +25,6 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "./ui/chart";
-import { toKebab } from "@/lib/utils";
 import ErrorAlert from "./ErrorAlert";
 import slugify from "slugify";
 import { nanoid } from "nanoid";
@@ -86,13 +81,13 @@ const TeamOverviewTab: React.FC<TeamOverviewTabProps> = ({
     // --- Tasks finished per day (last 7 days)
     const today = new Date();
     const days = [
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
+        "Sun",
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat",
     ];
 
     const tasksPerDay = Array(7)
@@ -158,8 +153,6 @@ const TeamOverviewTab: React.FC<TeamOverviewTabProps> = ({
             : []),
     ];
 
-    console.log(listData);
-
     // Generate config dynamically from listData
     const listConfig: ChartConfig = Object.fromEntries(
         listData.map((d, i) => [
@@ -170,7 +163,6 @@ const TeamOverviewTab: React.FC<TeamOverviewTabProps> = ({
             },
         ])
     );
-    console.log(listConfig);
 
     return (
         <div className="flex flex-col gap-4">
