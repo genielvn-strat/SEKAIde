@@ -26,7 +26,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
     projectSlug,
     taskSlug,
 }) => {
-    const { setOpen } = useModalStore();
+    const { setDeleteCommentId, setEditCommentId } = useModalStore();
 
     return (
         <>
@@ -85,7 +85,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuItem
                                             onClick={() => {
-                                                setOpen("editComment", true);
+                                                setEditCommentId(comment.id);
                                             }}
                                         >
                                             Edit
@@ -93,7 +93,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
                                         <DropdownMenuItem
                                             className="text-red-600"
                                             onClick={() => {
-                                                setOpen("deleteComment", true);
+                                                setDeleteCommentId(comment.id);
                                             }}
                                         >
                                             Delete

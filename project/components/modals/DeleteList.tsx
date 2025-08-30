@@ -22,7 +22,7 @@ interface DeleteListProps {
 }
 
 const DeleteList: React.FC<DeleteListProps> = ({ list, projectSlug }) => {
-    const { modals, setOpen } = useModalStore();
+    const { deleteListId, setDeleteListId } = useModalStore();
     const { deleteList } = useListActions(projectSlug);
 
     const handleDelete = async () => {
@@ -41,14 +41,16 @@ const DeleteList: React.FC<DeleteListProps> = ({ list, projectSlug }) => {
                 return;
             }
         } finally {
-            setOpen("deleteList", false);
+            setDeleteListId(null);
         }
     };
 
     return (
         <AlertDialog
-            open={modals.deleteList}
-            onOpenChange={(e: boolean) => setOpen("deleteList", e)}
+            open={list.id == deleteListId}
+            onOpenChange={(open: boolean) =>
+                setDeleteListId(open ? list.id : null)
+            }
         >
             <AlertDialogContent>
                 <AlertDialogHeader>

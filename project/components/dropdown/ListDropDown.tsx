@@ -22,7 +22,7 @@ interface ListDropDownProps {
 
 const ListDropDown: React.FC<ListDropDownProps> = ({ list, projectSlug }) => {
     const { moveList } = useListActions(projectSlug);
-    const { setOpen } = useModalStore();
+    const { setEditListId, setDeleteListId } = useModalStore();
 
     const { permitted: permittedUpdate } = useAuthRoleByProject(
         projectSlug,
@@ -80,7 +80,7 @@ const ListDropDown: React.FC<ListDropDownProps> = ({ list, projectSlug }) => {
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 onClick={() => {
-                                    setOpen("editList", true);
+                                    setEditListId(list.id)
                                 }}
                             >
                                 Edit
@@ -91,7 +91,7 @@ const ListDropDown: React.FC<ListDropDownProps> = ({ list, projectSlug }) => {
                         <DropdownMenuItem
                             className="text-destructive"
                             onClick={() => {
-                                setOpen("deleteList", true);
+                                setDeleteListId(list.id)
                             }}
                         >
                             Delete

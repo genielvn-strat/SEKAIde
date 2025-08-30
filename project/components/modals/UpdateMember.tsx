@@ -50,7 +50,7 @@ const UpdateMember: React.FC<InviteMemberProps> = ({
     teamSlug,
     teamMember,
 }) => {
-    const { modals, setOpen } = useModalStore();
+    const { updateMemberId, setUpdateMemberId } = useModalStore();
     const { update } = useTeamMemberActions();
     const {
         roles,
@@ -92,11 +92,13 @@ const UpdateMember: React.FC<InviteMemberProps> = ({
 
     return (
         <Dialog
-            open={modals.updateMember}
-            onOpenChange={(e: boolean) => setOpen("updateMember", e)}
+            open={teamMember.userId == updateMemberId}
+            onOpenChange={(open: boolean) =>
+                setUpdateMemberId(open ? teamMember.userId : null)
+            }
         >
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} id="update-member">
+                <form onSubmit={form.handleSubmit(onSubmit)} id={`update-member-${teamMember.userId}`}>
                     <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
                             <DialogTitle>
@@ -168,7 +170,7 @@ const UpdateMember: React.FC<InviteMemberProps> = ({
                             <Button
                                 type="submit"
                                 disabled={form.formState.isSubmitting}
-                                form="update-member"
+                                form={`update-member-${teamMember.userId}`}
                             >
                                 {form.formState.isSubmitting
                                     ? "Updating"

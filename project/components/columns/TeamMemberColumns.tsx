@@ -80,7 +80,7 @@ export const TeamMemberColumns: (
     {
         id: "actions",
         cell: ({ row }) => {
-            const { setOpen } = useModalStore();
+            const { setUpdateMemberId, setKickMemberId } = useModalStore();
 
             const [updateDialog, showUpdateDialog] = useState(false);
             const permittedKick = row.original.allowKick;
@@ -101,7 +101,7 @@ export const TeamMemberColumns: (
                                 {permittedUpdate && (
                                     <DropdownMenuItem
                                         onClick={() =>
-                                            setOpen("updateMember", true)
+                                            setUpdateMemberId(memberId)
                                         }
                                     >
                                         Update
@@ -111,7 +111,7 @@ export const TeamMemberColumns: (
                                     <DropdownMenuItem
                                         className="text-destructive"
                                         onClick={() =>
-                                            setOpen("kickMember", true)
+                                            setKickMemberId(memberId)
                                         }
                                     >
                                         Kick

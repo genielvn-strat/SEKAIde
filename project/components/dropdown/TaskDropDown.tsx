@@ -17,7 +17,7 @@ interface TaskDropDownProps {
 }
 
 const TaskDropDown: React.FC<TaskDropDownProps> = ({ task }) => {
-    const { setOpen } = useModalStore();
+    const { setEditTaskId, setDeleteTaskId } = useModalStore();
 
     return (
         <>
@@ -31,12 +31,12 @@ const TaskDropDown: React.FC<TaskDropDownProps> = ({ task }) => {
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => setOpen("editTask", true)}>
+                    <DropdownMenuItem onClick={() => setEditTaskId(task.id)}>
                         Edit
                     </DropdownMenuItem>
                     <DropdownMenuItem
                         className="text-destructive"
-                        onClick={() => setOpen("deleteTask", true)}
+                        onClick={() => setDeleteTaskId(task.id)}
                     >
                         Delete
                     </DropdownMenuItem>
