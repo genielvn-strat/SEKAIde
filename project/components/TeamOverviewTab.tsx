@@ -31,6 +31,8 @@ import {
 } from "./ui/chart";
 import { toKebab } from "@/lib/utils";
 import ErrorAlert from "./ErrorAlert";
+import slugify from "slugify";
+import { nanoid } from "nanoid";
 
 interface TeamOverviewTabProps {
     projects?: FetchProject[] | null;
@@ -132,12 +134,18 @@ const TeamOverviewTab: React.FC<TeamOverviewTabProps> = ({
     const otherCount = sortedLists.slice(3).reduce((acc, [, v]) => acc + v, 0);
 
     const listData = [
-        ...topThree.map(([name, value]) => ({
-            key: toKebab(name),
-            name,
-            value,
-            fill: `var(--color-${toKebab(name)})`,
-        })),
+        ...topThree.map(([name, value]) => {
+            const key = `${slugify(name, {
+                lower: true,
+                strict: true,
+            })}-${nanoid(6)}`;
+            return {
+                key: key,
+                name,
+                value,
+                fill: `var(--color-${key})`,
+            };
+        }),
         ...(otherCount > 0
             ? [
                   {
@@ -150,6 +158,8 @@ const TeamOverviewTab: React.FC<TeamOverviewTabProps> = ({
             : []),
     ];
 
+    console.log(listData);
+
     // Generate config dynamically from listData
     const listConfig: ChartConfig = Object.fromEntries(
         listData.map((d, i) => [
@@ -160,6 +170,7 @@ const TeamOverviewTab: React.FC<TeamOverviewTabProps> = ({
             },
         ])
     );
+    console.log(listConfig);
 
     return (
         <div className="flex flex-col gap-4">
