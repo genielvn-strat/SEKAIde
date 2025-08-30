@@ -6,6 +6,7 @@ import {
     rolePermissions,
     permissions,
     tasks,
+    activityLogs,
 } from "@/migrations/schema";
 import { and, countDistinct, eq, or } from "drizzle-orm";
 import { CreateTeam, UpdateTeam } from "@/types/Team";
@@ -293,6 +294,14 @@ export const teamQueries = {
                 .set({ ...data, updatedAt: new Date().toISOString() })
                 .where(eq(teams.id, member.teamId))
                 .returning();
+
+            // save log as well
+            await db.insert(activityLogs).values({
+                teamId: member.teamId,
+                permissionId: permitted.id,
+                userId: member.id,
+                description: `Team has been renamed from ${member.teamName} to ${result[0].name} by ${member.userFullName}.`,
+            });
             return success(200, "Team updated successfully", result[0]);
         } catch {
             return failure(500, "Failed to update team");

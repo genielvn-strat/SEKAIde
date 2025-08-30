@@ -1,0 +1,1 @@
+ALTER TABLE "activity_logs" ADD COLUMN "created_at" timestamp DEFAULT now();
