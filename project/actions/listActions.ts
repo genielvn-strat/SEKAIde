@@ -11,11 +11,12 @@ import {
 import { CreateList, UpdateList } from "@/types/List";
 import { ZodError } from "zod";
 import { failure } from "@/types/Response";
+import { pusher } from "@/lib/websocket/pusher";
 
 export const fetchProjectLists = async (projectSlug: string) => {
     const userId = await getUserDbId();
     const lists = await queries.lists.getByProjectSlug(projectSlug, userId);
-    if (!lists.success) throw new Error(lists.message)
+    if (!lists.success) throw new Error(lists.message);
     return lists;
 };
 
@@ -34,7 +35,14 @@ export const createList = async (
     const listData: CreateList = {
         ...data,
     };
-    return await queries.lists.create(listData, userId, projectSlug);
+    const result = await queries.lists.create(listData, userId, projectSlug);
+    if (result.success)
+        await pusher.trigger(
+            `project-${projectSlug}`,
+            "lists-updated",
+            result.data
+        );
+    return result;
 };
 
 export const updateList = async (
@@ -53,7 +61,19 @@ export const updateList = async (
     const listData: UpdateList = {
         ...data,
     };
-    return await queries.lists.update(listData, listId, userId, projectSlug);
+    const result = await queries.lists.update(
+        listData,
+        listId,
+        userId,
+        projectSlug
+    );
+    if (result.success)
+        await pusher.trigger(
+            `project-${projectSlug}`,
+            "lists-updated",
+            result.data
+        );
+    return result;
 };
 
 export const deleteList = async (listId: string, projectSlug: string) => {
@@ -63,9 +83,21 @@ export const deleteList = async (listId: string, projectSlug: string) => {
 
 export const moveList = async (
     listId: string,
-    projectId: string,
+    projectSlug: string,
     direction: "left" | "right"
 ) => {
     const userId = await getUserDbId();
-    return await queries.lists.move(listId, projectId, direction, userId);
+    const result = await queries.lists.move(
+        listId,
+        projectSlug,
+        direction,
+        userId
+    );
+    if (result.success)
+        await pusher.trigger(
+            `project-${projectSlug}`,
+            "lists-updated",
+            result.data
+        );
+    return result;
 };

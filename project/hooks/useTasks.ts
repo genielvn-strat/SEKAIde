@@ -15,7 +15,7 @@ import { FetchTask } from "@/types/ServerResponses";
 import { ArrangeTask } from "@/types/Task";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-export function useTaskActions() {
+export function useTaskActions(projectSlug: string) {
     const queryClient = useQueryClient();
     const create = useMutation({
         mutationFn: ({
@@ -26,7 +26,7 @@ export function useTaskActions() {
             data: CreateTaskInput;
         }) => createTask(projectSlug, data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`tasks`] });
+            queryClient.invalidateQueries({ queryKey: [`tasks`, projectSlug] });
         },
     });
 
@@ -39,7 +39,7 @@ export function useTaskActions() {
             projectSlug: string;
         }) => deleteTask(taskSlug, projectSlug),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`tasks`] });
+            queryClient.invalidateQueries({ queryKey: [`tasks`, projectSlug] });
         },
     });
 
@@ -54,7 +54,7 @@ export function useTaskActions() {
             projectSlug: string;
         }) => updateTask(taskSlug, data, projectSlug),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`tasks`] });
+            queryClient.invalidateQueries({ queryKey: [`tasks`, projectSlug] });
         },
     });
     const arrange = useMutation({
@@ -68,7 +68,7 @@ export function useTaskActions() {
             projectSlug: string;
         }) => arrangeTask(tasks, selectedTaskId, projectSlug),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`tasks`] });
+            queryClient.invalidateQueries({ queryKey: [`tasks`, projectSlug] });
         },
     });
 
@@ -91,10 +91,9 @@ export function useProjectTasks(
         isLoading,
         error,
     } = useQuery({
-        queryKey: [`tasks`],
+        queryKey: [`tasks`, projectSlug],
         queryFn: () => fetchProjectTasks(projectSlug),
         enabled: !!projectSlug && options.enabled,
-        refetchInterval: 30000,
     });
 
     return {
@@ -111,9 +110,8 @@ export function useCalendarTasks() {
         isLoading,
         error,
     } = useQuery({
-        queryKey: [`tasks`],
+        queryKey: [`calendar-tasks`],
         queryFn: () => fetchCalendarTask(),
-        refetchInterval: 30000,
     });
 
     return {
@@ -133,10 +131,9 @@ export function useTeamTasks(
         isError,
         error,
     } = useQuery({
-        queryKey: [`teamTasks`],
+        queryKey: [`team-tasks`],
         queryFn: () => fetchTeamTasks(teamSlug),
         enabled: !!teamSlug && options.enabled,
-        refetchInterval: 30000,
     });
 
     return {

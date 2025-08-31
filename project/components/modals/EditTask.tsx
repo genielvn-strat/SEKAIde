@@ -59,7 +59,7 @@ interface EditTaskProps {
 const EditTask: React.FC<EditTaskProps> = ({ task, projectSlug }) => {
     const { editTaskId, setEditTaskId } = useModalStore();
 
-    const { updateTask } = useTaskActions();
+    const { updateTask } = useTaskActions(projectSlug);
     const { permitted: permittedAssign } = useAuthRoleByProject(
         projectSlug,
         "assign_others"

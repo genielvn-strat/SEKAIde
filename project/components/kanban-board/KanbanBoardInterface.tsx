@@ -46,7 +46,7 @@ export function KanbanBoardInterface({
         enabled: !!project,
     });
 
-    const { updateTask, arrangeTask } = useTaskActions();
+    const { updateTask, arrangeTask } = useTaskActions(project.slug);
     const { permitted: permittedCreateList } = useAuthRoleByProject(
         project.slug,
         "create_list"

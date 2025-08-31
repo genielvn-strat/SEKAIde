@@ -13,6 +13,7 @@ import slugify from "slugify";
 import { nanoid } from "nanoid";
 import { failure } from "@/types/Response";
 import { ZodError } from "zod";
+import { pusher } from "@/lib/websocket/pusher";
 
 export const fetchProjectTasks = async (projectSlug: string) => {
     const userId = await getUserDbId();
@@ -67,12 +68,28 @@ export const createTask = async (
         })}-${nanoid(6)}`,
         assigneeId: data.assigneeId ?? userId,
     };
-    return await queries.tasks.create(projectSlug, taskData, userId);
+
+    const result = await queries.tasks.create(projectSlug, taskData, userId);
+    if (result.success)
+        await pusher.trigger(
+            `project-${projectSlug}`,
+            "tasks-updated",
+            result.data
+        );
+
+    return result;
 };
 
 export const deleteTask = async (taskSlug: string, projectSlug: string) => {
     const userId = await getUserDbId();
-    return await queries.tasks.delete(taskSlug, projectSlug, userId);
+    const result = await queries.tasks.delete(taskSlug, projectSlug, userId);
+    if (result.success)
+        await pusher.trigger(
+            `project-${projectSlug}`,
+            "tasks-updated",
+            result.data
+        );
+    return result;
 };
 
 export const updateTask = async (
@@ -91,7 +108,19 @@ export const updateTask = async (
     const taskData: UpdateTask = {
         ...data,
     };
-    return await queries.tasks.update(taskSlug, taskData, projectSlug, userId);
+    const result = await queries.tasks.update(
+        taskSlug,
+        taskData,
+        projectSlug,
+        userId
+    );
+    if (result.success)
+        await pusher.trigger(
+            `project-${projectSlug}`,
+            "tasks-updated",
+            result.data
+        );
+    return result;
 };
 export const arrangeTask = async (
     tasks: ArrangeTask[],
@@ -100,10 +129,17 @@ export const arrangeTask = async (
 ) => {
     const userId = await getUserDbId();
 
-    return await queries.tasks.arrange(
+    const result = await queries.tasks.arrange(
         tasks,
         selectedTaskId,
         projectSlug,
         userId
     );
+    if (result.success)
+        await pusher.trigger(
+            `project-${projectSlug}`,
+            "tasks-updated",
+            result.data
+        );
+    return result;
 };
