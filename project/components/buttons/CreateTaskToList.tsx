@@ -55,7 +55,7 @@ interface CreateTaskProps {
 }
 
 const CreateTaskToList: React.FC<CreateTaskProps> = ({ projectSlug, list }) => {
-    const { createTask } = useTaskActions();
+    const { createTask } = useTaskActions(projectSlug);
     const { permitted: permittedAssign } = useAuthRoleByProject(
         projectSlug,
         "assign_others"

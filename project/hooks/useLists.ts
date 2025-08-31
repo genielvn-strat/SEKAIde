@@ -21,7 +21,7 @@ export function useLists(
         isError,
         error,
     } = useQuery({
-        queryKey: [`lists-${projectSlug}`],
+        queryKey: [`lists`, projectSlug],
         queryFn: () => fetchProjectLists(projectSlug),
         enabled: !!projectSlug && options.enabled,
     });
@@ -46,7 +46,7 @@ export function useListActions(projectSlug: string) {
         }) => createList(projectSlug, data),
         onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey: [`lists-${projectSlug}`],
+                queryKey: [`lists`, projectSlug],
             });
         },
     });
@@ -61,7 +61,7 @@ export function useListActions(projectSlug: string) {
         }) => deleteList(listId, projectSlug),
         onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey: [`lists-${projectSlug}`],
+                queryKey: [`lists`, projectSlug],
             });
         },
     });
@@ -78,7 +78,7 @@ export function useListActions(projectSlug: string) {
         }) => updateList(projectSlug, listId, data),
         onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey: [`lists-${projectSlug}`],
+                queryKey: [`lists`, projectSlug],
             });
         },
     });
@@ -95,7 +95,7 @@ export function useListActions(projectSlug: string) {
         }) => moveList(listId, projectSlug, direction),
         onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey: [`lists-${projectSlug}`],
+                queryKey: [`lists`, projectSlug],
             });
         },
     });

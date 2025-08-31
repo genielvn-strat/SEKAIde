@@ -4,7 +4,7 @@ import { useProjectDetails } from "@/hooks/useProjects";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { KanbanBoardInterface } from "@/components/kanban-board/KanbanBoardInterface";
-import { use } from "react";
+import { use, useEffect } from "react";
 import { TypographyH1 } from "@/components/typography/TypographyH1";
 import { TypographyMuted } from "@/components/typography/TypographyMuted";
 import { Separator } from "@/components/ui/separator";
@@ -28,6 +28,8 @@ import { TypographyH2 } from "@/components/typography/TypographyH2";
 import AssignedTasks from "@/components/AssignedTasks";
 import ErrorAlert from "@/components/ErrorAlert";
 import { useAuthRoleByProject } from "@/hooks/useRoles";
+import { pusherClient } from "@/lib/websocket/pusher";
+import { useQueryClient } from "@tanstack/react-query";
 interface ProjectProps {
     params: Promise<{
         projectSlug: string;
@@ -36,6 +38,7 @@ interface ProjectProps {
 
 export default function ProjectDetails({ params }: ProjectProps) {
     const { projectSlug } = use(params);
+    const queryClient = useQueryClient();
 
     const { project, isLoading, isError, error } =
         useProjectDetails(projectSlug);
@@ -53,6 +56,25 @@ export default function ProjectDetails({ params }: ProjectProps) {
     } = useProjectTasks(projectSlug, {
         enabled: !!project,
     });
+
+    useEffect(() => {
+        const channelName = `project-${projectSlug}`;
+        const channel = pusherClient.subscribe(channelName);
+        channel.bind("tasks-updated", () => {
+            queryClient.invalidateQueries({
+                queryKey: ["tasks", projectSlug],
+            });
+        });
+        channel.bind("lists-updated", () => {
+            queryClient.invalidateQueries({
+                queryKey: ["lists", projectSlug],
+            });
+        });
+        return () => {
+            channel.unbind("tasks-updated");
+            pusherClient.unsubscribe(channelName);
+        };
+    }, []);
 
     if (isLoading || taskLoading) {
         return <LoadingSkeleton />;
@@ -103,7 +125,11 @@ export default function ProjectDetails({ params }: ProjectProps) {
                     <AssignedTasks tasks={tasks} />
                 </TabsContent>
                 <TabsContent value="board">
-                    <KanbanBoardInterface project={project} tasks={tasks} permittedCreateTask={createTask} />
+                    <KanbanBoardInterface
+                        project={project}
+                        tasks={tasks}
+                        permittedCreateTask={createTask}
+                    />
                 </TabsContent>
                 <TabsContent value="tasks">
                     <div className="flex flex-col gap-4">

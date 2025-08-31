@@ -80,7 +80,7 @@ const ListDropDown: React.FC<ListDropDownProps> = ({ list, projectSlug }) => {
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 onClick={() => {
-                                    setEditListId(list.id)
+                                    setEditListId(list.id);
                                 }}
                             >
                                 Edit
@@ -91,7 +91,7 @@ const ListDropDown: React.FC<ListDropDownProps> = ({ list, projectSlug }) => {
                         <DropdownMenuItem
                             className="text-destructive"
                             onClick={() => {
-                                setDeleteListId(list.id)
+                                setDeleteListId(list.id);
                             }}
                         >
                             Delete

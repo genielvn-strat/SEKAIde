@@ -55,7 +55,7 @@ interface CreateTaskProps {
 }
 
 const CreateTask: React.FC<CreateTaskProps> = ({ projectSlug }) => {
-    const { createTask } = useTaskActions();
+    const { createTask } = useTaskActions(projectSlug);
     const { permitted: permittedAssign } = useAuthRoleByProject(
         projectSlug,
         "assign_others"
@@ -248,8 +248,7 @@ const CreateTask: React.FC<CreateTaskProps> = ({ projectSlug }) => {
                                             defaultValue={field.value}
                                             onValueChange={field.onChange}
                                         >
-                                            <SelectTrigger
-                                            >
+                                            <SelectTrigger>
                                                 <SelectValue placeholder="Select list" />
                                             </SelectTrigger>
                                             <SelectContent>

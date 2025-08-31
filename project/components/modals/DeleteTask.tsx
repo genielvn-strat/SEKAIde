@@ -26,7 +26,7 @@ interface DeleteTaskProps {
 const DeleteTask: React.FC<DeleteTaskProps> = ({ task, projectSlug }) => {
     const { deleteTaskId, setDeleteTaskId } = useModalStore();
     const router = useRouter();
-    const { deleteTask, isDeleting } = useTaskActions();
+    const { deleteTask, isDeleting } = useTaskActions(projectSlug);
 
     const handleDelete = async () => {
         try {
