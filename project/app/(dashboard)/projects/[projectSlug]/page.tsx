@@ -30,6 +30,7 @@ import ErrorAlert from "@/components/ErrorAlert";
 import { useAuthRoleByProject } from "@/hooks/useRoles";
 import { pusherClient } from "@/lib/websocket/pusher";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRecentStore } from "@/stores/recentStores";
 interface ProjectProps {
     params: Promise<{
         projectSlug: string;
@@ -38,6 +39,7 @@ interface ProjectProps {
 
 export default function ProjectDetails({ params }: ProjectProps) {
     const { projectSlug } = use(params);
+    const { setRecent } = useRecentStore();
     const queryClient = useQueryClient();
 
     const { project, isLoading, isError, error } =
@@ -56,6 +58,14 @@ export default function ProjectDetails({ params }: ProjectProps) {
     } = useProjectTasks(projectSlug, {
         enabled: !!project,
     });
+    useEffect(() => {
+        if (!project) return;
+        setRecent({
+            type: "project",
+            title: project.name,
+            link: `/projects/${projectSlug}`,
+        });
+    }, [project]);
 
     useEffect(() => {
         const channelName = `project-${projectSlug}`;

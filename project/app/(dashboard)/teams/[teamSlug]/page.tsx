@@ -2,7 +2,7 @@
 
 import { useTeamDetails } from "@/hooks/useTeams";
 import { notFound } from "next/navigation";
-import { use } from "react";
+import { use, useEffect } from "react";
 import { TypographyH1 } from "@/components/typography/TypographyH1";
 import { TypographyMuted } from "@/components/typography/TypographyMuted";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -28,6 +28,7 @@ import LoadingSkeletonCards from "@/components/LoadingSkeletonCards";
 import ErrorAlert from "@/components/ErrorAlert";
 import TeamActivityTab from "@/components/TeamActivityTab";
 import { useTeamActivity } from "@/hooks/useTeamActivity";
+import { useRecentStore } from "@/stores/recentStores";
 
 interface ProjectProps {
     params: Promise<{
@@ -36,6 +37,7 @@ interface ProjectProps {
 }
 
 export default function TeamDetails({ params }: ProjectProps) {
+    const { setRecent } = useRecentStore();
     const { teamSlug } = use(params);
     const {
         teamDetails,
@@ -73,6 +75,15 @@ export default function TeamDetails({ params }: ProjectProps) {
     } = useTeamActivity(teamSlug, {
         enabled: !!teamDetails,
     });
+
+    useEffect(() => {
+        if (!teamDetails) return;
+        setRecent({
+            type: "team",
+            title: teamDetails.name,
+            link: `/teams/${teamSlug}`,
+        });
+    }, [teamDetails]);
 
     if (teamsLoading) {
         return <LoadingSkeleton />;

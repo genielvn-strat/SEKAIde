@@ -20,6 +20,8 @@ import {
     Bell,
     Calendar,
     BellDotIcon,
+    LayoutList,
+    Circle,
 } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
@@ -38,8 +40,10 @@ import { redirect } from "next/navigation";
 import { useInvitedTeams } from "@/hooks/useTeams";
 import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
+import { useRecentStore } from "@/stores/recentStores";
 
 export function AppSidebar() {
+    const { recents } = useRecentStore();
     const session = useSession();
     const { signOut } = useAuth();
     const { teams } = useInvitedTeams();
@@ -111,6 +115,33 @@ export function AppSidebar() {
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
+                {recents.length != 0 && (
+                    <SidebarGroup>
+                        <SidebarGroupLabel>Recents</SidebarGroupLabel>
+                        <SidebarGroupContent>
+                            <SidebarMenu>
+                                {recents.map((item) => (
+                                    <SidebarMenuItem key={item.link}>
+                                        <SidebarMenuButton asChild>
+                                            <Link href={item.link}>
+                                                {item.type == "project" ? (
+                                                    <FolderOpen />
+                                                ) : item.type == "task" ? (
+                                                    <LayoutList />
+                                                ) : item.type == "team" ? (
+                                                    <Users />
+                                                ) : (
+                                                    <Circle />
+                                                )}
+                                                <span>{item.title}</span>
+                                            </Link>
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                ))}
+                            </SidebarMenu>
+                        </SidebarGroupContent>
+                    </SidebarGroup>
+                )}
             </SidebarContent>
 
             {/* Footer */}
