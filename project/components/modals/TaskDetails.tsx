@@ -1,5 +1,5 @@
 import { FetchTask } from "@/types/ServerResponses";
-import React, { Dispatch, SetStateAction } from "react";
+import React from "react";
 import {
     Drawer,
     DrawerClose,
@@ -13,10 +13,8 @@ import {
 import { Button } from "../ui/button";
 import { TypographyH1 } from "../typography/TypographyH1";
 import { useRouter } from "next/navigation";
-import { Separator } from "../ui/separator";
-import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { CheckCircle2, Circle } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import TaskDropDown from "../dropdown/TaskDropDown";
 import Priority from "../badge/Priority";
 import ListBadge from "../badge/ListBadge";

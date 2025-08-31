@@ -36,8 +36,6 @@ interface TeamOverviewTabProps {
     teamSlug: string;
 }
 
-const COLORS = ["#4ade80", "#f87171", "#60a5fa", "#fbbf24"];
-
 const TeamOverviewTab: React.FC<TeamOverviewTabProps> = ({
     members,
     tasks,

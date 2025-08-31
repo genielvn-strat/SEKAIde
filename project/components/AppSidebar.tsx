@@ -11,7 +11,6 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-    SidebarTrigger,
 } from "@/components/ui/sidebar";
 import {
     FolderOpen,
@@ -25,16 +24,13 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
-import { Button } from "./ui/button";
-import { SignOutButton, useAuth, UserButton, useSession } from "@clerk/nextjs";
+import {  useAuth, useSession } from "@clerk/nextjs";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { TypographyP } from "./typography/TypographyP";
-import { TypographyMuted } from "./typography/TypographyMuted";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { redirect } from "next/navigation";
 import { useInvitedTeams } from "@/hooks/useTeams";

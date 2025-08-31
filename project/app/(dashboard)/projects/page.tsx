@@ -133,9 +133,9 @@ export default function ProjectsPage() {
                         <MessageCircleQuestion />
                         <AlertTitle>No projects found</AlertTitle>
                         <AlertDescription>
-                            There are no projects available right now. Please
-                            wait for one to be assigned, or create a new project
-                            if you're a Project Manager.
+                            {
+                                "There are no projects available right now. Please wait for one to be assigned, or create a new project if you're a Project Manager."
+                            }
                         </AlertDescription>
                     </Alert>
                 )}

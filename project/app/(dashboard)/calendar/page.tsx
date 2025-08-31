@@ -37,7 +37,6 @@ const localizer = dateFnsLocalizer({
 export default function CalendarPage() {
     const { setOpen } = useModalStore();
     const [selectedTask, setSelectedTask] = useState<FetchTask | null>(null);
-    const [showTask, setShowTask] = useState<boolean>(false);
     const [userTask, setUserTask] = useState<boolean>(false);
     const {
         tasks,

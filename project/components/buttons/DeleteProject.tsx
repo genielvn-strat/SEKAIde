@@ -1,5 +1,5 @@
 "use client";
-import { FetchProject, FetchTeamDetails } from "@/types/ServerResponses";
+import { FetchProject } from "@/types/ServerResponses";
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,11 +16,10 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { TypographyMuted } from "@/components/typography/TypographyMuted";
-import { useTeamActions } from "@/hooks/useTeams";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { FolderOpen, LayoutList, TriangleAlert, Users } from "lucide-react";
+import { LayoutList } from "lucide-react";
 import { TypographyP } from "../typography/TypographyP";
 import { useProjectActions } from "@/hooks/useProjects";
 
@@ -64,7 +63,7 @@ const DeleteProject: React.FC<DeleteProjectProps> = ({ projectDetails }) => {
                 </AlertDialogHeader>
                 <Alert variant="destructive">
                     <AlertTitle className="flex flex-row items-center gap-2">
-                        You're also going to do the following:
+                        You are also going to do the following:
                     </AlertTitle>
                     <AlertDescription>
                         {projectDetails.totalTaskCount != 0 && (
@@ -86,7 +85,8 @@ const DeleteProject: React.FC<DeleteProjectProps> = ({ projectDetails }) => {
                     />
                     <TypographyMuted>
                         <strong>
-                            Type "I am sure to delete this project" to confirm.
+                            Type &quot;I am sure to delete this project&quot; to
+                            confirm.
                         </strong>
                     </TypographyMuted>
                 </div>

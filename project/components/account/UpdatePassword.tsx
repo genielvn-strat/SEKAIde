@@ -17,7 +17,6 @@ import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
@@ -63,7 +62,7 @@ const UpdatePassword: React.FC = () => {
                     <TypographyH2>Password</TypographyH2>
                 </CardTitle>
                 <CardDescription>
-                    It's recommended to change your password regularly.
+                    It is recommended to change your password regularly.
                 </CardDescription>
             </CardHeader>
             <CardContent>

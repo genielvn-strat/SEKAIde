@@ -1,14 +1,12 @@
 "use client";
 import { FetchTask } from "@/types/ServerResponses";
 import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import {
     Card,
     CardDescription,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "../ui/badge";
 import TaskDetails from "../modals/TaskDetails";
 import { Grip } from "lucide-react";
 import Priority from "../badge/Priority";
@@ -24,9 +22,7 @@ export function KanbanTask({
         attributes,
         listeners,
         setNodeRef,
-        transform,
         transition,
-        isDragging,
     } = useSortable({ id: task.id });
 
     const style = {

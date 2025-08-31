@@ -8,7 +8,7 @@ import {
     users,
 } from "@/migrations/schema";
 import { db } from "../db";
-import { and, asc, desc, eq, inArray, isNotNull, ne, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { failure, success } from "@/types/Response";
 import {
     DashboardRecentComment,
@@ -17,7 +17,6 @@ import {
     DashboardRecentTask,
     DashboardRecentTeamMembers,
 } from "@/types/Dashboard";
-import { authorization } from "./authorizationQueries";
 import { FetchTask } from "@/types/ServerResponses";
 
 export const dashboardQueries = {

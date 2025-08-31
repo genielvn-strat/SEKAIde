@@ -5,20 +5,8 @@ import { TypographyP } from "@/components/typography/TypographyP";
 import { Badge } from "@/components/ui/badge";
 import { FetchTeamMember } from "@/types/ServerResponses";
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import KickMember from "@/components/modals/KickMember";
-import { useState } from "react";
-import { useAuthRoleByTeam } from "@/hooks/useRoles";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import UpdateMember from "../modals/UpdateMember";
-import useModalStore from "@/stores/modalStores";
+import TeamMemberDropDown from "../dropdown/TeamMemberDropDown";
 
 export const TeamMemberColumns: (
     teamSlug: string
@@ -80,58 +68,12 @@ export const TeamMemberColumns: (
     {
         id: "actions",
         cell: ({ row }) => {
-            const { setUpdateMemberId, setKickMemberId } = useModalStore();
-
-            const [updateDialog, showUpdateDialog] = useState(false);
-            const permittedKick = row.original.allowKick;
-            const permittedUpdate = row.original.allowUpdate;
-            const memberId = row.original.userId;
-            const memberName = row.original.name;
+            const teamMember = row.original;
             return (
-                (permittedKick || permittedUpdate) && (
-                    <>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                    <span className="sr-only">Open menu</span>
-                                    <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                {permittedUpdate && (
-                                    <DropdownMenuItem
-                                        onClick={() =>
-                                            setUpdateMemberId(memberId)
-                                        }
-                                    >
-                                        Update
-                                    </DropdownMenuItem>
-                                )}
-                                {permittedKick && (
-                                    <DropdownMenuItem
-                                        className="text-destructive"
-                                        onClick={() =>
-                                            setKickMemberId(memberId)
-                                        }
-                                    >
-                                        Kick
-                                    </DropdownMenuItem>
-                                )}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-
-                        <KickMember
-                            teamSlug={teamSlug}
-                            memberUserId={memberId}
-                            memberName={memberName}
-                        />
-
-                        <UpdateMember
-                            teamMember={row.original}
-                            teamSlug={teamSlug}
-                        />
-                    </>
-                )
+                <TeamMemberDropDown
+                    teamMember={teamMember}
+                    teamSlug={teamSlug}
+                />
             );
         },
     },

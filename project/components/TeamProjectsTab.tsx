@@ -1,7 +1,5 @@
 "use client";
-import { useTeamProjects } from "@/hooks/useProjects";
 import React, { useState, useMemo } from "react";
-import LoadingSkeletonCards from "./LoadingSkeletonCards";
 import ProjectCard from "./cards/ProjectCard";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { MessageCircleQuestion, ListFilter } from "lucide-react";
@@ -30,8 +28,6 @@ const TeamProjectsTab: React.FC<TeamProjectsTabProps> = ({
     projects,
     teamDetails: teamDetails,
 }) => {
-    if (!projects) return <ErrorAlert />;
-
     const { permitted: permittedCreate } = useAuthRoleByTeam(
         teamDetails.slug,
         "create_project"
@@ -67,6 +63,7 @@ const TeamProjectsTab: React.FC<TeamProjectsTabProps> = ({
             });
     }, [projects, searchQuery, sortCriteria]);
 
+    if (!projects) return <ErrorAlert />;
     return (
         <div className="flex flex-col gap-4">
             <div className="flex flex-row justify-between items-center">
@@ -115,9 +112,9 @@ const TeamProjectsTab: React.FC<TeamProjectsTabProps> = ({
                         <MessageCircleQuestion />
                         <AlertTitle>No projects found</AlertTitle>
                         <AlertDescription>
-                            There are no projects available right now. Please
-                            wait for one to be assigned, or create a new project
-                            if you're a Project Manager.
+                            {
+                                "There are no projects available right now. Please wait for one to be assigned, or create a new project if you're a Project Manager."
+                            }
                         </AlertDescription>
                     </Alert>
                 ) : (

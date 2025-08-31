@@ -3,14 +3,11 @@ import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { TypographyH2 } from "../typography/TypographyH2";
 import { useAccountSessions } from "@/hooks/useAccountSettings"; // assume revokeSession exists
-import { Separator } from "@/components/ui/separator";
 import ErrorAlert from "../ErrorAlert";
 import SessionCard from "../cards/SessionCard";
 

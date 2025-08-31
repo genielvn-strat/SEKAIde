@@ -1,11 +1,10 @@
 "use client";
-import React, { Dispatch, SetStateAction } from "react";
+import React from "react";
 import { useListActions } from "@/hooks/useLists";
 import { CreateListInput, listSchema } from "@/lib/validations";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FetchList, FetchProject } from "@/types/ServerResponses";
-import { Card, CardContent } from "@/components/ui/card";
+import { FetchList  } from "@/types/ServerResponses";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -15,7 +14,6 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog";
 import {
     Form,

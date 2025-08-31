@@ -45,7 +45,6 @@ import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { FetchTeamDetails } from "@/types/ServerResponses";
-import TeamDetails from "@/app/(dashboard)/teams/[teamSlug]/page";
 
 interface CreateTeamProjectProps {
     teamDetails: FetchTeamDetails;

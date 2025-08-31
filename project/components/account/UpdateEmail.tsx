@@ -16,15 +16,13 @@ import {
 import {
     Card,
     CardContent,
-    CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
 import { TypographyH2 } from "../typography/TypographyH2";
 import { Input } from "@/components/ui/input";
 import { useAccountSettingsActions } from "@/hooks/useAccountSettings";
-import { useAuth, useSession } from "@clerk/nextjs";
+import { useSession } from "@clerk/nextjs";
 
 const UpdateEmail: React.FC = () => {
     const { updateEmail } = useAccountSettingsActions();

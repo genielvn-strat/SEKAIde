@@ -106,7 +106,7 @@ const CreateProject: React.FC = () => {
                 <AlertDialogHeader>
                     <AlertDialogTitle>No Teams Available</AlertDialogTitle>
                     <AlertDialogDescription>
-                        You don't have any teams you own or manage as
+                        You do not have any teams you own or manage as
                         a Project Manager. Would you like to create a new team?
                     </AlertDialogDescription>
                 </AlertDialogHeader>

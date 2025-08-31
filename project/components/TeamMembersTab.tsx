@@ -5,8 +5,6 @@ import React from "react";
 import InviteMember from "./buttons/InviteMember";
 import { DataTable } from "./DataTable";
 import { TeamMemberColumns } from "./columns/TeamMemberColumns";
-import { useTeamMembers } from "@/hooks/useTeamMembers";
-import { DataTableSkeleton } from "./DataTableSkeleton";
 import { FetchTeamMember } from "@/types/ServerResponses";
 import ErrorAlert from "./ErrorAlert";
 
@@ -19,11 +17,11 @@ const TeamMembersTab: React.FC<TeamMembersTabProps> = ({
     members,
     teamSlug,
 }) => {
-    if (!members) return <ErrorAlert />;
     const { permitted: permittedInvite } = useAuthRoleByTeam(
         teamSlug,
         "invite_members"
     );
+    if (!members) return <ErrorAlert />;
 
     return (
         <div className="flex flex-col gap-4">

@@ -6,7 +6,7 @@ import { FetchTeamActivity } from "@/types/ServerResponses";
 import ErrorAlert from "./ErrorAlert";
 import { TeamActivityColumns } from "./columns/TeamActivityColumns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, LineChart, CartesianGrid, Line } from "recharts";
+import { XAxis, YAxis, LineChart, CartesianGrid, Line } from "recharts";
 import {
     ChartConfig,
     ChartContainer,

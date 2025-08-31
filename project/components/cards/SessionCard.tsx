@@ -2,9 +2,7 @@ import { FetchUserSession } from "@/types/ServerResponses";
 import React from "react";
 import {
     Card,
-    CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
@@ -15,7 +13,6 @@ import {
     AlertDialogContent,
     AlertDialogDescription,
     AlertDialogFooter,
-    AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
@@ -75,8 +72,9 @@ const SessionCard: React.FC<SessionCardProps> = ({ session }) => {
                             Revoke this session?
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                            This session's device will be signed out. You'll
-                            have to sign in again on that device.
+                            {
+                                "This session's device will be signed out. You'll have to sign in again on that device."
+                            }
                         </AlertDialogDescription>
                         <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>

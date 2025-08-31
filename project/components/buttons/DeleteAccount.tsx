@@ -66,7 +66,7 @@ const DeleteAccount: React.FC = () => {
                         />
                         <TypographyMuted>
                             <strong>
-                                Type "I am sure to delete my account" to
+                                Type &quot;I am sure to delete my account&quot; to
                                 confirm.
                             </strong>
                         </TypographyMuted>

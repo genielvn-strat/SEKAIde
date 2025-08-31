@@ -6,10 +6,9 @@ import {
     teams,
     teamMembers,
     activityLogs,
-    roles,
     permissions,
 } from "@/migrations/schema";
-import { and, asc, eq, isNotNull, sql } from "drizzle-orm";
+import { and, asc, eq, isNotNull, or, sql } from "drizzle-orm";
 import { ArrangeTask, CreateTask, UpdateTask } from "@/types/Task";
 import { failure, success } from "@/types/Response";
 import { authorization } from "./authorizationQueries";
@@ -234,7 +233,15 @@ export const taskQueries = {
                 .innerJoin(teamMembers, eq(teamMembers.teamId, teams.id))
                 .innerJoin(users, eq(tasks.assigneeId, users.id))
                 .leftJoin(lists, eq(tasks.listId, lists.id))
-                .where(isNotNull(tasks.dueDate))
+                .where(
+                    and(
+                        isNotNull(tasks.dueDate),
+                        or(
+                            eq(teamMembers.userId, userId),
+                            eq(tasks.assigneeId, userId)
+                        )
+                    )
+                )
                 .orderBy(asc(tasks.dueDate));
 
             return success(200, "Calendar Tasks fetched successfully", result);

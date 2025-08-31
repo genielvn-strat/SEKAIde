@@ -1,10 +1,5 @@
 "use client";
-import {
-    createPermissions,
-    createRolePermissions,
-} from "@/actions/createActions";
 import FeedCard from "@/components/Feed";
-import LoadingSkeleton from "@/components/LoadingSkeleton";
 import { TypographyH1 } from "@/components/typography/TypographyH1";
 import { TypographyH2 } from "@/components/typography/TypographyH2";
 import { TypographyMuted } from "@/components/typography/TypographyMuted";
@@ -86,8 +81,9 @@ export default function DashboardPage() {
                                 <MessageCircleQuestion />
                                 <AlertTitle>No tasks assigned</AlertTitle>
                                 <AlertDescription>
-                                    Horray! Let's wait for more tasks to get
-                                    assigned for you.
+                                    {
+                                        "Horray! Let's wait for more tasks to get assigned for you."
+                                    }
                                 </AlertDescription>
                             </Alert>
                         ) : (
@@ -109,10 +105,9 @@ export default function DashboardPage() {
                                 <MessageCircleQuestion />
                                 <AlertTitle>No projects found</AlertTitle>
                                 <AlertDescription>
-                                    There are no projects available right now.
-                                    Please wait for one to be assigned, or
-                                    create a new project if you're a Project
-                                    Manager.
+                                    {
+                                        "There are no projects available right now. Please wait for one to be assigned, or create a new project if you're a Project Manager."
+                                    }
                                 </AlertDescription>
                             </Alert>
                         ) : (

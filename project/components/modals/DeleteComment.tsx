@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction } from "react";
+import React from "react";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -8,12 +8,9 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Button } from "../ui/button";
-import { useListActions } from "@/hooks/useLists";
-import { FetchComment, FetchList } from "@/types/ServerResponses";
+import { FetchComment } from "@/types/ServerResponses";
 import { useCommentActions } from "@/hooks/useComments";
 import useModalStore from "@/stores/modalStores";
 
@@ -67,9 +64,7 @@ const DeleteComment: React.FC<DeleteCommentProps> = ({
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel
-                        onClick={() => setDeleteCommentId(null)}
-                    >
+                    <AlertDialogCancel onClick={() => setDeleteCommentId(null)}>
                         Cancel
                     </AlertDialogCancel>
                     <AlertDialogAction

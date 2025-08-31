@@ -9,7 +9,7 @@ import { TypographyMuted } from "../typography/TypographyMuted";
 
 export const TeamActivityColumns: (
     teamSlug: string
-) => ColumnDef<FetchTeamActivity>[] = (teamSlug) => [
+) => ColumnDef<FetchTeamActivity>[] = () => [
     {
         accessorKey: "createdAt",
         header: "Activity since",
