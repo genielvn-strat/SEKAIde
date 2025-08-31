@@ -57,7 +57,7 @@ interface EditTaskProps {
 }
 
 const EditTask: React.FC<EditTaskProps> = ({ task, projectSlug }) => {
-    const { modals, setOpen } = useModalStore();
+    const { editTaskId, setEditTaskId } = useModalStore();
 
     const { updateTask } = useTaskActions();
     const { permitted: permittedAssign } = useAuthRoleByProject(
@@ -109,8 +109,10 @@ const EditTask: React.FC<EditTaskProps> = ({ task, projectSlug }) => {
 
     return (
         <Dialog
-            open={modals.editTask}
-            onOpenChange={(e: boolean) => setOpen("editTask", e)}
+            open={task.id == editTaskId}
+            onOpenChange={(open: boolean) =>
+                setEditTaskId(open ? task.id : null)
+            }
         >
             <Form {...form}>
                 <form

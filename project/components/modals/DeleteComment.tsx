@@ -28,7 +28,7 @@ const DeleteComment: React.FC<DeleteCommentProps> = ({
     projectSlug,
     taskSlug,
 }) => {
-    const { modals, setOpen } = useModalStore();
+    const { deleteCommentId, setDeleteCommentId } = useModalStore();
     const { deleteComment } = useCommentActions(taskSlug);
 
     const handleDelete = async () => {
@@ -48,14 +48,16 @@ const DeleteComment: React.FC<DeleteCommentProps> = ({
                 return;
             }
         } finally {
-            setOpen("deleteComment", false);
+            setDeleteCommentId(null);
         }
     };
 
     return (
         <AlertDialog
-            open={modals.deleteComment}
-            onOpenChange={(e: boolean) => setOpen("deleteComment", e)}
+            open={deleteCommentId == comment.id}
+            onOpenChange={(open: boolean) =>
+                setDeleteCommentId(open ? comment.id : null)
+            }
         >
             <AlertDialogContent>
                 <AlertDialogHeader>
@@ -66,7 +68,7 @@ const DeleteComment: React.FC<DeleteCommentProps> = ({
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel
-                        onClick={() => setOpen("deleteComment", false)}
+                        onClick={() => setDeleteCommentId(null)}
                     >
                         Cancel
                     </AlertDialogCancel>

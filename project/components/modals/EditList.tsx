@@ -42,7 +42,7 @@ interface UpdateListProps {
 }
 
 const EditList: React.FC<UpdateListProps> = ({ list, projectSlug }) => {
-    const { modals, setOpen } = useModalStore();
+    const { editListId, setEditListId } = useModalStore();
     const { updateList } = useListActions(projectSlug);
     const form = useForm<CreateListInput>({
         resolver: zodResolver(listSchema),
@@ -81,11 +81,13 @@ const EditList: React.FC<UpdateListProps> = ({ list, projectSlug }) => {
 
     return (
         <Dialog
-            open={modals.editList}
-            onOpenChange={(e: boolean) => setOpen("editList", e)}
+            open={list.id == editListId}
+            onOpenChange={(open: boolean) =>
+                setEditListId(open ? list.id : null)
+            }
         >
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} id="edit-list">
+                <form onSubmit={form.handleSubmit(onSubmit)} id={`edit-list-${list.id}`}>
                     <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
                             <DialogTitle>Edit List</DialogTitle>
@@ -224,7 +226,7 @@ const EditList: React.FC<UpdateListProps> = ({ list, projectSlug }) => {
                             <Button
                                 type="submit"
                                 disabled={form.formState.isSubmitting}
-                                form="edit-list"
+                                form={`edit-list-${list.id}`}
                             >
                                 {form.formState.isSubmitting
                                     ? "Editing"

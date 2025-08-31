@@ -1,4 +1,10 @@
-import { users, comments, projects, tasks } from "@/migrations/schema";
+import {
+    users,
+    comments,
+    projects,
+    tasks,
+    activityLogs,
+} from "@/migrations/schema";
 import { eq, sql } from "drizzle-orm";
 import { failure, success } from "@/types/Response";
 import { authorization } from "./authorizationQueries";
@@ -75,12 +81,24 @@ export const commentQueries = {
         userId: string,
         data: CreateComment
     ) => {
-        const isAuthorized = await authorization.checkIfTeamMemberByProjectSlug(
+        const member = await authorization.checkIfTeamMemberByProjectSlug(
             projectSlug,
             userId
         );
 
-        if (!isAuthorized) {
+        if (!member) {
+            return failure(
+                400,
+                "Not authorized to create comment in this task."
+            );
+        }
+
+        const permitted = await authorization.checkIfRoleHasPermission(
+            member.roleId,
+            "create_comment"
+        );
+
+        if (!permitted) {
             return failure(
                 400,
                 "Not authorized to create comment in this task."
@@ -105,6 +123,12 @@ export const commentQueries = {
                     authorId: userId,
                 })
                 .returning();
+            await db.insert(activityLogs).values({
+                teamId: member.teamId,
+                permissionId: permitted.id,
+                userId: member.userId,
+                description: `${member.userFullName} commented on a task titled ${task.title} on ${member.projectName}.`,
+            });
             return success(200, "Comment created successfully", result[0]);
         } catch {
             return failure(500, "Failed to create comment");
@@ -131,12 +155,12 @@ export const commentQueries = {
             userId
         );
 
-        const permission = await authorization.checkIfRoleHasPermission(
+        const permitted = await authorization.checkIfRoleHasPermission(
             member.roleId,
             "update_comment"
         );
 
-        if (!owned && !permission) {
+        if (!owned && !permitted) {
             return failure(400, "Not authorized to update this comment.");
         }
 
@@ -172,6 +196,12 @@ export const commentQueries = {
                     updatedAt: new Date().toISOString(),
                 })
                 .where(eq(tasks.id, task.id));
+            await db.insert(activityLogs).values({
+                teamId: member.teamId,
+                permissionId: permitted.id,
+                userId: member.userId,
+                description: `${member.userFullName} updated a comment on a task titled ${task.title} on ${member.projectName}.`,
+            });
             return success(200, "Comment updated successfully", result[0]);
         } catch {
             return failure(500, "Failed to update comment");
@@ -196,12 +226,12 @@ export const commentQueries = {
             userId
         );
 
-        const permission = await authorization.checkIfRoleHasPermission(
+        const permitted = await authorization.checkIfRoleHasPermission(
             member.roleId,
             "delete_comment"
         );
 
-        if (!owned && !permission) {
+        if (!owned && !permitted) {
             return failure(400, "Not authorized to delete this comment.");
         }
 
@@ -227,7 +257,12 @@ export const commentQueries = {
                 .delete(comments)
                 .where(eq(comments.id, commentId))
                 .returning();
-
+            await db.insert(activityLogs).values({
+                teamId: member.teamId,
+                permissionId: permitted.id,
+                userId: member.userId,
+                description: `${member.userFullName} deleted a comment on a task titled ${task.title} on ${member.projectName}.`,
+            });
             return success(200, "Comment successfully deleted", result);
         } catch {
             return failure(500, "Failed to delete comment");

@@ -26,7 +26,7 @@ const KickMember: React.FC<KickMemberProps> = ({
     memberUserId,
     memberName,
 }) => {
-    const { modals, setOpen } = useModalStore();
+    const { kickMemberId, setKickMemberId} = useModalStore();
     const { kick } = useTeamMemberActions();
 
     const handleKick = async () => {
@@ -42,14 +42,14 @@ const KickMember: React.FC<KickMemberProps> = ({
                 return;
             }
         } finally {
-            setOpen("kickMember", false);
+            setKickMemberId(null)
         }
     };
 
     return (
         <AlertDialog
-            open={modals.kickMember}
-            onOpenChange={(e: boolean) => setOpen("kickMember", e)}
+            open={memberUserId == kickMemberId}
+            onOpenChange={(open: boolean) => setKickMemberId(open ? memberUserId : null)}
         >
             <AlertDialogContent>
                 <AlertDialogHeader>

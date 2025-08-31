@@ -27,6 +27,7 @@ import Link from "next/link";
 import ListBadge from "@/components/badge/ListBadge";
 import LoadingSkeletonCards from "@/components/LoadingSkeletonCards";
 import ErrorAlert from "@/components/ErrorAlert";
+import { useAuthRoleByProject } from "@/hooks/useRoles";
 interface TaskProps {
     params: Promise<{
         projectSlug: string;
@@ -40,6 +41,11 @@ export default function TaskDetails({ params }: TaskProps) {
     const { task, isLoading, isError, error } = useTaskDetails(
         taskSlug,
         projectSlug
+    );
+
+    const { permitted: createComment } = useAuthRoleByProject(
+        projectSlug,
+        "create_comment"
     );
 
     const {
@@ -179,15 +185,17 @@ export default function TaskDetails({ params }: TaskProps) {
             <Separator className="my-4" />
             <div className="flex flex-row justify-between items-center">
                 <TypographyH2>Comments</TypographyH2>
-                <Button
-                    onClick={() =>
-                        document
-                            .getElementById("create-comment")
-                            ?.scrollIntoView({ behavior: "smooth" })
-                    }
-                >
-                    Make a comment
-                </Button>
+                {createComment && (
+                    <Button
+                        onClick={() =>
+                            document
+                                .getElementById("create-comment")
+                                ?.scrollIntoView({ behavior: "smooth" })
+                        }
+                    >
+                        Make a comment
+                    </Button>
+                )}
             </div>
             <div className="space-y-4 my-2">
                 {commentsLoading ? (
@@ -206,7 +214,7 @@ export default function TaskDetails({ params }: TaskProps) {
                 ) : (
                     <p className="text-sm text-gray-500">No comments yet.</p>
                 )}
-                <CreateComment task={task} />
+                {createComment && <CreateComment task={task} />}
             </div>
         </>
     );

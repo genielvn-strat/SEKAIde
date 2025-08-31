@@ -8,6 +8,7 @@ import {
     rolePermissions,
     roles,
     permissions,
+    users,
 } from "@/migrations/schema";
 import { and, eq } from "drizzle-orm";
 import { db } from "../db";
@@ -21,11 +22,15 @@ export const authorization = {
             .select({
                 id: teamMembers.id,
                 userId: teamMembers.userId,
+                userFullName: users.name,
                 teamId: teamMembers.teamId,
+                teamName: teams.name,
                 roleId: teamMembers.roleId,
                 inviteConfirmed: teamMembers.inviteConfirmed,
             })
             .from(teamMembers)
+            .innerJoin(users, eq(users.id, teamMembers.userId))
+            .innerJoin(teams, eq(teams.id, teamMembers.teamId))
             .where(
                 and(
                     eq(teamMembers.teamId, teamId),
@@ -72,12 +77,16 @@ export const authorization = {
             .select({
                 id: teamMembers.id,
                 userId: teamMembers.userId,
+                userFullName: users.name,
                 teamId: teams.id,
-                roleId: teamMembers.roleId,
+                teamName: teams.name,
                 projectId: projects.id,
+                projectName: projects.name,
+                roleId: teamMembers.roleId,
                 inviteConfirmed: teamMembers.inviteConfirmed,
             })
             .from(teamMembers)
+            .innerJoin(users, eq(teamMembers.userId, users.id))
             .innerJoin(teams, eq(teamMembers.teamId, teams.id))
             .innerJoin(projects, eq(teams.id, projects.teamId))
             .where(
@@ -98,12 +107,16 @@ export const authorization = {
             .select({
                 id: teamMembers.id,
                 userId: teamMembers.userId,
+                userFullName: users.name,
                 teamId: teams.id,
-                roleId: teamMembers.roleId,
+                teamName: teams.name,
                 projectId: projects.id,
+                projectName: projects.name,
+                roleId: teamMembers.roleId,
                 inviteConfirmed: teamMembers.inviteConfirmed,
             })
             .from(teamMembers)
+            .innerJoin(users, eq(teamMembers.userId, users.id))
             .innerJoin(teams, eq(teamMembers.teamId, teams.id))
             .innerJoin(projects, eq(teams.id, projects.teamId))
             .where(
@@ -200,7 +213,9 @@ export const authorization = {
         const result = await db
             .select({
                 id: tasks.id,
+                title: tasks.title,
                 projectId: tasks.projectId,
+                projectName: projects.name,
                 teamId: projects.teamId,
             })
             .from(tasks)
@@ -221,7 +236,9 @@ export const authorization = {
         const result = await db
             .select({
                 id: lists.id,
+                name: lists.name,
                 projectId: lists.projectId,
+                projectName: projects.name,
                 teamId: projects.teamId,
             })
             .from(lists)
@@ -250,6 +267,8 @@ export const authorization = {
     checkIfRoleHasPermission: async (userRoleId: string, action: string) => {
         const result = await db
             .select({
+                id: permissions.id,
+                roleId: roles.id,
                 roleName: roles.name,
                 permissionName: permissions.name,
             })
@@ -271,7 +290,7 @@ export const authorization = {
     ) => {
         const result = await db
             .select({
-                teamId: teams.id,
+                id: permissions.id,
                 roleId: roles.id,
                 roleName: roles.name,
                 permissionName: permissions.name,
@@ -302,7 +321,7 @@ export const authorization = {
     ) => {
         const result = await db
             .select({
-                teamId: teams.id,
+                id: permissions.id,
                 roleId: roles.id,
                 roleName: roles.name,
                 permissionName: permissions.name,
@@ -348,7 +367,7 @@ export const authorization = {
         // 2. Otherwise, check role-based permission
         const result = await db
             .select({
-                teamId: teams.id,
+                id: permissions.id,
                 roleId: roles.id,
                 roleName: roles.name,
                 permissionName: permissions.name,

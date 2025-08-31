@@ -14,12 +14,8 @@ import {
     Bar,
     XAxis,
     YAxis,
-    Tooltip,
-    ResponsiveContainer,
     PieChart,
     Pie,
-    Cell,
-    Legend,
 } from "recharts";
 import {
     ChartConfig,
@@ -29,8 +25,9 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "./ui/chart";
-import { toKebab } from "@/lib/utils";
 import ErrorAlert from "./ErrorAlert";
+import slugify from "slugify";
+import { nanoid } from "nanoid";
 
 interface TeamOverviewTabProps {
     projects?: FetchProject[] | null;
@@ -84,13 +81,13 @@ const TeamOverviewTab: React.FC<TeamOverviewTabProps> = ({
     // --- Tasks finished per day (last 7 days)
     const today = new Date();
     const days = [
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
+        "Sun",
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat",
     ];
 
     const tasksPerDay = Array(7)
@@ -132,12 +129,18 @@ const TeamOverviewTab: React.FC<TeamOverviewTabProps> = ({
     const otherCount = sortedLists.slice(3).reduce((acc, [, v]) => acc + v, 0);
 
     const listData = [
-        ...topThree.map(([name, value]) => ({
-            key: toKebab(name),
-            name,
-            value,
-            fill: `var(--color-${toKebab(name)})`,
-        })),
+        ...topThree.map(([name, value]) => {
+            const key = `${slugify(name, {
+                lower: true,
+                strict: true,
+            })}-${nanoid(6)}`;
+            return {
+                key: key,
+                name,
+                value,
+                fill: `var(--color-${key})`,
+            };
+        }),
         ...(otherCount > 0
             ? [
                   {

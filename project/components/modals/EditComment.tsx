@@ -55,7 +55,7 @@ const EditComment: React.FC<EditCommentProps> = ({
     taskSlug,
     projectSlug,
 }) => {
-    const { modals, setOpen } = useModalStore();
+    const { editCommentId, setEditCommentId } = useModalStore();
 
     const { updateComment } = useCommentActions(taskSlug);
     const form = useForm<UpdateCommentInput>({
@@ -92,11 +92,11 @@ const EditComment: React.FC<EditCommentProps> = ({
 
     return (
         <Dialog
-            open={modals.editComment}
-            onOpenChange={(e: boolean) => setOpen("editComment", e)}
+            open={editCommentId == comment.id}
+            onOpenChange={(open: boolean) => setEditCommentId(open ? comment.id : null)}
         >
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} id="edit-comment">
+                <form onSubmit={form.handleSubmit(onSubmit)} id={`edit-comment-${comment.id}`}>
                     <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
                             <DialogTitle>Edit Comment</DialogTitle>
@@ -127,7 +127,7 @@ const EditComment: React.FC<EditCommentProps> = ({
                             <Button
                                 type="submit"
                                 disabled={form.formState.isSubmitting}
-                                form="edit-comment"
+                                form={`edit-comment-${comment.id}`}
                             >
                                 {form.formState.isSubmitting
                                     ? "Editing"

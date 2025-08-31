@@ -37,7 +37,7 @@ export const fetchProjectBySlug = async (slug: string) => {
 };
 
 export const createProject = async (data: CreateProjectInput) => {
-    const ownerId = await getUserDbId();
+    const userId = await getUserDbId();
     try {
         createProjectSchema.parse(data);
     } catch (err) {
@@ -49,7 +49,7 @@ export const createProject = async (data: CreateProjectInput) => {
     const project: CreateProject = {
         ...data,
         description: data.description,
-        ownerId: ownerId,
+        ownerId: userId,
         dueDate: data.dueDate,
         slug: `${slugify(data.name, {
             lower: true,
@@ -57,7 +57,7 @@ export const createProject = async (data: CreateProjectInput) => {
         })}-${nanoid(6)}`,
     };
 
-    return await queries.projects.create(project);
+    return await queries.projects.create(project, userId)
 };
 
 export const deleteProject = async (id: string) => {

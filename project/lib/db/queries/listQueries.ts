@@ -1,4 +1,4 @@
-import { projects, lists } from "@/migrations/schema";
+import { projects, lists, activityLogs } from "@/migrations/schema";
 import { asc, count, eq } from "drizzle-orm";
 import { CreateList, UpdateList } from "@/types/List";
 import { failure, success } from "@/types/Response";
@@ -57,12 +57,12 @@ export const listQueries = {
             return failure(400, "Not authorized to create a list");
         }
 
-        const permission = await authorization.checkIfRoleHasPermission(
+        const permitted = await authorization.checkIfRoleHasPermission(
             member.roleId,
             "create_list"
         );
 
-        if (!permission) return failure(400, "Not authorized to create a list");
+        if (!permitted) return failure(400, "Not authorized to create a list");
 
         try {
             const [{ count: listCount }] = await db
@@ -77,7 +77,12 @@ export const listQueries = {
                     position: listCount,
                 })
                 .returning();
-
+            await db.insert(activityLogs).values({
+                teamId: member.teamId,
+                permissionId: permitted.id,
+                userId: member.userId,
+                description: `A list named ${result[0].name} has been created on ${member.projectName} by ${member.userFullName}.`,
+            });
             return success(200, "List created successfully", result[0]);
         } catch {
             return failure(500, "Failed to create list");
@@ -110,11 +115,11 @@ export const listQueries = {
         if (!member) {
             return failure(400, "Not authorized to update this list");
         }
-        const permission = await authorization.checkIfRoleHasPermission(
+        const permitted = await authorization.checkIfRoleHasPermission(
             member.roleId,
             "update_list"
         );
-        if (!permission)
+        if (!permitted)
             return failure(400, "Not authorized to update this list");
 
         try {
@@ -133,7 +138,12 @@ export const listQueries = {
                     updatedAt: new Date().toISOString(),
                 })
                 .where(eq(projects.id, list.projectId));
-
+            await db.insert(activityLogs).values({
+                teamId: member.teamId,
+                permissionId: permitted.id,
+                userId: member.userId,
+                description: `${member.userFullName} has made changes to the list named ${list.name} on ${list.projectName}.`,
+            });
             return success(200, "List updated successfully", result[0]);
         } catch {
             return failure(500, "Failed to update list");
@@ -157,11 +167,11 @@ export const listQueries = {
         if (!member) {
             return failure(400, "Not authorized to delete this list");
         }
-        const permission = await authorization.checkIfRoleHasPermission(
+        const permitted = await authorization.checkIfRoleHasPermission(
             member.roleId,
             "delete_list"
         );
-        if (!permission)
+        if (!permitted)
             return failure(400, "Not authorized to delete this list");
 
         try {
@@ -169,6 +179,12 @@ export const listQueries = {
                 .delete(lists)
                 .where(eq(lists.id, list.id))
                 .returning();
+            await db.insert(activityLogs).values({
+                teamId: member.teamId,
+                permissionId: permitted.id,
+                userId: member.userId,
+                description: `A list named ${list.name} on ${list.projectName} has been deleted by ${member.userFullName}.`,
+            });
             return success(200, "List deleted successfully", result);
         } catch {
             return failure(500, "Failed to delete list.");
@@ -196,11 +212,11 @@ export const listQueries = {
 
         if (!member) return failure(400, "Not authorized to move this list");
 
-        const permission = await authorization.checkIfRoleHasPermission(
+        const permitted = await authorization.checkIfRoleHasPermission(
             member.roleId,
             "update_list"
         );
-        if (!permission)
+        if (!permitted)
             return failure(400, "Not authorized to move this list");
 
         try {
@@ -250,7 +266,12 @@ export const listQueries = {
                     .set({ position: currentList.position })
                     .where(eq(lists.id, swapList.id));
             });
-
+            await db.insert(activityLogs).values({
+                teamId: member.teamId,
+                permissionId: permitted.id,
+                userId: member.userId,
+                description: `${member.userFullName} has made changes to the list named ${list.name} on ${list.projectName}.`,
+            });
             return success(200, "List moved successfully", {
                 movedListId: currentList.id,
                 swappedWithId: swapList.id,

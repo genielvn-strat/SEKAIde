@@ -4,6 +4,7 @@ import {
     teamMembers,
     lists,
     tasks,
+    activityLogs,
 } from "@/migrations/schema";
 import { and, count, desc, eq, or, sql } from "drizzle-orm";
 import { CreateProject, UpdateProject } from "@/types/Project";
@@ -142,7 +143,7 @@ export const projectQueries = {
                 .from(teamMembers)
                 .innerJoin(projects, eq(teamMembers.teamId, projects.teamId))
                 .innerJoin(teams, eq(teamMembers.teamId, teams.id))
-                .leftJoin(tasks, eq(tasks.projectId, projects.id)) 
+                .leftJoin(tasks, eq(tasks.projectId, projects.id))
                 .where(
                     and(
                         eq(teamMembers.userId, userId),
@@ -156,12 +157,31 @@ export const projectQueries = {
             return failure(500, "Failed to fetch projects");
         }
     },
-    create: async (data: CreateProject) => {
+    create: async (data: CreateProject, userId: string) => {
+        const member = await authorization.checkIfTeamMemberByTeamId(
+            data.teamId,
+            userId
+        );
+        if (!member) {
+            return failure(
+                400,
+                "You are not authorized to create a project on this team."
+            );
+        }
+
+        const permitted = await authorization.checkIfRoleHasPermission(
+            member.roleId,
+            "create_project"
+        );
+        if (!permitted) {
+            return failure(
+                400,
+                "You are not authorized to create a project on this team."
+            );
+        }
+
         try {
             const result = await db.transaction(async (tx) => {
-                if (!data.name || !data.ownerId || !data.teamId) {
-                    return failure(500, "Missing required fields");
-                }
                 const inserted = await tx
                     .insert(projects)
                     .values({
@@ -185,6 +205,13 @@ export const projectQueries = {
                 );
 
                 await tx.insert(lists).values(defaultLists);
+
+                await tx.insert(activityLogs).values({
+                    teamId: member.teamId,
+                    permissionId: permitted.id,
+                    userId: member.userId,
+                    description: `A project named ${inserted[0].name} has been created by ${member.userFullName}.`,
+                });
 
                 return success(200, "Project successfully created", project);
             });
@@ -210,12 +237,12 @@ export const projectQueries = {
             );
         }
 
-        const permission = await authorization.checkIfRoleHasPermission(
+        const permitted = await authorization.checkIfRoleHasPermission(
             member.roleId,
             "update_project"
         );
 
-        if (!permission) {
+        if (!permitted) {
             return failure(
                 400,
                 "You are not authorized to update this project"
@@ -231,6 +258,12 @@ export const projectQueries = {
                 })
                 .where(eq(projects.id, member.projectId))
                 .returning();
+            await db.insert(activityLogs).values({
+                teamId: member.teamId,
+                permissionId: permitted.id,
+                userId: member.userId,
+                description: `${member.userFullName} has made changes to ${member.projectName}.`,
+            });
             return success(200, "Project successfully updated", result);
         } catch {
             return failure(500, "Failed to update project");
@@ -251,12 +284,12 @@ export const projectQueries = {
             );
         }
 
-        const permission = await authorization.checkIfRoleHasPermission(
+        const permitted = await authorization.checkIfRoleHasPermission(
             member.roleId,
             "delete_project"
         );
 
-        if (!permission) {
+        if (!permitted) {
             return failure(
                 400,
                 "You are not authorized to delete this project"
@@ -268,6 +301,12 @@ export const projectQueries = {
                 .delete(projects)
                 .where(eq(projects.id, member.projectId))
                 .returning();
+            await db.insert(activityLogs).values({
+                teamId: member.teamId,
+                permissionId: permitted.id,
+                userId: member.userId,
+                description: ` ${member.projectName} has been deleted by ${member.userFullName}.`,
+            });
             return success(200, "Project successfully deleted", result);
         } catch {
             return failure(500, "Failed to update project");
@@ -284,19 +323,19 @@ export const projectQueries = {
         if (!member) {
             return failure(
                 400,
-                "You are not authorized to delete this project"
+                "You are not authorized to reset this project"
             );
         }
 
-        const permission = await authorization.checkIfRoleHasPermission(
+        const permitted = await authorization.checkIfRoleHasPermission(
             member.roleId,
             "reset_project"
         );
 
-        if (!permission) {
+        if (!permitted) {
             return failure(
                 400,
-                "You are not authorized to delete this project"
+                "You are not authorized to reset this project"
             );
         }
 
@@ -324,6 +363,12 @@ export const projectQueries = {
                 .insert(lists)
                 .values(defaultLists)
                 .returning();
+            await db.insert(activityLogs).values({
+                teamId: member.teamId,
+                permissionId: permitted.id,
+                userId: member.userId,
+                description: ` ${member.projectName} has been reset by ${member.userFullName}.`,
+            });
             return success(200, "Project successfully reset to default", {
                 tasksDeleted,
                 listsDeleted,

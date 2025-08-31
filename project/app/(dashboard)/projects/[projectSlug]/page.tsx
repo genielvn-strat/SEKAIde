@@ -27,6 +27,7 @@ import ProjectOverview from "@/components/ProjectOverview";
 import { TypographyH2 } from "@/components/typography/TypographyH2";
 import AssignedTasks from "@/components/AssignedTasks";
 import ErrorAlert from "@/components/ErrorAlert";
+import { useAuthRoleByProject } from "@/hooks/useRoles";
 interface ProjectProps {
     params: Promise<{
         projectSlug: string;
@@ -38,6 +39,11 @@ export default function ProjectDetails({ params }: ProjectProps) {
 
     const { project, isLoading, isError, error } =
         useProjectDetails(projectSlug);
+
+    const { permitted: createTask } = useAuthRoleByProject(
+        projectSlug,
+        "create_task"
+    );
 
     const {
         tasks,
@@ -97,13 +103,15 @@ export default function ProjectDetails({ params }: ProjectProps) {
                     <AssignedTasks tasks={tasks} />
                 </TabsContent>
                 <TabsContent value="board">
-                    <KanbanBoardInterface project={project} tasks={tasks} />
+                    <KanbanBoardInterface project={project} tasks={tasks} permittedCreateTask={createTask} />
                 </TabsContent>
                 <TabsContent value="tasks">
                     <div className="flex flex-col gap-4">
-                        <div className="flex flex-row justify-between items-center">
-                            <CreateTask projectSlug={projectSlug} />
-                        </div>
+                        {createTask && (
+                            <div className="flex flex-row justify-between items-center">
+                                <CreateTask projectSlug={projectSlug} />
+                            </div>
+                        )}
                         <DataTable
                             columns={ProjectTasksColumn(projectSlug)}
                             data={tasks}

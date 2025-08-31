@@ -24,7 +24,7 @@ interface DeleteTaskProps {
 }
 
 const DeleteTask: React.FC<DeleteTaskProps> = ({ task, projectSlug }) => {
-    const { modals, setOpen } = useModalStore();
+    const { deleteTaskId, setDeleteTaskId } = useModalStore();
     const router = useRouter();
     const { deleteTask, isDeleting } = useTaskActions();
 
@@ -45,14 +45,14 @@ const DeleteTask: React.FC<DeleteTaskProps> = ({ task, projectSlug }) => {
                 return;
             }
         } finally {
-            setOpen("deleteTask", false);
+            setDeleteTaskId(null);
         }
     };
 
     return (
         <AlertDialog
-            open={modals.deleteTask}
-            onOpenChange={(e: boolean) => setOpen("deleteTask", e)}
+            open={task.id == deleteTaskId }
+            onOpenChange={(open: boolean) => setDeleteTaskId(open ? task.id : null)}
         >
             <AlertDialogContent>
                 <AlertDialogHeader>
