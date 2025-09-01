@@ -19,7 +19,7 @@ import { useTeamActions } from "@/hooks/useTeams";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { FolderOpen, LayoutList, TriangleAlert, Users } from "lucide-react";
+import { FolderOpen, LayoutList, Users } from "lucide-react";
 import { TypographyP } from "../typography/TypographyP";
 
 interface DeleteTeamProps {
@@ -62,7 +62,7 @@ const DeleteTeam: React.FC<DeleteTeamProps> = ({ teamDetails }) => {
                 </AlertDialogHeader>
                 <Alert variant="destructive">
                     <AlertTitle className="flex flex-row items-center gap-2">
-                        You're also going to do the following:
+                        You are also going to do the following:
                     </AlertTitle>
                     <AlertDescription>
                         {teamDetails.memberCount != 0 && (
@@ -100,7 +100,7 @@ const DeleteTeam: React.FC<DeleteTeamProps> = ({ teamDetails }) => {
                     />
                     <TypographyMuted>
                         <strong>
-                            Type "I am sure to delete this team" to confirm.
+                            Type &quot;I am sure to delete this team&quot; to confirm.
                         </strong>
                     </TypographyMuted>
                 </div>

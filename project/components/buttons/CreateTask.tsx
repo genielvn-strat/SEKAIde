@@ -42,7 +42,6 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { CalendarIcon, CirclePlus } from "lucide-react";
 import { Calendar } from "../ui/calendar";
-import { FetchList } from "@/types/ServerResponses";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuthRoleByProject } from "@/hooks/useRoles";
 import { useTeamMembersByProject } from "@/hooks/useTeamMembers";

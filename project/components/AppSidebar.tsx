@@ -11,7 +11,6 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-    SidebarTrigger,
 } from "@/components/ui/sidebar";
 import {
     FolderOpen,
@@ -20,26 +19,27 @@ import {
     Bell,
     Calendar,
     BellDotIcon,
+    LayoutList,
+    Circle,
 } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
-import { Button } from "./ui/button";
-import { SignOutButton, useAuth, UserButton, useSession } from "@clerk/nextjs";
+import {  useAuth, useSession } from "@clerk/nextjs";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { TypographyP } from "./typography/TypographyP";
-import { TypographyMuted } from "./typography/TypographyMuted";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { redirect } from "next/navigation";
 import { useInvitedTeams } from "@/hooks/useTeams";
 import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
+import { useRecentStore } from "@/stores/recentStores";
 
 export function AppSidebar() {
+    const { recents } = useRecentStore();
     const session = useSession();
     const { signOut } = useAuth();
     const { teams } = useInvitedTeams();
@@ -111,6 +111,33 @@ export function AppSidebar() {
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
+                {recents.length != 0 && (
+                    <SidebarGroup>
+                        <SidebarGroupLabel>Recents</SidebarGroupLabel>
+                        <SidebarGroupContent>
+                            <SidebarMenu>
+                                {recents.map((item) => (
+                                    <SidebarMenuItem key={item.link}>
+                                        <SidebarMenuButton asChild>
+                                            <Link href={item.link}>
+                                                {item.type == "project" ? (
+                                                    <FolderOpen />
+                                                ) : item.type == "task" ? (
+                                                    <LayoutList />
+                                                ) : item.type == "team" ? (
+                                                    <Users />
+                                                ) : (
+                                                    <Circle />
+                                                )}
+                                                <span>{item.title}</span>
+                                            </Link>
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                ))}
+                            </SidebarMenu>
+                        </SidebarGroupContent>
+                    </SidebarGroup>
+                )}
             </SidebarContent>
 
             {/* Footer */}

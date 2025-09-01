@@ -4,22 +4,15 @@ import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
 import {
     CheckCircle2,
     Clock,
-    FolderClock,
     FolderOpen,
-    LayoutList,
-    Users,
 } from "lucide-react";
-import Link from "next/link";
-import { FetchProject, FetchTask } from "@/types/ServerResponses";
-import { Progress } from "../ui/progress";
-import { Badge } from "../ui/badge";
+import { FetchTask } from "@/types/ServerResponses";
 import Priority from "../badge/Priority";
 import TaskDetails from "../modals/TaskDetails";
 import ListBadge from "../badge/ListBadge";
@@ -33,7 +26,6 @@ interface TaskCardProps {
 
 const TaskCard: React.FC<TaskCardProps> = ({
     task: task,
-    showProject,
     small,
 }) => {
     return (

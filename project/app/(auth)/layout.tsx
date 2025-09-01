@@ -3,7 +3,7 @@
 import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import React, { Suspense } from "react";
+import React from "react";
 
 export default function DashboardLayout({
     children,

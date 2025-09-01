@@ -1,12 +1,6 @@
 import { FetchProject } from "@/types/ServerResponses";
 import React from "react";
-import { useTeamActions } from "@/hooks/useTeams";
-import {
-    UpdateProjectInput,
-    updateProjectSchema,
-    UpdateTeamInput,
-    updateTeamSchema,
-} from "@/lib/validations";
+import { UpdateProjectInput, updateProjectSchema } from "@/lib/validations";
 import { toast } from "sonner";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,15 +14,8 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import { CalendarIcon, CirclePlus } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CalendarIcon } from "lucide-react";
 import {
     Popover,
     PopoverContent,
@@ -54,7 +41,7 @@ const UpdateProject: React.FC<UpdateProjectProps> = ({ project }) => {
         defaultValues: {
             name: project.name,
             description: project.description ?? undefined,
-            dueDate: project.dueDate ? new Date(project.dueDate) : undefined
+            dueDate: project.dueDate ? new Date(project.dueDate) : undefined,
         },
     });
 

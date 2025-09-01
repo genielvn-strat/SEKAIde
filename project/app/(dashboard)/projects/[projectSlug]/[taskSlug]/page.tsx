@@ -7,7 +7,7 @@ import { useComments } from "@/hooks/useComments";
 import { useTaskDetails } from "@/hooks/useTasks";
 import { CheckCircle2, SlashIcon } from "lucide-react";
 import { notFound } from "next/navigation";
-import { use } from "react";
+import { use, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TypographyP } from "@/components/typography/TypographyP";
 import { TypographyH2 } from "@/components/typography/TypographyH2";
@@ -28,6 +28,7 @@ import ListBadge from "@/components/badge/ListBadge";
 import LoadingSkeletonCards from "@/components/LoadingSkeletonCards";
 import ErrorAlert from "@/components/ErrorAlert";
 import { useAuthRoleByProject } from "@/hooks/useRoles";
+import { useRecentStore } from "@/stores/recentStores";
 interface TaskProps {
     params: Promise<{
         projectSlug: string;
@@ -37,6 +38,7 @@ interface TaskProps {
 
 export default function TaskDetails({ params }: TaskProps) {
     const { projectSlug, taskSlug } = use(params);
+    const { setRecent } = useRecentStore();
 
     const { task, isLoading, isError, error } = useTaskDetails(
         taskSlug,
@@ -56,6 +58,15 @@ export default function TaskDetails({ params }: TaskProps) {
     } = useComments(taskSlug, projectSlug, {
         enabled: !!task,
     });
+
+    useEffect(() => {
+        if (!task) return;
+        setRecent({
+            type: "task",
+            title: task.title,
+            link: `/projects/${projectSlug}/${taskSlug}`,
+        });
+    }, [task]);
 
     if (isLoading) {
         return <LoadingSkeleton />;

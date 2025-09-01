@@ -43,9 +43,9 @@ export default function NotificationsPage() {
                             <MessageCircleQuestion />
                             <AlertTitle>No team invitations</AlertTitle>
                             <AlertDescription>
-                                You don't have any pending invitations right
-                                now. When someone invites you to join their
-                                team, you'll see it here.
+                                {
+                                    "You don't have any pending invitations right now. When someone invites you to join their team, you'll see it here."
+                                }
                             </AlertDescription>
                         </Alert>
                     ) : (

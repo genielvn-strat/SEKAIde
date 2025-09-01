@@ -1,5 +1,5 @@
 "use client";
-import { FetchProject, FetchTeamDetails } from "@/types/ServerResponses";
+import { FetchProject } from "@/types/ServerResponses";
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,17 +16,10 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { TypographyMuted } from "@/components/typography/TypographyMuted";
-import { useTeamActions } from "@/hooks/useTeams";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-    FolderOpen,
-    LayoutList,
-    List,
-    TriangleAlert,
-    Users,
-} from "lucide-react";
+import { LayoutList, List } from "lucide-react";
 import { TypographyP } from "../typography/TypographyP";
 import { useProjectActions } from "@/hooks/useProjects";
 
@@ -70,7 +63,7 @@ const ResetProject: React.FC<ResetProjectProps> = ({ projectDetails }) => {
                 </AlertDialogHeader>
                 <Alert variant="destructive">
                     <AlertTitle className="flex flex-row items-center gap-2">
-                        You're also going to do the following:
+                        You are also going to do the following:
                     </AlertTitle>
                     <AlertDescription>
                         {projectDetails.totalTaskCount != 0 && (
@@ -83,7 +76,9 @@ const ResetProject: React.FC<ResetProjectProps> = ({ projectDetails }) => {
                             </TypographyP>
                         )}
                         <TypographyP>
-                            <List /> The current columns will be reset to three.
+                            <List /> The current columns will be reset to
+                            &quot;To Do&quot;, &quot;In Progress&quot;, and
+                            &quot;Done&quot;.
                         </TypographyP>
                     </AlertDescription>
                 </Alert>
@@ -95,7 +90,7 @@ const ResetProject: React.FC<ResetProjectProps> = ({ projectDetails }) => {
                     />
                     <TypographyMuted>
                         <strong>
-                            Type "I am sure to reset this project" to confirm.
+                            Type &quot;I am sure to reset this project&quot; to confirm.
                         </strong>
                     </TypographyMuted>
                 </div>

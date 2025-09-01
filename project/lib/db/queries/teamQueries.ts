@@ -160,7 +160,7 @@ export const teamQueries = {
                 .then((res) => res[0] || null);
 
             return success(200, "Team details successfully fetched.", result);
-        } catch (err) {
+        } catch {
             return failure(500, "Failed to fetch team details");
         }
     },

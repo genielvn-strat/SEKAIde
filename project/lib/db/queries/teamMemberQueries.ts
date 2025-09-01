@@ -1,5 +1,5 @@
 import { roles, teamMembers, teams, users } from "@/migrations/schema";
-import { and, eq, ne, or, sql } from "drizzle-orm";
+import { and, eq, or, sql } from "drizzle-orm";
 import { db } from "../db";
 import { authorization } from "./authorizationQueries";
 import { failure, success } from "@/types/Response";
@@ -377,7 +377,7 @@ export const teamMemberQueries = {
                 .returning();
 
             return success(200, "Team left successfully", result);
-        } catch (err) {
+        } catch {
             return failure(500, "Failed to leave team");
         }
     },

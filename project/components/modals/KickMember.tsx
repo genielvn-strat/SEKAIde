@@ -1,15 +1,13 @@
 import { useTeamMemberActions } from "@/hooks/useTeamMembers";
-import React, { Dispatch, SetStateAction } from "react";
+import React  from "react";
 import {
     AlertDialog,
-    AlertDialogAction,
     AlertDialogCancel,
     AlertDialogContent,
     AlertDialogDescription,
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Button } from "../ui/button";

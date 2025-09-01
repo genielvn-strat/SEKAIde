@@ -8,7 +8,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { FolderClock, FolderOpen, LayoutList, Users } from "lucide-react";
+import { FolderClock, LayoutList, Users } from "lucide-react";
 import Link from "next/link";
 import { FetchProject } from "@/types/ServerResponses";
 import { Progress } from "../ui/progress";

@@ -1,5 +1,5 @@
 "use client";
-import React, { Dispatch, SetStateAction } from "react";
+import React from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { CreateTaskInput, taskSchema } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,7 +13,6 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,9 +39,9 @@ import {
 } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { CalendarIcon, CirclePlus } from "lucide-react";
+import { CalendarIcon  } from "lucide-react";
 import { Calendar } from "../ui/calendar";
-import { FetchList, FetchTask } from "@/types/ServerResponses";
+import { FetchTask } from "@/types/ServerResponses";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuthRoleByProject } from "@/hooks/useRoles";
 import { useTeamMembersByProject } from "@/hooks/useTeamMembers";

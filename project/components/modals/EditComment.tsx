@@ -1,11 +1,7 @@
 "use client";
-import React, { Dispatch, SetStateAction } from "react";
-import { useListActions } from "@/hooks/useLists";
+import React from "react";
 import {
-    commentSchema,
     CreateCommentInput,
-    CreateListInput,
-    listSchema,
     UpdateCommentInput,
     updateCommentSchema,
 } from "@/lib/validations";
@@ -17,29 +13,18 @@ import {
     Dialog,
     DialogClose,
     DialogContent,
-    DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog";
 import {
     Form,
     FormControl,
     FormField,
     FormItem,
-    FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "../ui/checkbox";
+
 import { toast } from "sonner";
 import { useCommentActions } from "@/hooks/useComments";
 import { Textarea } from "../ui/textarea";

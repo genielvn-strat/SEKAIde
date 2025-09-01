@@ -24,12 +24,12 @@ import ProjectSettingsTab from "@/components/ProjectSettingsTab";
 import { SlashIcon } from "lucide-react";
 import Link from "next/link";
 import ProjectOverview from "@/components/ProjectOverview";
-import { TypographyH2 } from "@/components/typography/TypographyH2";
 import AssignedTasks from "@/components/AssignedTasks";
 import ErrorAlert from "@/components/ErrorAlert";
 import { useAuthRoleByProject } from "@/hooks/useRoles";
 import { pusherClient } from "@/lib/websocket/pusher";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRecentStore } from "@/stores/recentStores";
 interface ProjectProps {
     params: Promise<{
         projectSlug: string;
@@ -38,6 +38,7 @@ interface ProjectProps {
 
 export default function ProjectDetails({ params }: ProjectProps) {
     const { projectSlug } = use(params);
+    const { setRecent } = useRecentStore();
     const queryClient = useQueryClient();
 
     const { project, isLoading, isError, error } =
@@ -56,6 +57,14 @@ export default function ProjectDetails({ params }: ProjectProps) {
     } = useProjectTasks(projectSlug, {
         enabled: !!project,
     });
+    useEffect(() => {
+        if (!project) return;
+        setRecent({
+            type: "project",
+            title: project.name,
+            link: `/projects/${projectSlug}`,
+        });
+    }, [project]);
 
     useEffect(() => {
         const channelName = `project-${projectSlug}`;
@@ -84,8 +93,8 @@ export default function ProjectDetails({ params }: ProjectProps) {
         return notFound();
     }
 
-    if (isError || taskError || !tasks) {
-        return <ErrorAlert message={error?.message} />;
+    if (isError || taskIsError || !tasks) {
+        return <ErrorAlert message={error?.message || taskError?.message} />;
     }
 
     return (
@@ -106,7 +115,9 @@ export default function ProjectDetails({ params }: ProjectProps) {
                     </Breadcrumb>
                     <div className="flex flex-row items-center gap-4">
                         <TypographyH1>{project.name}</TypographyH1>
-                        <TypographyMuted>// {project.teamName}</TypographyMuted>
+                        <TypographyMuted>
+                            {"//"} {project.teamName}
+                        </TypographyMuted>
                     </div>
                     <TypographyMuted>{project.description}</TypographyMuted>
                 </div>

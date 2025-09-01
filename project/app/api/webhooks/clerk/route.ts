@@ -1,7 +1,7 @@
 "use server";
 
 import { queries } from "@/lib/db";
-import { CreateUser, UpdateUser, User } from "@/types/User";
+import { CreateUser, UpdateUser } from "@/types/User";
 import { verifyWebhook } from "@clerk/nextjs/webhooks";
 import { NextRequest } from "next/server";
 
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
                     displayPictureLink: image_url,
                 };
 
-                const user = await queries.users.create(data);
+                await queries.users.create(data);
 
                 console.log(
                     `User created: ${id} - ${email_addresses[0]?.email_address}`
