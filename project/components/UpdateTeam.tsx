@@ -14,12 +14,7 @@ import {
     FormItem,
     FormMessage,
 } from "@/components/ui/form";
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TypographyH2 } from "./typography/TypographyH2";
 import { Input } from "@/components/ui/input";
 
@@ -43,7 +38,7 @@ const UpdateTeam: React.FC<UpdateTeamProps> = ({ teamDetails }) => {
             if (!response.success) {
                 throw new Error(response.message);
             }
-            toast.success("Team has been created successfully.");
+            toast.success("Team has been updated successfully.");
         } catch (e) {
             if (e instanceof Error) {
                 form.setError("root", { message: e.message });
@@ -76,7 +71,10 @@ const UpdateTeam: React.FC<UpdateTeamProps> = ({ teamDetails }) => {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormControl>
-                                        <Input {...field} />
+                                        <Input
+                                            placeholder="Team Name"
+                                            {...field}
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

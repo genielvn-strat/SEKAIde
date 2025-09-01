@@ -14,7 +14,7 @@ function resizeWindow(width: number, height: number) {
 }
 
 describe("LandingPage", () => {
-    it("renders heading and description", () => {
+    test("renders heading and description", () => {
         render(<LandingPage />);
         expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
             /make your task world manageable/i
@@ -24,25 +24,25 @@ describe("LandingPage", () => {
         ).toBeInTheDocument();
     });
 
-    it("calls redirect on button click", () => {
+    test("calls redirect on button click", () => {
         render(<LandingPage />);
         screen.getByRole("button", { name: /get started/i }).click();
         expect(redirect).toHaveBeenCalledWith("/sign-in");
     });
 
-    it("shows phone mockup when portrait", () => {
+    test("shows phone mockup when portrait", () => {
         resizeWindow(400, 800); // portrait
         render(<LandingPage />);
         expect(screen.getByAltText("phone-light")).toBeInTheDocument();
     });
 
-    it("shows laptop mockup when landscape", () => {
+    test("shows laptop mockup when landscape", () => {
         resizeWindow(1200, 800); // landscape
         render(<LandingPage />);
         expect(screen.getByAltText("laptop-light")).toBeInTheDocument();
     });
 
-    it("disables and restores scroll", () => {
+    test("disables and restores scroll", () => {
         const original = document.body.style.overflow;
         const { unmount } = render(<LandingPage />);
 
