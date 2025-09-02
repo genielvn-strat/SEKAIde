@@ -1,60 +1,12 @@
-"use client";
+import { Metadata } from "next";
+import NotificationsPage from "./NotificationsPage";
+export async function generateMetadata(): Promise<Metadata> {
+    return {
+        title: "Notifications",
+        description: "See invited teams",
+    };
+}
 
-import TeamInvitationCard from "@/components/cards/TeamInvitationCard";
-import { TypographyH1 } from "@/components/typography/TypographyH1";
-import { TypographyH2 } from "@/components/typography/TypographyH2";
-import { TypographyMuted } from "@/components/typography/TypographyMuted";
-import { Separator } from "@/components/ui/separator";
-import { useInvitedTeams } from "@/hooks/useTeams";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { MessageCircleQuestion } from "lucide-react";
-import LoadingSkeletonCards from "@/components/LoadingSkeletonCards";
-import ErrorAlert from "@/components/ErrorAlert";
-
-export default function NotificationsPage() {
-    const {
-        teams,
-        isError: teamsIsError,
-        error: teamsError,
-        isLoading: teamsIsLoading,
-    } = useInvitedTeams();
-
-    return (
-        <>
-            <div className="doc-header flex flex-row justify-between items-center">
-                <div className="left">
-                    <TypographyH1>Notifications</TypographyH1>
-                    <TypographyMuted>
-                        View your team invitations and assigned tasks
-                    </TypographyMuted>
-                </div>
-                <div className="right"></div>
-            </div>
-            <Separator className="my-4" />
-            <div className="space-y-4 w-full">
-                <TypographyH2>Team Invitations</TypographyH2>
-                <div className="space-y-4 w-full">
-                    {teamsIsLoading ? (
-                        <LoadingSkeletonCards />
-                    ) : teamsIsError ? (
-                        <ErrorAlert message={teamsError?.message} />
-                    ) : teams?.length == 0 ? (
-                        <Alert variant="default">
-                            <MessageCircleQuestion />
-                            <AlertTitle>No team invitations</AlertTitle>
-                            <AlertDescription>
-                                {
-                                    "You don't have any pending invitations right now. When someone invites you to join their team, you'll see it here."
-                                }
-                            </AlertDescription>
-                        </Alert>
-                    ) : (
-                        teams?.map((t) => (
-                            <TeamInvitationCard team={t} key={t.teamMemberId} />
-                        ))
-                    )}
-                </div>
-            </div>
-        </>
-    );
+export default function Page() {
+    return <NotificationsPage />;
 }
