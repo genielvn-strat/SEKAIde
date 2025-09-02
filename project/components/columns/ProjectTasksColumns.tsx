@@ -53,7 +53,7 @@ export const ProjectTasksColumn: (
     },
     {
         accessorKey: "priority",
-        header: () => <span className="hidden md:table-cell">Priority</span>,
+        header: () => "Priority",
         cell: ({ row }) => {
             const task = row.original;
             return <Priority priority={task.priority} />;
@@ -74,7 +74,7 @@ export const ProjectTasksColumn: (
     },
     {
         accessorKey: "listName",
-        header: () => <span className="hidden md:table-cell">List</span>,
+        header: "List",
         cell: ({ row }) => {
             const task = row.original;
             if (!task.listId || !task.listName) return "Unlisted";
