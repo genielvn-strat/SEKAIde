@@ -6,8 +6,13 @@ import {
     getCoreRowModel,
     getPaginationRowModel,
     useReactTable,
+    SortingState,
+    getSortedRowModel,
+    ColumnFiltersState,
+    getFilteredRowModel,
 } from "@tanstack/react-table";
 
+import { Input } from "@/components/ui/input";
 import {
     Table,
     TableBody,
@@ -17,25 +22,50 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Button } from "./ui/button";
+import React, { useState } from "react";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
+    children?: React.ReactNode;
 }
 
 export function DataTable<TData, TValue>({
     columns,
     data,
+    children,
 }: DataTableProps<TData, TValue>) {
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+    const [sorting, setSorting] = useState<SortingState>([]);
+    const [globalFilter, setGlobalFilter] = useState("");
     const table = useReactTable({
         data,
         columns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
+        onSortingChange: setSorting,
+        getSortedRowModel: getSortedRowModel(),
+        onColumnFiltersChange: setColumnFilters,
+        getFilteredRowModel: getFilteredRowModel(),
+        onGlobalFilterChange: setGlobalFilter,
+        state: {
+            sorting,
+            columnFilters,
+            globalFilter,
+        },
     });
 
     return (
-        <div>
+        <div className="flex flex-col gap-4">
+            <div className="flex flex-row items-center gap-4">
+                {children}
+                <Input
+                    placeholder="Search..."
+                    value={globalFilter ?? ""}
+                    onChange={(event) => setGlobalFilter(event.target.value)}
+                    className="max-w-sm"
+                />
+            </div>
             <div className="overflow-hidden rounded-md border">
                 <Table>
                     <TableHeader>

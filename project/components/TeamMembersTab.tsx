@@ -25,13 +25,17 @@ const TeamMembersTab: React.FC<TeamMembersTabProps> = ({
 
     return (
         <div className="flex flex-col gap-4">
-            {permittedInvite && (
-                <div className="flex flex-row justify-between items-center">
-                    <InviteMember teamSlug={teamSlug} />
-                </div>
-            )}
-
-            <DataTable columns={TeamMemberColumns(teamSlug)} data={members} />
+            <DataTable
+                columns={TeamMemberColumns(teamSlug)}
+                data={members}
+                children={
+                    permittedInvite && (
+                        <div className="flex flex-row justify-between items-center">
+                            <InviteMember teamSlug={teamSlug} />
+                        </div>
+                    )
+                }
+            />
         </div>
     );
 };

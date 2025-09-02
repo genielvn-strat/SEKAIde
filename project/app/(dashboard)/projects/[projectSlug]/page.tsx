@@ -144,14 +144,16 @@ export default function ProjectDetails({ params }: ProjectProps) {
                 </TabsContent>
                 <TabsContent value="tasks">
                     <div className="flex flex-col gap-4">
-                        {createTask && (
-                            <div className="flex flex-row justify-between items-center">
-                                <CreateTask projectSlug={projectSlug} />
-                            </div>
-                        )}
                         <DataTable
                             columns={ProjectTasksColumn(projectSlug)}
                             data={tasks}
+                            children={
+                                createTask && (
+                                    <div className="flex flex-row justify-between items-center">
+                                        <CreateTask projectSlug={projectSlug} />
+                                    </div>
+                                )
+                            }
                         />
                     </div>
                 </TabsContent>
