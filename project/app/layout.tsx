@@ -22,7 +22,13 @@ export default function RootLayout({
 }) {
     return (
         <SidebarProvider>
-            <ClerkProvider>
+            <ClerkProvider
+                appearance={{
+                    layout: {
+                        unsafe_disableDevelopmentModeWarnings: true,
+                    },
+                }}
+            >
                 <TanstackProvider>
                     <html lang="en" suppressHydrationWarning>
                         <body>
