@@ -8,6 +8,7 @@ import { commentQueries } from "./queries/commentQueries";
 import { roleQueries } from "./queries/roleQueries";
 import { dashboardQueries } from "./queries/dashboardQueries";
 import { activityQueries } from "./queries/activityQueries";
+import { searchQueries } from "./queries/searchQueries";
 
 export const queries = {
     dashboard: dashboardQueries,
@@ -20,4 +21,5 @@ export const queries = {
     tasks: taskQueries,
     comments: commentQueries,
     roles: roleQueries,
+    search: searchQueries,
 };
