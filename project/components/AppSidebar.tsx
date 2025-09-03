@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
-import {  useAuth, useSession } from "@clerk/nextjs";
+import { useAuth, useSession } from "@clerk/nextjs";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -39,7 +39,7 @@ import { toast } from "sonner";
 import { useRecentStore } from "@/stores/recentStores";
 
 export function AppSidebar() {
-    const { recents } = useRecentStore();
+    const { recents, clearRecent } = useRecentStore();
     const session = useSession();
     const { signOut } = useAuth();
     const { teams } = useInvitedTeams();
@@ -178,6 +178,7 @@ export function AppSidebar() {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                     onClick={() => {
+                                        clearRecent();
                                         signOut({ redirectUrl: "/" });
                                     }}
                                 >

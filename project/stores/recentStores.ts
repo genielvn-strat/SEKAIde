@@ -10,6 +10,7 @@ type RecentDetails = {
 type RecentStore = {
     recents: RecentDetails[];
     setRecent: (item: RecentDetails) => void;
+    clearRecent: () => void;
 };
 
 export const useRecentStore = create<RecentStore>()(
@@ -24,9 +25,10 @@ export const useRecentStore = create<RecentStore>()(
                     const updated = [item, ...filtered].slice(0, 10);
                     return { recents: updated };
                 }),
+            clearRecent: () => set({ recents: [] }),
         }),
         {
-            name: "recents", 
+            name: "recents",
         }
     )
 );
