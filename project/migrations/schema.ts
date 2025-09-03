@@ -246,7 +246,7 @@ export const activityLogs = pgTable("activity_logs", {
     id: uuid().defaultRandom().primaryKey().notNull(),
     teamId: uuid("team_id")
         .notNull()
-        .references(() => teams.id),
+        .references(() => teams.id, { onDelete: "cascade" }),
     permissionId: uuid("permission_id")
         .notNull()
         .references(() => permissions.id),
