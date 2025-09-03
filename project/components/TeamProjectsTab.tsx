@@ -66,13 +66,11 @@ const TeamProjectsTab: React.FC<TeamProjectsTabProps> = ({
     if (!projects) return <ErrorAlert />;
     return (
         <div className="flex flex-col gap-4">
-            <div className="flex flex-row justify-between items-center">
+
+            <div className="flex flex-row gap-4 items-center">
                 {permittedCreate && (
                     <CreateTeamProject teamDetails={teamDetails} />
                 )}
-            </div>
-
-            <div className="flex flex-row gap-4 items-center">
                 <Input
                     placeholder="Search projects..."
                     value={searchQuery}
