@@ -25,7 +25,7 @@ export default function NotificationsPage() {
                 <div className="left">
                     <TypographyH1>Notifications</TypographyH1>
                     <TypographyMuted>
-                        View your team invitations and assigned tasks
+                        View your team invitations
                     </TypographyMuted>
                 </div>
                 <div className="right"></div>
